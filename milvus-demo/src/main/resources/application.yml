@@ -1,0 +1,5 @@
+server:
+  port: 8131
+milvus:
+  uri: localhost:8999
+  token: sss
