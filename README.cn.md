@@ -26,8 +26,8 @@ MilvusPlus 是一个功能强大的 Java 库，旨在简化与 Milvus 向量数�
 ```xml
 <dependency>
     <groupId>io.github.javpower</groupId>
-    <artifactId>MilvusPlus</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>milvus-plus-boot-starter</artifactId>
+    <version>2.4.0</version>
 </dependency>
 ```
 
@@ -103,7 +103,7 @@ public static void main(String[] args) {
 
 ## 许可证
 
-MilvusPlus 是开源的，遵循 [MIT 许可证](https://github.com/yourusername/MilvusPlus/blob/master/LICENSE)。
+MilvusPlus 是开源的，遵循 [许可证](https://github.com/yourusername/MilvusPlus/blob/master/LICENSE)。
 
 ## 联系
 
