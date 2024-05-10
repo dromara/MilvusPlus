@@ -3,3 +3,4 @@ server:
 milvus:
   uri: localhost:8999
   token: sss
+  enable: false

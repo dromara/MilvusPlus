@@ -82,15 +82,25 @@ public class Face {
 }
 ```
 ```
-public static void main(String[] args) {
-        MilvusWrapper<Face> wrapper=new MilvusWrapper();
+@Component
+public class FaceMilvusMapper extends MilvusMapper<Face> {
+    
+}
+
+@Component
+public class ApplicationRunnerTest implements ApplicationRunner {
+    @Autowired
+    private FaceMilvusMapper mapper;
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
         List<Float> vector = Lists.newArrayList(0.1f,0.2f,0.3f);
-        MilvusResp<Face> resp = wrapper.lambda()
+        MilvusResp<Face> resp = mapper.lambda()
                 .eq(Face::getPersonId,1l)
-                .addVector(vector)
+                .vector(vector)
+                .limit(100l)
                 .query();
     }
-
+}
 
 ```
 

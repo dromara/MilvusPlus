@@ -19,7 +19,7 @@ public class MilvusCollectionConfig implements ApplicationRunner {
     private final ApplicationContext applicationContext;
     private final MilvusCollectionService milvusCollectionService;
 
-    @Autowired
+    @Autowired(required = false)
     public MilvusCollectionConfig(ApplicationContext applicationContext, MilvusCollectionService milvusCollectionService) {
         this.applicationContext = applicationContext;
         this.milvusCollectionService = milvusCollectionService;
@@ -33,6 +33,8 @@ public class MilvusCollectionConfig implements ApplicationRunner {
             .map(applicationContext::getType)
             .toArray(Class<?>[]::new);
         // 调用业务处理服务
-        milvusCollectionService.performBusinessLogic(Arrays.asList(annotatedClasses));
+        if(milvusCollectionService!=null){
+            milvusCollectionService.performBusinessLogic(Arrays.asList(annotatedClasses));
+        }
     }
 }
