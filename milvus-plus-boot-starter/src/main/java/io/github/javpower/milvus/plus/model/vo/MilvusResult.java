@@ -1,4 +1,4 @@
-package io.github.javpower.milvus.plus.model;
+package io.github.javpower.milvus.plus.model.vo;
 
 import lombok.Data;
 /**

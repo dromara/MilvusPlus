@@ -3,8 +3,9 @@ package io.github.javpower.milvus.plus.converter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.javpower.milvus.plus.model.MilvusResp;
-import io.github.javpower.milvus.plus.model.MilvusResult;
+import io.github.javpower.milvus.plus.model.vo.MilvusResp;
+import io.github.javpower.milvus.plus.model.vo.MilvusResult;
+import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
 import io.milvus.v2.service.vector.response.SearchResp;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class SearchRespConverter {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static <T> MilvusResp<T> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType){
+    public static <T> MilvusResp<MilvusResultVo<T>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType){
         List<List<SearchResp.SearchResult>> searchResults = searchResp.getSearchResults();
 
         // 反序列化JSON字符串到具体的MilvusResult对象列表
@@ -29,8 +30,11 @@ public class SearchRespConverter {
             throw new RuntimeException(e);
         }
         // 创建MilvusResp对象并设置结果
-        MilvusResp<T> milvusResp = new MilvusResp<>();
-        milvusResp.setRes(milvusResults);
+        MilvusResp<MilvusResultVo<T>> milvusResp = new MilvusResp<>();
+        MilvusResultVo<T> vo=new MilvusResultVo<>();
+        vo.setVo(milvusResults);
+        milvusResp.setData(vo);
+        milvusResp.setSuccess(true);
         return milvusResp;
     }
 

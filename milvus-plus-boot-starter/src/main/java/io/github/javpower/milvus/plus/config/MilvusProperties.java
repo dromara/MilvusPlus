@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "milvus")
 @Component
 public class MilvusProperties {
-
-    private Boolean enable;
+    private boolean enable;
     private String uri;
     private String token;
 }

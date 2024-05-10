@@ -17,7 +17,7 @@ public class MilvusConfig {
 
     @Bean
     public MilvusClientV2 milvusClientV2() {
-        if(!properties.getEnable()){
+        if(!properties.isEnable()){
             return null;
         }
         ConnectConfig connectConfig = ConnectConfig.builder()

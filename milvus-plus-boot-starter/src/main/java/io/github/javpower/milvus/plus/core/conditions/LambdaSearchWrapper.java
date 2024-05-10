@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSON;
 import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.converter.SearchRespConverter;
 import io.github.javpower.milvus.plus.core.FieldFunction;
-import io.github.javpower.milvus.plus.model.MilvusResp;
+import io.github.javpower.milvus.plus.model.vo.MilvusResp;
+import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
 import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.common.ConsistencyLevel;
@@ -15,20 +16,18 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
      * 搜索构建器内部类，用于构建搜索请求
      */
 @Data
 @Slf4j
-public  class LambdaSearchWrapper<T> {
+public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaSearchWrapper<T>,T>{
     private ConversionCache<?, ?> conversionCache;
     private Class<T> entityType;
     private String collectionName;
     private String annsField;
     private int topK;
-    private List<String> filters = new ArrayList<>();
     private List<List<Float>> vectors = new ArrayList<>();
     private long offset;
     private long limit;
@@ -49,243 +48,288 @@ public  class LambdaSearchWrapper<T> {
     public LambdaSearchWrapper() {
 
     }
-
-    // addVector
-    public LambdaSearchWrapper<T> addVector(List<Float> vector) {
-        vectors.add(vector);
-        return this;
-    }
-    public LambdaSearchWrapper<T> vector(List<Float> vector) {
-        vectors.add(vector);
-        return this;
-    }
-
-    // Common comparison operations
-    public LambdaSearchWrapper<T> eq(String fieldName, Object value) {
-        return addFilter(fieldName, "==", value);
-    }
-
-    public LambdaSearchWrapper<T> ne(String fieldName, Object value) {
-        return addFilter(fieldName, "!=", value);
-    }
-
-    public LambdaSearchWrapper<T> gt(String fieldName, Object value) {
-        return addFilter(fieldName, ">", value);
-    }
-
-    public LambdaSearchWrapper<T> ge(String fieldName, Object value) {
-        return addFilter(fieldName, ">=", value);
-    }
-
-    public LambdaSearchWrapper<T> lt(String fieldName, Object value) {
-        return addFilter(fieldName, "<", value);
-    }
-
-    public LambdaSearchWrapper<T> le(String fieldName, Object value) {
-        return addFilter(fieldName, "<=", value);
-    }
-
-    // Range operation
-    public LambdaSearchWrapper<T> between(String fieldName, Object start, Object end) {
-        String filter = String.format("%s >= %s && %s <= %s", fieldName, convertValue(start), fieldName, convertValue(end));
-        filters.add(filter);
+    /**
+     * 添加等于条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要比较的值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> eq(String fieldName, Object value) {
+        super.eq(fieldName,value);
         return this;
     }
 
-    // Null check
-    public LambdaSearchWrapper<T> isNull(String fieldName) {
-        filters.add(fieldName + " == null");
+    /**
+     * 添加不等于条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要比较的值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> ne(String fieldName, Object value) {
+        super.ne(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> isNotNull(String fieldName) {
-        filters.add(fieldName + " != null");
+    /**
+     * 添加大于条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要比较的值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> gt(String fieldName, Object value) {
+        super.gt(fieldName,value);
         return this;
     }
 
-    // In operator
-    public LambdaSearchWrapper<T> in(String fieldName, List<?> values) {
-        String valueList = values.stream()
-                .map(this::convertValue)
-                .collect(Collectors.joining(", ", "[", "]"));
-        filters.add(fieldName + " in " + valueList);
+    /**
+     * 添加大于等于条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要比较的值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> ge(String fieldName, Object value) {
+        super.ge(fieldName,value);
         return this;
     }
 
-    // Like operator
-    public LambdaSearchWrapper<T> like(String fieldName, String value) {
-        filters.add(fieldName + " like '%" + value + "%'");
+    /**
+     * 添加小于条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要比较的值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> lt(String fieldName, Object value) {
+        super.lt(fieldName,value);
         return this;
     }
 
-    // JSON array operations
+    /**
+     * 添加小于等于条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要比较的值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> le(String fieldName, Object value) {
+        super.le(fieldName,value);
+        return this;
+    }
+
+    /**
+     * 添加范围条件。
+     *
+     * @param fieldName 字段名
+     * @param start     范围开始值
+     * @param end       范围结束值
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> between(String fieldName, Object start, Object end) {
+        super.between(fieldName,start,end);
+        return this;
+    }
+
+    /**
+     * 添加空值检查条件。
+     *
+     * @param fieldName 字段名
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> isNull(String fieldName) {
+        super.isNull(fieldName);
+        return this;
+    }
+
+    /**
+     * 添加非空值检查条件。
+     *
+     * @param fieldName 字段名
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> isNotNull(String fieldName) {
+        super.isNotNull(fieldName);
+        return this;
+    }
+
+    /**
+     * 添加IN条件。
+     *
+     * @param fieldName 字段名
+     * @param values    要检查的值列表
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> in(String fieldName, List<?> values) {
+        super.in(fieldName,values);
+        return this;
+    }
+
+    /**
+     * 添加LIKE条件。
+     *
+     * @param fieldName 字段名
+     * @param value     要匹配的模式
+     * @return 当前条件构建器对象
+     */
+    protected LambdaSearchWrapper<T> like(String fieldName, String value) {
+        super.like(fieldName,value);
+        return this;
+    }
+
     public LambdaSearchWrapper<T> jsonContains(String fieldName, Object value) {
-        filters.add("JSON_CONTAINS(" + fieldName + ", " + convertValue(value) + ")");
+        super.jsonContains(fieldName,value);
         return this;
     }
 
     public LambdaSearchWrapper<T> jsonContainsAll(String fieldName, List<?> values) {
-        String valueList = convertValues(values);
-        filters.add("JSON_CONTAINS_ALL(" + fieldName + ", " + valueList + ")");
+        super.jsonContainsAll(fieldName,values);
         return this;
     }
 
     public LambdaSearchWrapper<T> jsonContainsAny(String fieldName, List<?> values) {
-        String valueList = convertValues(values);
-        filters.add("JSON_CONTAINS_ANY(" + fieldName + ", " + valueList + ")");
+        super.jsonContainsAny(fieldName,values);
         return this;
     }
 
     // Array operations
     public LambdaSearchWrapper<T> arrayContains(String fieldName, Object value) {
-        filters.add("ARRAY_CONTAINS(" + fieldName + ", " + convertValue(value) + ")");
+        super.arrayContains(fieldName,value);
         return this;
     }
 
     public LambdaSearchWrapper<T> arrayContainsAll(String fieldName, List<?> values) {
-        String valueList = convertValues(values);
-        filters.add("ARRAY_CONTAINS_ALL(" + fieldName + ", " + valueList + ")");
+        super.arrayContainsAll(fieldName,values);
         return this;
     }
 
     public LambdaSearchWrapper<T> arrayContainsAny(String fieldName, List<?> values) {
-        String valueList = convertValues(values);
-        filters.add("ARRAY_CONTAINS_ANY(" + fieldName + ", " + valueList + ")");
+        super.arrayContainsAny(fieldName,values);
         return this;
     }
 
     public LambdaSearchWrapper<T> arrayLength(String fieldName, int length) {
-        filters.add(fieldName + ".length() == " + length);
+        super.arrayLength(fieldName,length);
         return this;
     }
 
-
-
     public LambdaSearchWrapper<T> eq(FieldFunction<T,?> fieldName, Object value) {
-        return addFilter(fieldName, "==", value);
+        super.eq(fieldName,value);
+        return this;
     }
 
     public LambdaSearchWrapper<T> ne(FieldFunction<T,?> fieldName, Object value) {
-        return addFilter(fieldName, "!=", value);
+        super.ne(fieldName,value);
+        return this;
     }
 
     public LambdaSearchWrapper<T> gt(FieldFunction<T,?> fieldName, Object value) {
-        return addFilter(fieldName, ">", value);
+        super.gt(fieldName,value);
+        return this;
     }
 
     public LambdaSearchWrapper<T> ge(FieldFunction<T,?> fieldName, Object value) {
-        return addFilter(fieldName, ">=", value);
+        super.ge(fieldName,value);
+        return this;
     }
 
     public LambdaSearchWrapper<T> lt(FieldFunction<T,?> fieldName, Object value) {
-        return addFilter(fieldName, "<", value);
+        super.lt(fieldName,value);
+        return this;
     }
 
     public LambdaSearchWrapper<T> le(FieldFunction<T,?> fieldName, Object value) {
-        return addFilter(fieldName, "<=", value);
+        super.le(fieldName,value);
+        return this;
     }
 
     // Range operation
     public LambdaSearchWrapper<T> between(FieldFunction<T,?> fieldName, Object start, Object end) {
-        String fn = getFieldName(fieldName);
-        String filter = String.format("%s >= %s && %s <= %s", fn, convertValue(start), fn, convertValue(end));
-        filters.add(filter);
+        super.between(fieldName,start,end);
         return this;
     }
 
     // Null check
     public LambdaSearchWrapper<T> isNull(FieldFunction<T,?> fieldName) {
-        String fn = getFieldName(fieldName);
-        filters.add(fn + " == null");
+        super.isNull(fieldName);
         return this;
     }
 
     public LambdaSearchWrapper<T> isNotNull(FieldFunction<T,?> fieldName) {
-        String fn = getFieldName(fieldName);
-        filters.add(fn + " != null");
+        super.isNotNull(fieldName);
         return this;
     }
 
     // In operator
     public LambdaSearchWrapper<T> in(FieldFunction<T,?> fieldName, List<?> values) {
-        String fn = getFieldName(fieldName);
-        String valueList = values.stream()
-                .map(this::convertValue)
-                .collect(Collectors.joining(", ", "[", "]"));
-        filters.add(fn + " in " + valueList);
+        super.in(fieldName,values);
         return this;
     }
 
     // Like operator
     public LambdaSearchWrapper<T> like(FieldFunction<T,?> fieldName, String value) {
-        String fn = getFieldName(fieldName);
-        filters.add(fn + " like '%" + value + "%'");
+        super.like(fieldName,value);
         return this;
     }
 
     // JSON array operations
     public LambdaSearchWrapper<T> jsonContains(FieldFunction<T,?> fieldName, Object value) {
-        String fn = getFieldName(fieldName);
-        filters.add("JSON_CONTAINS(" + fn + ", " + convertValue(value) + ")");
+        super.jsonContains(fieldName,value);
         return this;
     }
 
     public LambdaSearchWrapper<T> jsonContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
-        String fn = getFieldName(fieldName);
-        String valueList = convertValues(values);
-        filters.add("JSON_CONTAINS_ALL(" + fn + ", " + valueList + ")");
+        super.jsonContainsAll(fieldName,values);
         return this;
     }
 
     public LambdaSearchWrapper<T> jsonContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
-        String fn = getFieldName(fieldName);
-        String valueList = convertValues(values);
-        filters.add("JSON_CONTAINS_ANY(" + fn + ", " + valueList + ")");
+        super.jsonContainsAny(fieldName,values);
         return this;
     }
 
     // Array operations
     public LambdaSearchWrapper<T> arrayContains(FieldFunction<T,?> fieldName, Object value) {
-        String fn = getFieldName(fieldName);
-        filters.add("ARRAY_CONTAINS(" + fn + ", " + convertValue(value) + ")");
+        super.arrayContains(fieldName,value);
         return this;
     }
 
     public LambdaSearchWrapper<T> arrayContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
-        String fn = getFieldName(fieldName);
-        String valueList = convertValues(values);
-        filters.add("ARRAY_CONTAINS_ALL(" + fn + ", " + valueList + ")");
+        super.arrayContainsAll(fieldName,values);
         return this;
     }
     public LambdaSearchWrapper<T> arrayContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
-        String fn = getFieldName(fieldName);
-        String valueList = convertValues(values);
-        filters.add("ARRAY_CONTAINS_ANY(" + fn + ", " + valueList + ")");
+        super.arrayContainsAny(fieldName,values);
         return this;
     }
 
     public LambdaSearchWrapper<T> arrayLength(FieldFunction<T,?> fieldName, int length) {
-        String fn = getFieldName(fieldName);
-        filters.add(fn + ".length() == " + length);
+        super.arrayLength(fieldName,length);
         return this;
     }
 
     // Logic operations
-    public LambdaSearchWrapper<T> and(LambdaSearchWrapper<T> other) {
-        filters.add("(" + String.join(" && ", other.filters) + ")");
+    public LambdaSearchWrapper<T> and(ConditionBuilder<T> other) {
+        super.and(other);
         return this;
     }
 
-    public LambdaSearchWrapper<T> or(LambdaSearchWrapper<T> other) {
-        filters.add("(" + String.join(" || ", other.filters) + ")");
+    public LambdaSearchWrapper<T> or(ConditionBuilder<T> other) {
+        super.or(other);
         return this;
     }
 
     public LambdaSearchWrapper<T> not() {
-        filters.add("not (" + String.join(" && ", filters) + ")");
+        super.not();
         return this;
     }
 
+    public LambdaSearchWrapper<T> vector(List<Float> vector) {
+        vectors.add(vector);
+        return this;
+    }
     public LambdaSearchWrapper<T> limit(Long limit) {
         this.setLimit(limit);
         return this;
@@ -294,35 +338,6 @@ public  class LambdaSearchWrapper<T> {
         this.setTopK(topK);
         return this;
     }
-
-
-    // Helper methods
-    private String convertValue(Object value) {
-        if (value instanceof String) {
-            return "'" + value.toString().replace("'", "\\'") + "'";
-        }
-        return value.toString();
-    }
-
-    private String convertValues(List<?> values) {
-        return values.stream()
-                .map(this::convertValue)
-                .collect(Collectors.joining(", ", "[", "]"));
-    }
-
-    private LambdaSearchWrapper<T> addFilter(String fieldName, String op, Object value) {
-        filters.add(fieldName + " " + op + " " + convertValue(value));
-        return this;
-    }
-    private LambdaSearchWrapper<T> addFilter(FieldFunction<T, ?> fieldFunction, String op, Object value) {
-        String fieldName = getFieldName(fieldFunction);
-        filters.add(fieldName + " " + op + " " + convertValue(value));
-        return this;
-    }
-    private String getFieldName(FieldFunction<T, ?> fieldFunction) {
-        return fieldFunction.getFieldName(fieldFunction);
-    }
-
     /**
      * 构建完整的搜索请求
      * @return 搜索请求对象
@@ -335,9 +350,12 @@ public  class LambdaSearchWrapper<T> {
         if (!vectors.isEmpty()) {
             builder.data(vectors);
         }
-        String filterStr = filters.stream().collect(Collectors.joining(" && "));
+        String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {
             builder.filter(filterStr);
+        }
+        if(limit>0){
+            builder.limit(limit);
         }
         // Set other parameters as needed
         return builder.build();
@@ -347,11 +365,24 @@ public  class LambdaSearchWrapper<T> {
      * 执行搜索
      * @return 搜索响应对象
      */
-    public MilvusResp<T> query() throws MilvusException {
+    public MilvusResp<MilvusResultVo<T>> query() throws MilvusException {
         SearchReq searchReq = build();
         log.info("build query param-->{}", JSON.toJSONString(searchReq));
         SearchResp search = client.client.search(searchReq);
-        MilvusResp<T> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
+        MilvusResp<MilvusResultVo<T>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
         return tMilvusResp;
     }
+    @Override
+    public void init(String collectionName, MilvusClient client, ConversionCache conversionCache, Class entityType) {
+        setClient(client);
+        setCollectionName(collectionName);
+        setEntityType(entityType);
+        setConversionCache(conversionCache);
+    }
+
+    @Override
+    public LambdaSearchWrapper<T> wrapper() {
+        return this;
+    }
+
 }
