@@ -94,11 +94,17 @@ public class ApplicationRunnerTest implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         List<Float> vector = Lists.newArrayList(0.1f,0.2f,0.3f);
-        MilvusResp<Face> resp = mapper.lambda()
-                .eq(Face::getPersonId,1l)
+
+        MilvusResp<MilvusResultVo<Face>> query =  mapper.searchWrapper()
+                .eq(Face::getPersonId, 1l)
                 .vector(vector)
                 .limit(100l)
                 .query();
+
+        MilvusResp<DeleteResp> remove= mapper.deleteWrapper()
+                .eq(Face::getPersonId, 1l)
+                .id(111)
+                .remove();
     }
 }
 
