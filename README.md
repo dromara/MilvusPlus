@@ -96,7 +96,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         List<Float> vector = Lists.newArrayList(0.1f,0.2f,0.3f);
 
         //查询
-        MilvusResp<MilvusResultVo<Face>> query =  mapper.searchWrapper()
+        MilvusResp<MilvusResultVo<Face>> query =  mapper.queryWrapper()
                 .eq(Face::getPersonId, 1l)
                 .vector(Face::getFaceVector,vector)
                 .limit(100l)
