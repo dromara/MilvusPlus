@@ -5,13 +5,19 @@ import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
 import io.github.javpower.milvus.plus.core.conditions.LambdaDeleteWrapper;
 import io.github.javpower.milvus.plus.core.conditions.LambdaSearchWrapper;
+import io.github.javpower.milvus.plus.core.conditions.LambdaUpdateWrapper;
 import io.github.javpower.milvus.plus.core.conditions.Wrapper;
+import io.github.javpower.milvus.plus.model.vo.MilvusResp;
 import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.github.javpower.milvus.plus.util.SpringUtils;
+import io.milvus.v2.service.vector.response.DeleteResp;
+import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * @author xgc
@@ -34,6 +40,30 @@ public class MilvusMapper<T> {
     public LambdaDeleteWrapper<T> deleteWrapper() {
         return lambda(new LambdaDeleteWrapper<>());
     }
+
+    /**
+     * 创建更新构建器实例
+     * @return 返回删除构建器
+     */
+    public LambdaUpdateWrapper<T> updateWrapper() {
+        return lambda(new LambdaUpdateWrapper<>());
+    }
+
+
+    public MilvusResp<List<T>> getById(Serializable ... ids) {
+        LambdaSearchWrapper<T> lambda = searchWrapper();
+        return lambda.getById(ids);
+    }
+    public MilvusResp<DeleteResp> removeById(Serializable ... ids){
+        LambdaDeleteWrapper<T> lambda = deleteWrapper();
+        return lambda.removeById(ids);
+    }
+    public MilvusResp<UpsertResp> updateById(T ... entity){
+        LambdaUpdateWrapper<T> lambda = updateWrapper();
+        return lambda.updateById(entity);
+    }
+
+
 
     /**
      * 创建通用构建器实例
