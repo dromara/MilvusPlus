@@ -1,5 +1,4 @@
 # MilvusPlus：向量数据库增强操作库
-
 MilvusPlus 是一个功能强大的 Java 库，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API。
 
 ## 目录
@@ -7,22 +6,24 @@ MilvusPlus 是一个功能强大的 Java 库，旨在简化与 Milvus 向量数�
 1. [特性](#特性)
 2. [快速开始](#快速开始)
 3. [应用场景](#应用场景)
-4. [注解说明](#注解说明)
-5. [贡献](#贡献)
-6. [许可证](#许可证)
+4. [自定义注解](#自定义注解)
+5. [索引与度量类型详解](#索引与度量类型详解)
+6. [使用案例](#使用案例)
+7. [贡献](#贡献)
+8. [许可证](#许可证)
+9. [联系](#联系)
 
 ## 特性
 
-- **注解式配置**：采用与 MyBatis-Plus 类似的注解方式来配置你的实体模型。
-- **直观的 API**：直接的 API 设计，让向量数据库操作变得自然而然。
-- **易于扩展**：以可扩展性为核心设计，方便新增功能。
-- **类型安全**：利用 Java 的类型安全特性，最大程度减少错误。
+- **注解式配置**：采用与 MyBatis-Plus 类似的注解方式配置实体模型。
+- **直观的 API**：直接的 API 设计简化数据库操作。
+- **易于扩展**：核心设计注重可扩展性。
+- **类型安全**：利用 Java 类型安全减少错误。
 
 ## 快速开始
 
-将 MilvusPlus 添加到你的项目中：
+通过 Maven 将 MilvusPlus 添加到项目中：
 
-**Maven:**
 ```xml
 <dependency>
     <groupId>io.github.javpower</groupId>
@@ -33,23 +34,48 @@ MilvusPlus 是一个功能强大的 Java 库，旨在简化与 Milvus 向量数�
 
 ## 应用场景
 
-向量数据库在以下场景中特别有用：
-
 - **相似性搜索**：快速检索与给定向量最相似的项。
 - **推荐系统**：根据用户行为和偏好推荐相关内容。
 - **图像检索**：在大规模图像库中找到与查询图像最相似的图像。
 - **自然语言处理**：将文本转换为向量并执行语义搜索。
 - **生物信息学**：分析和比较生物序列，如蛋白质和基因组数据。
 
-## 注解说明
+## 自定义注解
 
-MilvusPlus 引入了几个注解，用于将你的 Java 实体映射到 Milvus 集合：
-
-- `@MilvusCollection`：表示一个 Java 类是一个 Milvus 集合。
-- `@MilvusField`：将 Java 字段映射到 Milvus 字段，并提供数据类型、维度等选项。
+- `@MilvusCollection`：标识 Java 类为 Milvus 集合。
+- `@MilvusField`：映射 Java 字段到 Milvus 字段。
 - `@MilvusIndex`：在 Milvus 字段上定义索引。
 
-示例用法：
+## 索引与度量类型详解
+
+### 索引类型（IndexType）
+
+- **INVALID**：无效索引类型，仅用于内部标记。
+- **FLAT**：暴力搜索，适用于小规模数据集。
+- **IVF_FLAT**：倒排索引平面模式，适用于中等规模数据集。
+- **IVF_SQ8**：倒排索引量化模式，适用于大规模数据集，牺牲精度提升速度。
+- **IVF_PQ**：倒排索引产品量化模式，适用于大规模高维数据集，平衡速度和精度。
+- **HNSW**：分层导航小世界图，提供快速搜索，适用于大规模数据集。
+- **DISKANN**：基于磁盘的近似最近邻搜索，适用于存储在磁盘上的大规模数据集。
+- **AUTOINDEX**：自动选择最优索引类型。
+- **SCANN**：使用扫描和树结构加速搜索。
+- **GPU_IVF_FLAT、GPU_IVF_PQ**：GPU 加速索引，适用于 GPU 环境。
+- **BIN_FLAT、BIN_IVF_FLAT**：二进制向量专用索引。
+- **TRIE**：适用于字符串类型的字典树索引。
+- **STL_SORT**：适用于标量字段的排序索引。
+
+### 度量类型（MetricType）
+
+- **INVALID**：无效度量类型，仅用于内部标记。
+- **L2**：欧几里得距离，适用于浮点向量。
+- **IP**：内积，用于计算余弦相似度。
+- **COSINE**：余弦相似度，适用于文本和图像搜索。
+- **HAMMING**：汉明距离，适用于二进制向量。
+- **JACCARD**：杰卡德相似系数，适用于集合相似度计算。
+
+## 使用案例
+
+以下是使用 MilvusPlus 进行向量搜索的示例：
 
 ```java
 
@@ -98,7 +124,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         //查询
         MilvusResp<MilvusResultVo<Face>> query =  mapper.searchWrapper()
                 .eq(Face::getPersonId, 1l)
-                .vector(vector)
+                .vector(Face::getFaceVector,vector)
                 .limit(100l)
                 .query();
         MilvusResp<List<Face>> query2 = mapper.getById(1l);

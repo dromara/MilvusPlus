@@ -98,7 +98,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         //查询
         MilvusResp<MilvusResultVo<Face>> query =  mapper.searchWrapper()
                 .eq(Face::getPersonId, 1l)
-                .vector(vector)
+                .vector(Face::getFaceVector,vector)
                 .limit(100l)
                 .query();
         MilvusResp<List<Face>> query2 = mapper.getById(1l);
