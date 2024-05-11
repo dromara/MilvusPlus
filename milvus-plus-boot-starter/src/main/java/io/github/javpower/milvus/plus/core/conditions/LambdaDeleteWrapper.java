@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
-     * 搜索构建器内部类，用于构建搜索请求
+     * 构建器内部类，用于构建remove请求
      */
 @Data
 @Slf4j

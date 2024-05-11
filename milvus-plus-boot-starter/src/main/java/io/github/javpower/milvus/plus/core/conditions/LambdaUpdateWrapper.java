@@ -16,14 +16,12 @@ import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
-     * 搜索构建器内部类，用于构建搜索请求
+     * 构建器内部类，用于构建update请求
      */
 @Data
 @Slf4j
@@ -413,25 +411,6 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
 
         }
        return update(jsonObjects);
-    }
-    private Map<String, Object> getPropertiesMap(T t) {
-        Map<String, Object> propertiesMap = new HashMap<>();
-        Class<?> clazz = t.getClass();
-        Field[] fields = clazz.getDeclaredFields(); // 获取所有属性
-        for (Field field : fields) {
-            try {
-                field.setAccessible(true); // 确保私有属性也可以访问
-                String fieldName = field.getName(); // 获取属性名
-                Object value = field.get(t); // 获取属性值
-                if(value!=null){
-                    propertiesMap.put(fieldName, value); // 将属性名和属性值放入Map
-                }
-            } catch (IllegalAccessException e) {
-                // 异常处理，实际开发中可以根据需要记录日志或进行其他处理
-                throw new RuntimeException("Error accessing field", e);
-            }
-        }
-        return propertiesMap; // 返回包含属性名和属性值的Map
     }
 
     @Override

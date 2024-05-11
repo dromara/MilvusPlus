@@ -3,14 +3,12 @@ package io.github.javpower.milvus.plus.core.mapper;
 import io.github.javpower.milvus.plus.annotation.MilvusCollection;
 import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
-import io.github.javpower.milvus.plus.core.conditions.LambdaDeleteWrapper;
-import io.github.javpower.milvus.plus.core.conditions.LambdaSearchWrapper;
-import io.github.javpower.milvus.plus.core.conditions.LambdaUpdateWrapper;
-import io.github.javpower.milvus.plus.core.conditions.Wrapper;
+import io.github.javpower.milvus.plus.core.conditions.*;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
 import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.github.javpower.milvus.plus.util.SpringUtils;
 import io.milvus.v2.service.vector.response.DeleteResp;
+import io.milvus.v2.service.vector.response.InsertResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +47,14 @@ public class MilvusMapper<T> {
         return lambda(new LambdaUpdateWrapper<>());
     }
 
+    /**
+     * 创建新增构建器实例
+     * @return 返回删除构建器
+     */
+    public LambdaInsertWrapper<T> insertWrapper() {
+        return lambda(new LambdaInsertWrapper<>());
+    }
+
 
     public MilvusResp<List<T>> getById(Serializable ... ids) {
         LambdaSearchWrapper<T> lambda = searchWrapper();
@@ -62,7 +68,10 @@ public class MilvusMapper<T> {
         LambdaUpdateWrapper<T> lambda = updateWrapper();
         return lambda.updateById(entity);
     }
-
+    public MilvusResp<InsertResp> insert(T ... entity){
+        LambdaInsertWrapper<T> lambda = insertWrapper();
+        return lambda.insert(entity);
+    }
 
 
     /**
