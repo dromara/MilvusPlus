@@ -11,21 +11,20 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection") // 指定Milvus集合的名称
+@MilvusCollection(name = "face_collection_3") // 指定Milvus集合的名称
 public class Face {
     @MilvusField(
             name = "person_id", // 字段名称
             dataType = DataType.Int64, // 数据类型为64位整数
             isPrimaryKey = true, // 标记为主键
-            autoID = true // 假设这个ID是自动生成的
+            autoID = false // 假设这个ID是自动生成的
     )
     private Long personId; // 人员的唯一标识符
 
     @MilvusField(
             name = "face_vector", // 字段名称
             dataType = DataType.FloatVector, // 数据类型为浮点型向量
-            dimension = 128, // 向量维度，假设人脸特征向量的维度是128
-            isPartitionKey = false // 假设这个字段不是分区键
+            dimension = 128 // 向量维度，假设人脸特征向量的维度是128
     )
     @MilvusIndex(
             indexType = IndexParam.IndexType.IVF_FLAT, // 使用IVF_FLAT索引类型
