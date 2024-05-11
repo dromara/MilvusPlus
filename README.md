@@ -119,6 +119,12 @@ public class ApplicationRunnerTest implements ApplicationRunner {
                 .update(face);
         face.setPersonId(1l);
         MilvusResp<UpsertResp> update2 = mapper.updateById(face);
+        
+         //新增
+        MilvusResp<InsertResp> insert = mapper.insertWrapper()
+                .put(Face::getFaceVector, vector)
+                .insert();
+        MilvusResp<InsertResp> insert2 = mapper.insert(face);
     }
 }
 
