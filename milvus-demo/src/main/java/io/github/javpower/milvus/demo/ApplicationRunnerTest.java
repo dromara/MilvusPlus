@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.javpower.milvus.demo.model.Face;
 import io.github.javpower.milvus.demo.test.FaceMilvusMapper;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
+import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
 import io.milvus.v2.service.vector.response.DeleteResp;
 import io.milvus.v2.service.vector.response.InsertResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
@@ -34,9 +35,15 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         //新增
         MilvusResp<InsertResp> insert = mapper.insert(face);
         log.info("insert--{}", JSONObject.toJSONString(insert));
-        //查询
+        //id查询
         MilvusResp<List<Face>> query = mapper.getById(1l);
         log.info("query--{}", JSONObject.toJSONString(query));
+        //向量查询
+        MilvusResp<MilvusResultVo<Face>> query1 = mapper.searchWrapper()
+                .vector(Face::getFaceVector, vector)
+                .topK(2)
+                .query();
+        log.info("query--{}", JSONObject.toJSONString(query1));
         //更新
         vector.clear();
         for (int i = 0; i < 128; i++) {
@@ -49,8 +56,8 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         log.info("remove--{}", JSONObject.toJSONString(remove));
 
         //查询
-        MilvusResp<List<Face>> query2 = mapper.getById(1l);
-        log.info("query--{}", JSONObject.toJSONString(query2));
+        MilvusResp<List<Face>> query3 = mapper.getById(1l);
+        log.info("query--{}", JSONObject.toJSONString(query3));
 
     }
 }
