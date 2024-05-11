@@ -52,6 +52,10 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         }
         MilvusResp<UpsertResp> update = mapper.updateById(face);
         log.info("update--{}", JSONObject.toJSONString(update));
+
+        //id查询
+        MilvusResp<List<Face>> query2 = mapper.getById(1l);
+        log.info("query--getById---{}", JSONObject.toJSONString(query2));
         //删除
         MilvusResp<DeleteResp> remove = mapper.removeById(1l);
         log.info("remove--{}", JSONObject.toJSONString(remove));
