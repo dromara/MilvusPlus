@@ -36,14 +36,13 @@ public class MilvusEntityConverter {
         List<AddFieldReq> milvusFields = new ArrayList<>();
         List<IndexParam> indexParams=new ArrayList<>();
         PropertyCache propertyCache=new PropertyCache();
-        CollectionToPrimaryCache collectionToPrimaryCache =new CollectionToPrimaryCache();
         for (Field field : entityClass.getDeclaredFields()) {
             MilvusField fieldAnnotation = field.getAnnotation(MilvusField.class);
             if (fieldAnnotation != null) {
                 String fieldName = fieldAnnotation.name().isEmpty() ? field.getName() : fieldAnnotation.name();
                 propertyCache.functionToPropertyMap.put(field.getName(),fieldName);
                 if (fieldAnnotation.isPrimaryKey()) {
-                    collectionToPrimaryCache.collectionToPrimary.put(collectionName,fieldName);
+                    CollectionToPrimaryCache.collectionToPrimary.put(collectionName,fieldName);
                 }
                 AddFieldReq.AddFieldReqBuilder<?, ?> builder = AddFieldReq.builder()
                         .fieldName(fieldName)
@@ -80,7 +79,6 @@ public class MilvusEntityConverter {
         conversionCache.setMilvusEntity(milvus);
         conversionCache.setCollectionName(collectionName);
         conversionCache.setPropertyCache(propertyCache);
-        conversionCache.setCollectionToPrimaryCache(collectionToPrimaryCache);
         MilvusCache.milvusCache.put(entityClass,conversionCache);
         return milvus;
     }

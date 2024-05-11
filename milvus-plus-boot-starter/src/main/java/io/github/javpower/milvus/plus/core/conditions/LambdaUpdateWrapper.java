@@ -351,8 +351,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
         }
         Map<String, Object> propertiesMap = getPropertiesMap(t);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
-        CollectionToPrimaryCache collectionToPrimaryCache = conversionCache.getCollectionToPrimaryCache();
-        String pk = collectionToPrimaryCache.collectionToPrimary.get(collectionName);
+        String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
         Boolean havePk=false;
         JSONObject jsonObject=new JSONObject();
         for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
@@ -392,8 +391,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
 
     public MilvusResp<UpsertResp> updateById(T ...t) throws MilvusException {
         PropertyCache propertyCache = conversionCache.getPropertyCache();
-        CollectionToPrimaryCache collectionToPrimaryCache = conversionCache.getCollectionToPrimaryCache();
-        String pk = collectionToPrimaryCache.collectionToPrimary.get(collectionName);
+        String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
         List<JSONObject> jsonObjects=new ArrayList<>();
         for (T t1 : t) {
             Map<String, Object> propertiesMap = getPropertiesMap(t1);

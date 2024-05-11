@@ -8,7 +8,6 @@ import lombok.Data;
 @Data
 public class ConversionCache<T,R> {
     private String collectionName;
-    private CollectionToPrimaryCache collectionToPrimaryCache;
     private PropertyCache propertyCache;
     private MilvusEntity milvusEntity;
 

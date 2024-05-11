@@ -3,6 +3,7 @@ package io.github.javpower.milvus.plus.config;
 
 import io.github.javpower.milvus.plus.annotation.MilvusCollection;
 import io.github.javpower.milvus.plus.builder.CollectionSchemaBuilder;
+import io.github.javpower.milvus.plus.cache.CollectionToPrimaryCache;
 import io.github.javpower.milvus.plus.converter.MilvusEntityConverter;
 import io.github.javpower.milvus.plus.model.MilvusEntity;
 import io.milvus.exception.MilvusException;
@@ -23,6 +24,7 @@ import org.springframework.util.ClassUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,12 +39,24 @@ public class MilvusInit implements AutoCloseable {
 
     public MilvusInit(MilvusClientV2 client, MilvusProperties properties) {
         this.client = client;
-        List<Class<?>> classes = getClass(properties.getPackages());
-        performBusinessLogic(classes);
+        if(client!=null){
+            List<Class<?>> classes = getClass(properties.getPackages());
+            performBusinessLogic(classes);
+        }
     }
 
     @Override
     public void close() throws InterruptedException {
+        //释放集合+释放client
+        Set<String> co = CollectionToPrimaryCache.collectionToPrimary.keySet();
+        if(co.size()>0){
+            for (String name : co) {
+                ReleaseCollectionReq releaseCollectionReq = ReleaseCollectionReq.builder()
+                        .collectionName(name)
+                        .build();
+                client.releaseCollection(releaseCollectionReq);
+            }
+        }
         client.close(10);
     }
     //获取指定包下实体类
@@ -96,13 +110,13 @@ public class MilvusInit implements AutoCloseable {
                         );
                         // 创建新集合
                         create(milvusEntity,client);
-                        loadStatus(collectionName);
                     }
                 } else {
                     // 创建新集合
                     create(milvusEntity,client);
-                    loadStatus(collectionName);
                 }
+                //加载集合
+                loadStatus(collectionName);
             } catch (MilvusException e) {
                 throw new RuntimeException("Error handling Milvus collection", e);
             }
@@ -122,7 +136,8 @@ public class MilvusInit implements AutoCloseable {
             log.info("-------create index---------");
         }
     }
-    private void  loadStatus(String collectionName){
+    private void loadStatus(String collectionName){
+        //集合加载状态+加载集合
         GetLoadStateReq getLoadStateReq = GetLoadStateReq.builder()
                 .collectionName(collectionName)
                 .build();
