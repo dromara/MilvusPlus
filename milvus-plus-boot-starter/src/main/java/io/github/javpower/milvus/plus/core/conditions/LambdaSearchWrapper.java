@@ -330,7 +330,21 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
         return this;
     }
 
+    public LambdaSearchWrapper<T> annsField(String annsField){
+        this.annsField=annsField;
+        return this;
+    }
     public LambdaSearchWrapper<T> vector(List<Float> vector) {
+        vectors.add(vector);
+        return this;
+    }
+    public LambdaSearchWrapper<T> vector(String annsField,List<Float> vector) {
+        this.annsField=annsField;
+        vectors.add(vector);
+        return this;
+    }
+    public LambdaSearchWrapper<T> vector(FieldFunction<T,?> annsField,List<Float> vector) {
+        this.annsField=annsField.getFieldName(annsField);
         vectors.add(vector);
         return this;
     }
@@ -348,9 +362,11 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      */
     private SearchReq build() {
         SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
-                .collectionName(collectionName)
-                .annsField(annsField);
+                .collectionName(collectionName);
 
+        if(!annsField.isEmpty()){
+            builder.annsField(annsField);
+        }
         if (!vectors.isEmpty()) {
             builder.data(vectors);
         }
