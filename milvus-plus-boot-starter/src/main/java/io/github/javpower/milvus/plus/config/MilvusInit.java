@@ -148,6 +148,8 @@ public class MilvusInit implements AutoCloseable {
                     .collectionName(collectionName)
                     .build();
             client.loadCollection(loadCollectionReq);
+            log.info("loadCollection-----");
+
         }
     }
 

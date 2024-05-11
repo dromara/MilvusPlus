@@ -37,13 +37,14 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         log.info("insert--{}", JSONObject.toJSONString(insert));
         //id查询
         MilvusResp<List<Face>> query = mapper.getById(1l);
-        log.info("query--{}", JSONObject.toJSONString(query));
+        log.info("query--getById---{}", JSONObject.toJSONString(query));
         //向量查询
-        MilvusResp<MilvusResultVo<Face>> query1 = mapper.searchWrapper()
+        MilvusResp<MilvusResultVo<Face>> query1 = mapper.queryWrapper()
                 .vector(Face::getFaceVector, vector)
+                .eq(Face::getPersonId,1l)
                 .topK(2)
                 .query();
-        log.info("query--{}", JSONObject.toJSONString(query1));
+        log.info("query--queryWrapper---{}", JSONObject.toJSONString(query1));
         //更新
         vector.clear();
         for (int i = 0; i < 128; i++) {

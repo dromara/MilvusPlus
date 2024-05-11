@@ -27,8 +27,8 @@ public class MilvusMapper<T> {
      * 创建搜索构建器实例
      * @return 返回搜索构建器
      */
-    public LambdaSearchWrapper<T> searchWrapper() {
-        return lambda(new LambdaSearchWrapper<>());
+    public LambdaQueryWrapper<T> queryWrapper() {
+        return lambda(new LambdaQueryWrapper<>());
     }
 
     /**
@@ -57,7 +57,7 @@ public class MilvusMapper<T> {
 
 
     public MilvusResp<List<T>> getById(Serializable ... ids) {
-        LambdaSearchWrapper<T> lambda = searchWrapper();
+        LambdaQueryWrapper<T> lambda = queryWrapper();
         return lambda.getById(ids);
     }
     public MilvusResp<DeleteResp> removeById(Serializable ... ids){

@@ -19,14 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
      * 搜索构建器内部类，用于构建搜索请求
      */
 @Data
 @Slf4j
-public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaSearchWrapper<T>,T>{
+public  class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>,T>{
     private ConversionCache<?, ?> conversionCache;
     private Class<T> entityType;
     private String collectionName;
@@ -42,14 +44,14 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
     private boolean ignoreGrowing;
     private MilvusClientV2 client;
 
-    public LambdaSearchWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;
         this.entityType=entityType;
     }
 
-    public LambdaSearchWrapper() {
+    public LambdaQueryWrapper() {
 
     }
     /**
@@ -59,7 +61,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> eq(String fieldName, Object value) {
+    protected LambdaQueryWrapper<T> eq(String fieldName, Object value) {
         super.eq(fieldName,value);
         return this;
     }
@@ -71,7 +73,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> ne(String fieldName, Object value) {
+    protected LambdaQueryWrapper<T> ne(String fieldName, Object value) {
         super.ne(fieldName,value);
         return this;
     }
@@ -83,7 +85,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> gt(String fieldName, Object value) {
+    protected LambdaQueryWrapper<T> gt(String fieldName, Object value) {
         super.gt(fieldName,value);
         return this;
     }
@@ -95,7 +97,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> ge(String fieldName, Object value) {
+    protected LambdaQueryWrapper<T> ge(String fieldName, Object value) {
         super.ge(fieldName,value);
         return this;
     }
@@ -107,7 +109,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> lt(String fieldName, Object value) {
+    protected LambdaQueryWrapper<T> lt(String fieldName, Object value) {
         super.lt(fieldName,value);
         return this;
     }
@@ -119,7 +121,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> le(String fieldName, Object value) {
+    protected LambdaQueryWrapper<T> le(String fieldName, Object value) {
         super.le(fieldName,value);
         return this;
     }
@@ -132,7 +134,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param end       范围结束值
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> between(String fieldName, Object start, Object end) {
+    protected LambdaQueryWrapper<T> between(String fieldName, Object start, Object end) {
         super.between(fieldName,start,end);
         return this;
     }
@@ -143,7 +145,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> isNull(String fieldName) {
+    protected LambdaQueryWrapper<T> isNull(String fieldName) {
         super.isNull(fieldName);
         return this;
     }
@@ -154,7 +156,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> isNotNull(String fieldName) {
+    protected LambdaQueryWrapper<T> isNotNull(String fieldName) {
         super.isNotNull(fieldName);
         return this;
     }
@@ -166,7 +168,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param values    要检查的值列表
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> in(String fieldName, List<?> values) {
+    protected LambdaQueryWrapper<T> in(String fieldName, List<?> values) {
         super.in(fieldName,values);
         return this;
     }
@@ -178,181 +180,185 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要匹配的模式
      * @return 当前条件构建器对象
      */
-    protected LambdaSearchWrapper<T> like(String fieldName, String value) {
+    protected LambdaQueryWrapper<T> like(String fieldName, String value) {
         super.like(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> jsonContains(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> jsonContains(String fieldName, Object value) {
         super.jsonContains(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> jsonContainsAll(String fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> jsonContainsAll(String fieldName, List<?> values) {
         super.jsonContainsAll(fieldName,values);
         return this;
     }
 
-    public LambdaSearchWrapper<T> jsonContainsAny(String fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> jsonContainsAny(String fieldName, List<?> values) {
         super.jsonContainsAny(fieldName,values);
         return this;
     }
 
     // Array operations
-    public LambdaSearchWrapper<T> arrayContains(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> arrayContains(String fieldName, Object value) {
         super.arrayContains(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> arrayContainsAll(String fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> arrayContainsAll(String fieldName, List<?> values) {
         super.arrayContainsAll(fieldName,values);
         return this;
     }
 
-    public LambdaSearchWrapper<T> arrayContainsAny(String fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> arrayContainsAny(String fieldName, List<?> values) {
         super.arrayContainsAny(fieldName,values);
         return this;
     }
 
-    public LambdaSearchWrapper<T> arrayLength(String fieldName, int length) {
+    public LambdaQueryWrapper<T> arrayLength(String fieldName, int length) {
         super.arrayLength(fieldName,length);
         return this;
     }
 
-    public LambdaSearchWrapper<T> eq(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> eq(FieldFunction<T,?> fieldName, Object value) {
         super.eq(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> ne(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> ne(FieldFunction<T,?> fieldName, Object value) {
         super.ne(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> gt(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> gt(FieldFunction<T,?> fieldName, Object value) {
         super.gt(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> ge(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> ge(FieldFunction<T,?> fieldName, Object value) {
         super.ge(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> lt(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> lt(FieldFunction<T,?> fieldName, Object value) {
         super.lt(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> le(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> le(FieldFunction<T,?> fieldName, Object value) {
         super.le(fieldName,value);
         return this;
     }
 
     // Range operation
-    public LambdaSearchWrapper<T> between(FieldFunction<T,?> fieldName, Object start, Object end) {
+    public LambdaQueryWrapper<T> between(FieldFunction<T,?> fieldName, Object start, Object end) {
         super.between(fieldName,start,end);
         return this;
     }
 
     // Null check
-    public LambdaSearchWrapper<T> isNull(FieldFunction<T,?> fieldName) {
+    public LambdaQueryWrapper<T> isNull(FieldFunction<T,?> fieldName) {
         super.isNull(fieldName);
         return this;
     }
 
-    public LambdaSearchWrapper<T> isNotNull(FieldFunction<T,?> fieldName) {
+    public LambdaQueryWrapper<T> isNotNull(FieldFunction<T,?> fieldName) {
         super.isNotNull(fieldName);
         return this;
     }
 
     // In operator
-    public LambdaSearchWrapper<T> in(FieldFunction<T,?> fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> in(FieldFunction<T,?> fieldName, List<?> values) {
         super.in(fieldName,values);
         return this;
     }
 
     // Like operator
-    public LambdaSearchWrapper<T> like(FieldFunction<T,?> fieldName, String value) {
+    public LambdaQueryWrapper<T> like(FieldFunction<T,?> fieldName, String value) {
         super.like(fieldName,value);
         return this;
     }
 
     // JSON array operations
-    public LambdaSearchWrapper<T> jsonContains(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> jsonContains(FieldFunction<T,?> fieldName, Object value) {
         super.jsonContains(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> jsonContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> jsonContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
         super.jsonContainsAll(fieldName,values);
         return this;
     }
 
-    public LambdaSearchWrapper<T> jsonContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> jsonContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
         super.jsonContainsAny(fieldName,values);
         return this;
     }
 
     // Array operations
-    public LambdaSearchWrapper<T> arrayContains(FieldFunction<T,?> fieldName, Object value) {
+    public LambdaQueryWrapper<T> arrayContains(FieldFunction<T,?> fieldName, Object value) {
         super.arrayContains(fieldName,value);
         return this;
     }
 
-    public LambdaSearchWrapper<T> arrayContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> arrayContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
         super.arrayContainsAll(fieldName,values);
         return this;
     }
-    public LambdaSearchWrapper<T> arrayContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> arrayContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
         super.arrayContainsAny(fieldName,values);
         return this;
     }
 
-    public LambdaSearchWrapper<T> arrayLength(FieldFunction<T,?> fieldName, int length) {
+    public LambdaQueryWrapper<T> arrayLength(FieldFunction<T,?> fieldName, int length) {
         super.arrayLength(fieldName,length);
         return this;
     }
 
     // Logic operations
-    public LambdaSearchWrapper<T> and(ConditionBuilder<T> other) {
+    public LambdaQueryWrapper<T> and(ConditionBuilder<T> other) {
         super.and(other);
         return this;
     }
 
-    public LambdaSearchWrapper<T> or(ConditionBuilder<T> other) {
+    public LambdaQueryWrapper<T> or(ConditionBuilder<T> other) {
         super.or(other);
         return this;
     }
 
-    public LambdaSearchWrapper<T> not() {
+    public LambdaQueryWrapper<T> not() {
         super.not();
         return this;
     }
 
-    public LambdaSearchWrapper<T> annsField(String annsField){
+    public LambdaQueryWrapper<T> annsField(String annsField){
         this.annsField=annsField;
         return this;
     }
-    public LambdaSearchWrapper<T> vector(List<Float> vector) {
+    public LambdaQueryWrapper<T> annsField(FieldFunction<T,?> annsField){
+        this.annsField=annsField.getFieldName(annsField);
+        return this;
+    }
+    public LambdaQueryWrapper<T> vector(List<Float> vector) {
         vectors.add(vector);
         return this;
     }
-    public LambdaSearchWrapper<T> vector(String annsField,List<Float> vector) {
+    public LambdaQueryWrapper<T> vector(String annsField, List<Float> vector) {
         this.annsField=annsField;
         vectors.add(vector);
         return this;
     }
-    public LambdaSearchWrapper<T> vector(FieldFunction<T,?> annsField,List<Float> vector) {
+    public LambdaQueryWrapper<T> vector(FieldFunction<T,?> annsField, List<Float> vector) {
         this.annsField=annsField.getFieldName(annsField);
         vectors.add(vector);
         return this;
     }
-    public LambdaSearchWrapper<T> limit(Long limit) {
+    public LambdaQueryWrapper<T> limit(Long limit) {
         this.setLimit(limit);
         return this;
     }
-    public LambdaSearchWrapper<T> topK(Integer topK) {
+    public LambdaQueryWrapper<T> topK(Integer topK) {
         this.setTopK(topK);
         return this;
     }
@@ -364,7 +370,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
         SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                 .collectionName(collectionName);
 
-        if(!annsField.isEmpty()){
+        if(annsField!=null&&!annsField.isEmpty()){
             builder.annsField(annsField);
         }
         if (!vectors.isEmpty()) {
@@ -380,6 +386,8 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
         if(limit>0){
             builder.limit(limit);
         }
+        Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
+        builder.outputFields(values.stream().collect(Collectors.toList()));
         // Set other parameters as needed
         return builder.build();
     }
@@ -414,7 +422,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
     }
 
     @Override
-    public LambdaSearchWrapper<T> wrapper() {
+    public LambdaQueryWrapper<T> wrapper() {
         return this;
     }
 
