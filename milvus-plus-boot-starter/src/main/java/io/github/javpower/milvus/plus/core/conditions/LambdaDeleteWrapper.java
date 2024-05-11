@@ -11,6 +11,7 @@ import io.milvus.v2.service.vector.response.DeleteResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -357,6 +358,10 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         resp.setData(delete);
         resp.setSuccess(true);
         return resp;
+    }
+    public MilvusResp<DeleteResp> removeById(Serializable ... ids) throws MilvusException {
+        this.id(ids);
+        return remove();
     }
 
     @Override

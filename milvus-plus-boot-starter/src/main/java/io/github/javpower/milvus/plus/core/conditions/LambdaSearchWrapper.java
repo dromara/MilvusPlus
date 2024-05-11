@@ -9,12 +9,16 @@ import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
 import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.common.ConsistencyLevel;
+import io.milvus.v2.service.vector.request.GetReq;
 import io.milvus.v2.service.vector.request.SearchReq;
+import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.SearchResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -345,14 +349,17 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
     private SearchReq build() {
         SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                 .collectionName(collectionName)
-                .annsField(annsField)
-                .topK(topK);
+                .annsField(annsField);
+
         if (!vectors.isEmpty()) {
             builder.data(vectors);
         }
         String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {
             builder.filter(filterStr);
+        }
+        if(topK>0){
+            builder.topK(topK);
         }
         if(limit>0){
             builder.limit(limit);
@@ -372,6 +379,17 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
         MilvusResp<MilvusResultVo<T>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
         return tMilvusResp;
     }
+    public MilvusResp<List<T>> getById(Serializable ... ids){
+        GetReq getReq = GetReq.builder()
+                .collectionName(collectionName)
+                .ids(Arrays.asList(ids))
+                .build();
+        GetResp getResp = client.client.get(getReq);
+        MilvusResp<List<T>> tMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
+        return tMilvusResp;
+
+    }
+
     @Override
     public void init(String collectionName, MilvusClient client, ConversionCache conversionCache, Class entityType) {
         setClient(client);
