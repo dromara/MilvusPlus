@@ -6,6 +6,7 @@ import io.github.javpower.milvus.demo.test.FaceMilvusMapper;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
 import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
 import io.milvus.v2.service.vector.response.DeleteResp;
+import io.milvus.v2.service.vector.response.InsertResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -30,7 +31,6 @@ public class ApplicationRunnerTest implements ApplicationRunner {
                 .query();
         MilvusResp<List<Face>> query2 = mapper.getById(1l);
 
-
         //删除
         MilvusResp<DeleteResp> remove= mapper.deleteWrapper()
                 .eq(Face::getPersonId, 1l)
@@ -46,5 +46,11 @@ public class ApplicationRunnerTest implements ApplicationRunner {
                 .update(face);
         face.setPersonId(1l);
         MilvusResp<UpsertResp> update2 = mapper.updateById(face);
+
+        //新增
+        MilvusResp<InsertResp> insert = mapper.insertWrapper()
+                .put(Face::getFaceVector, vector)
+                .insert();
+        MilvusResp<InsertResp> insert2 = mapper.insert(face);
     }
 }
