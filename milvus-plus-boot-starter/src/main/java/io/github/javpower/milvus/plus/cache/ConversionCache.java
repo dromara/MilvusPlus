@@ -6,7 +6,7 @@ import lombok.Data;
  * @author xgc
  **/
 @Data
-public class ConversionCache<T,R> {
+public class ConversionCache {
     private String collectionName;
     private PropertyCache propertyCache;
     private MilvusEntity milvusEntity;

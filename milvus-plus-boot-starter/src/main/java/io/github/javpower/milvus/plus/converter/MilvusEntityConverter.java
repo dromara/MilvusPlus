@@ -75,7 +75,7 @@ public class MilvusEntityConverter {
         milvus.setMilvusFields(milvusFields);
         milvus.setIndexParams(indexParams);
         //缓存
-        ConversionCache conversionCache=new ConversionCache<>();
+        ConversionCache conversionCache=new ConversionCache();
         conversionCache.setMilvusEntity(milvus);
         conversionCache.setCollectionName(collectionName);
         conversionCache.setPropertyCache(propertyCache);

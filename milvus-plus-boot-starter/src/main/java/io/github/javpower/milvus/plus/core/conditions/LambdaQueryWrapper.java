@@ -28,8 +28,9 @@ import java.util.stream.Collectors;
      */
 @Data
 @Slf4j
-public  class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>,T>{
-    private ConversionCache<?, ?> conversionCache;
+public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>,T>{
+    private ConversionCache conversionCache;
+    private List<String> outputFields;
     private Class<T> entityType;
     private String collectionName;
     private String annsField;
@@ -44,7 +45,7 @@ public  class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements W
     private boolean ignoreGrowing;
     private MilvusClientV2 client;
 
-    public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;
@@ -386,8 +387,12 @@ public  class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements W
         if(limit>0){
             builder.limit(limit);
         }
-        Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
-        builder.outputFields(values.stream().collect(Collectors.toList()));
+        if(outputFields!=null&&outputFields.size()>0){
+            builder.outputFields(outputFields);
+        }else {
+            Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
+            builder.outputFields(new ArrayList<>(values));
+        }
         // Set other parameters as needed
         return builder.build();
     }
@@ -403,6 +408,18 @@ public  class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements W
         MilvusResp<MilvusResultVo<T>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
         return tMilvusResp;
     }
+    public MilvusResp<MilvusResultVo<T>> query(FieldFunction<T,?> ... outputFields) throws MilvusException {
+        List<String> otf=new ArrayList<>();
+        for (FieldFunction<T, ?> outputField : outputFields) {
+            otf.add(outputField.getFieldName(outputField));
+        }
+        this.outputFields=otf;
+        return query();
+    }
+    public MilvusResp<MilvusResultVo<T>> query(String ... outputFields) throws MilvusException {
+        this.outputFields=Arrays.stream(outputFields).collect(Collectors.toList());
+        return query();
+    }
     public MilvusResp<List<T>> getById(Serializable ... ids){
         GetReq getReq = GetReq.builder()
                 .collectionName(collectionName)
@@ -414,7 +431,7 @@ public  class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements W
 
     }
     @Override
-    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);

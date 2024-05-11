@@ -26,12 +26,12 @@ import java.util.Map;
 @Data
 @Slf4j
 public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaUpdateWrapper<T>,T>{
-    private ConversionCache<?, ?> conversionCache;
+    private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
     private MilvusClientV2 client;
 
-    public LambdaUpdateWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaUpdateWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;

@@ -9,6 +9,6 @@ import io.milvus.v2.client.MilvusClientV2;
      * @param <T> 实体类型
      */
 public interface Wrapper<W, T> {
-    void init(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType);
+    void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType);
     W wrapper();
 }

@@ -22,13 +22,13 @@ import java.util.List;
 @Data
 @Slf4j
 public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaDeleteWrapper<T>,T>{
-    private ConversionCache<?, ?> conversionCache;
+    private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
     private MilvusClientV2 client;
     private List<Object> ids=new ArrayList<>();
 
-    public LambdaDeleteWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaDeleteWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;

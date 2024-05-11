@@ -25,7 +25,7 @@ public class SearchRespConverter {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static <T> MilvusResp<MilvusResultVo<T>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType) {
-        ConversionCache<?, ?> conversionCache = MilvusCache.milvusCache.get(entityType);
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         List<List<SearchResp.SearchResult>> searchResults = searchResp.getSearchResults();
         // 将searchResults中的每个SearchResult转换为MilvusResult<T>
@@ -67,7 +67,7 @@ public class SearchRespConverter {
 
     public static <T> MilvusResp<List<T>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType) {
         // 解析GetResp中的查询结果
-        ConversionCache<?, ?> conversionCache = MilvusCache.milvusCache.get(entityType);
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         List<QueryResp.QueryResult> getResults = getResp.getResults;
         List<T> entities = new ArrayList<>();

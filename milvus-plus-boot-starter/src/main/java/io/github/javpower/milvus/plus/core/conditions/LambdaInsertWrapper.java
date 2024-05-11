@@ -24,12 +24,12 @@ import java.util.Map;
 @Data
 @Slf4j
 public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaInsertWrapper<T>,T>{
-    private ConversionCache<?, ?> conversionCache;
+    private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
     private MilvusClientV2 client;
     private JSONObject entity=new JSONObject();
-    public LambdaInsertWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaInsertWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;
