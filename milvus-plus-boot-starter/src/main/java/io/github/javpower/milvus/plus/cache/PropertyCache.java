@@ -9,4 +9,14 @@ public class PropertyCache {
 
     public Map<String, String> functionToPropertyMap = new HashMap<>(); //属性名称->表名称
 
+
+    // 根据值查找第一个匹配的键
+    public String findKeyByValue(String value) {
+        for (Map.Entry<String, String> entry : functionToPropertyMap.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey(); // 返回与值匹配的第一个键
+            }
+        }
+        return null; // 如果没有找到匹配的键，返回null
+    }
 }

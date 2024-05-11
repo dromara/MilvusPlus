@@ -5,8 +5,8 @@ import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
 import io.github.javpower.milvus.plus.core.conditions.*;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
-import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.github.javpower.milvus.plus.util.SpringUtils;
+import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.response.DeleteResp;
 import io.milvus.v2.service.vector.response.InsertResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
@@ -91,7 +91,7 @@ public class MilvusMapper<T> {
         ConversionCache<?, ?> conversionCache = MilvusCache.milvusCache.get(entityType);
         String collectionName = conversionCache == null ? null : conversionCache.getCollectionName();
         // 使用SpringUtil获取MilvusClient实例
-        MilvusClient client = SpringUtils.getBean(MilvusClient.class);
+        MilvusClientV2 client = SpringUtils.getBean(MilvusClientV2.class);
         // 初始化构建器实例
         wrapper.init(collectionName, client, conversionCache, entityType);
         return wrapper.wrapper();

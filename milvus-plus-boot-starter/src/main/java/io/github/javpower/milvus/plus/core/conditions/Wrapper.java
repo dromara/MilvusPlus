@@ -1,7 +1,7 @@
 package io.github.javpower.milvus.plus.core.conditions;
 
 import io.github.javpower.milvus.plus.cache.ConversionCache;
-import io.github.javpower.milvus.plus.service.MilvusClient;
+import io.milvus.v2.client.MilvusClientV2;
 
 /**
      * 通用构建器接口
@@ -9,6 +9,6 @@ import io.github.javpower.milvus.plus.service.MilvusClient;
      * @param <T> 实体类型
      */
 public interface Wrapper<W, T> {
-    void init(String collectionName, MilvusClient client, ConversionCache<?, ?> conversionCache, Class<T> entityType);
+    void init(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType);
     W wrapper();
 }

@@ -1,11 +1,12 @@
 package io.github.javpower.milvus.plus.converter;
 
 
+import io.github.javpower.milvus.plus.annotation.ExtraParam;
 import io.github.javpower.milvus.plus.annotation.MilvusCollection;
 import io.github.javpower.milvus.plus.annotation.MilvusField;
 import io.github.javpower.milvus.plus.annotation.MilvusIndex;
-import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.CollectionToPrimaryCache;
+import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
 import io.github.javpower.milvus.plus.cache.PropertyCache;
 import io.github.javpower.milvus.plus.model.MilvusEntity;
@@ -15,7 +16,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 /**
  * @author xgc
  **/
@@ -41,18 +45,26 @@ public class MilvusEntityConverter {
                 if (fieldAnnotation.isPrimaryKey()) {
                     collectionToPrimaryCache.collectionToPrimary.put(collectionName,fieldName);
                 }
-                AddFieldReq milvusField = AddFieldReq.builder()
+                AddFieldReq.AddFieldReqBuilder<?, ?> builder = AddFieldReq.builder()
                         .fieldName(fieldName)
                         .dataType(fieldAnnotation.dataType())
                         .isPrimaryKey(fieldAnnotation.isPrimaryKey())
-                        .autoID(fieldAnnotation.autoID())
-                        .description(StringUtils.isNotEmpty(fieldAnnotation.description()) ? fieldAnnotation.description() : null)
-                        .dimension(fieldAnnotation.dimension())
-                        .maxLength(fieldAnnotation.maxLength() > 0 ? fieldAnnotation.maxLength() : null)
                         .isPartitionKey(fieldAnnotation.isPartitionKey())
                         .elementType(fieldAnnotation.elementType())
-                        .maxCapacity(fieldAnnotation.maxCapacity() > 0 ? fieldAnnotation.maxCapacity() : null)
-                        .build();
+                        .autoID(fieldAnnotation.autoID());
+                if(StringUtils.isNotEmpty(fieldAnnotation.description())){
+                    builder.description(fieldAnnotation.description());
+                }
+                if(fieldAnnotation.dimension()>0){
+                    builder.dimension(fieldAnnotation.dimension());
+                }
+                if(fieldAnnotation.maxLength() > 0){
+                    builder.maxLength(fieldAnnotation.maxLength());
+                }
+                if(fieldAnnotation.maxCapacity() > 0){
+                    builder.maxCapacity(fieldAnnotation.maxCapacity());
+                }
+                AddFieldReq milvusField = builder.build();
                 milvusFields.add(milvusField);
                 // 构建IndexParam对象
                 IndexParam indexParam = createIndexParam(field,fieldName);
@@ -79,10 +91,17 @@ public class MilvusEntityConverter {
         if (fieldAnnotation == null) {
             return null;
         }
+        Map<String,Object> map=new HashMap<>();
+        ExtraParam[] extraParams = fieldAnnotation.extraParams();
+        for (ExtraParam extraParam : extraParams) {
+            map.put(extraParam.key(),extraParam.value());
+        }
         return IndexParam.builder()
-                .fieldName(fieldAnnotation.indexName().isEmpty() ? fieldName : fieldAnnotation.indexName())
+                .indexName(fieldAnnotation.indexName().isEmpty() ? fieldName : fieldAnnotation.indexName())
+                .fieldName(fieldName)
                 .indexType(fieldAnnotation.indexType())
                 .metricType(fieldAnnotation.metricType()) // 默认使用L2距离，根据需要调整
+                .extraParams(map)
                 .build();
     }
 

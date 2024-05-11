@@ -1,7 +1,7 @@
 package io.github.javpower.milvus.plus.builder;
 
-import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.milvus.exception.MilvusException;
+import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
 import io.milvus.v2.service.collection.request.CreateCollectionReq;
@@ -12,13 +12,13 @@ import io.milvus.v2.service.index.request.CreateIndexReq;
 public class CollectionSchemaBuilder {
 
     private final String collectionName;
-    private final MilvusClient wrapper;
+    private final MilvusClientV2 wrapper;
     private final CreateCollectionReq.CollectionSchema  schema;
 
-    public CollectionSchemaBuilder(String collectionName, MilvusClient wrapper) {
+    public CollectionSchemaBuilder(String collectionName, MilvusClientV2 wrapper) {
         this.collectionName = collectionName;
         this.wrapper = wrapper;
-        this.schema = wrapper.client.createSchema();
+        this.schema = wrapper.createSchema();
     }
 
     public CollectionSchemaBuilder addField(AddFieldReq field) {
@@ -34,13 +34,13 @@ public class CollectionSchemaBuilder {
 
     public void createSchema() throws MilvusException {
         CreateCollectionReq req=CreateCollectionReq.builder().collectionName(this.collectionName).collectionSchema(this.schema).build();
-        wrapper.client.createCollection(req);
+        wrapper.createCollection(req);
     }
     public void createIndex(java.util.List<IndexParam> indexParams) throws MilvusException {
         CreateIndexReq req = CreateIndexReq.builder()
                 .collectionName(collectionName)
                 .indexParams(indexParams)
                 .build();
-        wrapper.client.createIndex(req);
+        wrapper.createIndex(req);
     }
 }

@@ -6,8 +6,8 @@ import io.github.javpower.milvus.plus.converter.SearchRespConverter;
 import io.github.javpower.milvus.plus.core.FieldFunction;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
 import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
-import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.milvus.exception.MilvusException;
+import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.service.vector.request.GetReq;
 import io.milvus.v2.service.vector.request.SearchReq;
@@ -40,9 +40,9 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
     private long guaranteeTimestamp;
     private ConsistencyLevel consistencyLevel;
     private boolean ignoreGrowing;
-    private MilvusClient client;
+    private MilvusClientV2 client;
 
-    public LambdaSearchWrapper(String collectionName, MilvusClient client,ConversionCache<?, ?> conversionCache,Class<T> entityType) {
+    public LambdaSearchWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;
@@ -391,7 +391,7 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
     public MilvusResp<MilvusResultVo<T>> query() throws MilvusException {
         SearchReq searchReq = build();
         log.info("build query param-->{}", JSON.toJSONString(searchReq));
-        SearchResp search = client.client.search(searchReq);
+        SearchResp search = client.search(searchReq);
         MilvusResp<MilvusResultVo<T>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
         return tMilvusResp;
     }
@@ -400,14 +400,13 @@ public  class LambdaSearchWrapper<T> extends AbstractChainWrapper<T> implements 
                 .collectionName(collectionName)
                 .ids(Arrays.asList(ids))
                 .build();
-        GetResp getResp = client.client.get(getReq);
+        GetResp getResp = client.get(getReq);
         MilvusResp<List<T>> tMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
         return tMilvusResp;
 
     }
-
     @Override
-    public void init(String collectionName, MilvusClient client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);

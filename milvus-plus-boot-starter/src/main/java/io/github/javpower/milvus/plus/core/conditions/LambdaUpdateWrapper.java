@@ -7,8 +7,8 @@ import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.PropertyCache;
 import io.github.javpower.milvus.plus.core.FieldFunction;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
-import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.milvus.exception.MilvusException;
+import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.SearchReq;
 import io.milvus.v2.service.vector.request.UpsertReq;
 import io.milvus.v2.service.vector.response.SearchResp;
@@ -29,9 +29,9 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
     private ConversionCache<?, ?> conversionCache;
     private Class<T> entityType;
     private String collectionName;
-    private MilvusClient client;
+    private MilvusClientV2 client;
 
-    public LambdaUpdateWrapper(String collectionName, MilvusClient client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaUpdateWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;
@@ -327,7 +327,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
         if (filterStr != null && !filterStr.isEmpty()) {
             SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                     .collectionName(collectionName).filter(filterStr);
-            SearchResp search = client.client.search(builder.build());
+            SearchResp search = client.search(builder.build());
             return search;
         }else {
             return null;
@@ -383,7 +383,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
                 .collectionName(collectionName)
                 .data(jsonObjects)
                 .build();
-        UpsertResp upsert = client.client.upsert(upsertReq);
+        UpsertResp upsert = client.upsert(upsertReq);
         MilvusResp<UpsertResp> resp=new MilvusResp();
         resp.setData(upsert);
         resp.setSuccess(true);
@@ -414,7 +414,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
     }
 
     @Override
-    public void init(String collectionName, MilvusClient client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);

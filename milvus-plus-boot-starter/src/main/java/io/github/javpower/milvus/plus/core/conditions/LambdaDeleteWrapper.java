@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.core.FieldFunction;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
-import io.github.javpower.milvus.plus.service.MilvusClient;
 import io.milvus.exception.MilvusException;
+import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.DeleteReq;
 import io.milvus.v2.service.vector.response.DeleteResp;
 import lombok.Data;
@@ -25,10 +25,10 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
     private ConversionCache<?, ?> conversionCache;
     private Class<T> entityType;
     private String collectionName;
-    private MilvusClient client;
+    private MilvusClientV2 client;
     private List<Object> ids=new ArrayList<>();
 
-    public LambdaDeleteWrapper(String collectionName, MilvusClient client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
+    public LambdaDeleteWrapper(String collectionName, MilvusClientV2 client, ConversionCache<?, ?> conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
         this.conversionCache=conversionCache;
@@ -353,7 +353,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
     public MilvusResp<DeleteResp> remove() throws MilvusException {
         DeleteReq deleteReq = build();
         log.info("build remove param-->{}", JSON.toJSONString(deleteReq));
-        DeleteResp delete = client.client.delete(deleteReq);
+        DeleteResp delete = client.delete(deleteReq);
         MilvusResp<DeleteResp> resp=new MilvusResp();
         resp.setData(delete);
         resp.setSuccess(true);
@@ -365,7 +365,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
     }
 
     @Override
-    public void init(String collectionName, MilvusClient client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);
