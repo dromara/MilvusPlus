@@ -11,7 +11,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection_3") // 指定Milvus集合的名称
+@MilvusCollection(name = "face_collection") // 指定Milvus集合的名称
 public class Face {
     @MilvusField(
             name = "person_id", // 字段名称
