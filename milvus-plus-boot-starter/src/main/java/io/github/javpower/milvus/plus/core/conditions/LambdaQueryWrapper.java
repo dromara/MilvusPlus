@@ -10,8 +10,10 @@ import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.service.vector.request.GetReq;
+import io.milvus.v2.service.vector.request.QueryReq;
 import io.milvus.v2.service.vector.request.SearchReq;
 import io.milvus.v2.service.vector.response.GetResp;
+import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -367,7 +369,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * 构建完整的搜索请求
      * @return 搜索请求对象
      */
-    private SearchReq build() {
+    private SearchReq buildSearch() {
         SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                 .collectionName(collectionName);
 
@@ -396,19 +398,47 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         // Set other parameters as needed
         return builder.build();
     }
+    public QueryReq buildQuery(){
+        QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
+                .collectionName(collectionName);
+        String filterStr = buildFilters();
+        if (filterStr != null && !filterStr.isEmpty()) {
+            builder.filter(filterStr);
+        }
+        if(topK>0){
+            builder.limit(topK);
+        }
+        if(limit>0){
+            builder.limit(limit);
+        }
+        if(outputFields!=null&&outputFields.size()>0){
+            builder.outputFields(outputFields);
+        }else {
+            Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
+            builder.outputFields(new ArrayList<>(values));
+        }
+        return builder.build();
+    }
 
     /**
      * 执行搜索
      * @return 搜索响应对象
      */
-    public MilvusResp<MilvusResultVo<T>> query() throws MilvusException {
-        SearchReq searchReq = build();
+    public MilvusResp<MilvusResultVo<T>> search() throws MilvusException {
+        SearchReq searchReq = buildSearch();
         log.info("build query param-->{}", JSON.toJSONString(searchReq));
         SearchResp search = client.search(searchReq);
         MilvusResp<MilvusResultVo<T>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
         return tMilvusResp;
     }
-    public MilvusResp<MilvusResultVo<T>> query(FieldFunction<T,?> ... outputFields) throws MilvusException {
+    public MilvusResp<List<T>> query() throws MilvusException{
+        QueryReq queryReq = buildQuery();
+        log.info("build query param-->{}", JSON.toJSONString(queryReq));
+        QueryResp query = client.query(queryReq);
+        MilvusResp<List<T>> listMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
+        return listMilvusResp;
+    }
+    public MilvusResp<List<T>> query(FieldFunction<T,?> ... outputFields) throws MilvusException{
         List<String> otf=new ArrayList<>();
         for (FieldFunction<T, ?> outputField : outputFields) {
             otf.add(outputField.getFieldName(outputField));
@@ -416,7 +446,19 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.outputFields=otf;
         return query();
     }
-    public MilvusResp<MilvusResultVo<T>> query(String ... outputFields) throws MilvusException {
+    public MilvusResp<MilvusResultVo<T>> search(FieldFunction<T,?> ... outputFields) throws MilvusException {
+        List<String> otf=new ArrayList<>();
+        for (FieldFunction<T, ?> outputField : outputFields) {
+            otf.add(outputField.getFieldName(outputField));
+        }
+        this.outputFields=otf;
+        return search();
+    }
+    public MilvusResp<MilvusResultVo<T>> search(String ... outputFields) throws MilvusException {
+        this.outputFields=Arrays.stream(outputFields).collect(Collectors.toList());
+        return search();
+    }
+    public MilvusResp<List<T>> query(String ... outputFields) throws MilvusException{
         this.outputFields=Arrays.stream(outputFields).collect(Collectors.toList());
         return query();
     }

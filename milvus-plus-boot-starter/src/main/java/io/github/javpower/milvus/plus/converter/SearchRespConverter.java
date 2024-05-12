@@ -65,11 +65,18 @@ public class SearchRespConverter {
         return milvusResp;
     }
 
+    public static <T> MilvusResp<List<T>> convertGetRespToMilvusResp(QueryResp getResp, Class<T> entityType) {
+        List<QueryResp.QueryResult> queryResults = getResp.getQueryResults();
+        return convertQuery(queryResults,entityType);
+    }
     public static <T> MilvusResp<List<T>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType) {
+        List<QueryResp.QueryResult> getResults = getResp.getResults;
+        return convertQuery(getResults,entityType);
+    }
+    private static <T> MilvusResp<List<T>>  convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType){
         // 解析GetResp中的查询结果
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
-        List<QueryResp.QueryResult> getResults = getResp.getResults;
         List<T> entities = new ArrayList<>();
         // 遍历每个查询结果，并将它们映射到Java实体类T的实例
         for (QueryResp.QueryResult queryResult : getResults) {
