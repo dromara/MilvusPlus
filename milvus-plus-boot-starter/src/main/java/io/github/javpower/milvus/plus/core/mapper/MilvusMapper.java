@@ -64,11 +64,11 @@ public class MilvusMapper<T> {
         LambdaDeleteWrapper<T> lambda = deleteWrapper();
         return lambda.removeById(ids);
     }
-    public MilvusResp<UpsertResp> updateById(T ... entity){
+    public MilvusResp<UpsertResp> updateById(T  entity){
         LambdaUpdateWrapper<T> lambda = updateWrapper();
         return lambda.updateById(entity);
     }
-    public MilvusResp<InsertResp> insert(T ... entity){
+    public MilvusResp<InsertResp> insert(T  entity){
         LambdaInsertWrapper<T> lambda = insertWrapper();
         return lambda.insert(entity);
     }
