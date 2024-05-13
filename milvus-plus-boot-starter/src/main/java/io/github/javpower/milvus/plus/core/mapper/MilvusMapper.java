@@ -5,6 +5,7 @@ import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
 import io.github.javpower.milvus.plus.core.conditions.*;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
+import io.github.javpower.milvus.plus.model.vo.MilvusResult;
 import io.github.javpower.milvus.plus.util.SpringUtils;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.response.DeleteResp;
@@ -56,7 +57,7 @@ public class MilvusMapper<T> {
     }
 
 
-    public MilvusResp<List<T>> getById(Serializable ... ids) {
+    public MilvusResp<List<MilvusResult<T>>> getById(Serializable ... ids) {
         LambdaQueryWrapper<T> lambda = queryWrapper();
         return lambda.getById(ids);
     }
@@ -64,11 +65,11 @@ public class MilvusMapper<T> {
         LambdaDeleteWrapper<T> lambda = deleteWrapper();
         return lambda.removeById(ids);
     }
-    public MilvusResp<UpsertResp> updateById(T  entity){
+    public MilvusResp<UpsertResp> updateById(T ... entity){
         LambdaUpdateWrapper<T> lambda = updateWrapper();
         return lambda.updateById(entity);
     }
-    public MilvusResp<InsertResp> insert(T  entity){
+    public MilvusResp<InsertResp> insert(T ... entity){
         LambdaInsertWrapper<T> lambda = insertWrapper();
         return lambda.insert(entity);
     }

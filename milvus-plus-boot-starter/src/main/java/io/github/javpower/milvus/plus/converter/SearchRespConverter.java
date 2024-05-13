@@ -6,7 +6,6 @@ import io.github.javpower.milvus.plus.cache.MilvusCache;
 import io.github.javpower.milvus.plus.cache.PropertyCache;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
 import io.github.javpower.milvus.plus.model.vo.MilvusResult;
-import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
@@ -24,7 +23,7 @@ public class SearchRespConverter {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static <T> MilvusResp<MilvusResultVo<T>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType) {
+    public static <T> MilvusResp<List<MilvusResult<T>>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType) {
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         List<List<SearchResp.SearchResult>> searchResults = searchResp.getSearchResults();
@@ -53,27 +52,28 @@ public class SearchRespConverter {
                         })
                         .collect(Collectors.toList()))
                 .collect(Collectors.toList());
+        List<MilvusResult<T>> results = milvusResults
+                .stream()         // 从原始列表开始流操作
+                .flatMap(List::stream) // 使用 flatMap 将嵌套列表展平
+                .collect(Collectors.toList());// 收集结果到一个新的列表中
 
-        // 创建MilvusResultVo对象并设置结果
-        MilvusResultVo<T> vo = new MilvusResultVo<>();
-        vo.setVo(milvusResults);
         // 创建MilvusResp对象并设置结果和成功标志
-        MilvusResp<MilvusResultVo<T>> milvusResp = new MilvusResp<>();
-        milvusResp.setData(vo);
+        MilvusResp<List<MilvusResult<T>>> milvusResp = new MilvusResp<>();
+        milvusResp.setData(results);
         milvusResp.setSuccess(true);
 
         return milvusResp;
     }
 
-    public static <T> MilvusResp<List<T>> convertGetRespToMilvusResp(QueryResp getResp, Class<T> entityType) {
+    public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(QueryResp getResp, Class<T> entityType) {
         List<QueryResp.QueryResult> queryResults = getResp.getQueryResults();
         return convertQuery(queryResults,entityType);
     }
-    public static <T> MilvusResp<List<T>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType) {
+    public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType) {
         List<QueryResp.QueryResult> getResults = getResp.getResults;
         return convertQuery(getResults,entityType);
     }
-    private static <T> MilvusResp<List<T>>  convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType){
+    private static <T> MilvusResp<List<MilvusResult<T>>>  convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType){
         // 解析GetResp中的查询结果
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
@@ -90,9 +90,15 @@ public class SearchRespConverter {
             T entity =  objectMapper.convertValue(entityMap2, entityType);
             entities.add(entity);
         }
+        List<MilvusResult<T>> results = entities.stream().map(v -> {
+            MilvusResult<T> vo = new MilvusResult<>();
+            vo.setEntity(v);
+            vo.setDistance(0.0f);
+            return vo;
+        }).collect(Collectors.toList());
         // 创建MilvusResp对象，并将实体列表作为其数据部分
-        MilvusResp<List<T>> milvusResp = new MilvusResp<>();
-        milvusResp.setData(entities);
+        MilvusResp<List<MilvusResult<T>>> milvusResp = new MilvusResp<>();
+        milvusResp.setData(results);
         milvusResp.setSuccess(true);
         // 返回MilvusResp对象
         return milvusResp;

@@ -5,7 +5,7 @@ import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.converter.SearchRespConverter;
 import io.github.javpower.milvus.plus.core.FieldFunction;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
-import io.github.javpower.milvus.plus.model.vo.MilvusResultVo;
+import io.github.javpower.milvus.plus.model.vo.MilvusResult;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
@@ -424,21 +424,22 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * 执行搜索
      * @return 搜索响应对象
      */
-    public MilvusResp<MilvusResultVo<T>> search() throws MilvusException {
-        SearchReq searchReq = buildSearch();
-        log.info("build query param-->{}", JSON.toJSONString(searchReq));
-        SearchResp search = client.search(searchReq);
-        MilvusResp<MilvusResultVo<T>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
-        return tMilvusResp;
+    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException{
+        if (!vectors.isEmpty()) {
+            SearchReq searchReq = buildSearch();
+            log.info("build query param-->{}", JSON.toJSONString(searchReq));
+            SearchResp search = client.search(searchReq);
+            MilvusResp<List<MilvusResult<T>>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
+            return tMilvusResp;
+        }else {
+            QueryReq queryReq = buildQuery();
+            log.info("build query param-->{}", JSON.toJSONString(queryReq));
+            QueryResp query = client.query(queryReq);
+            MilvusResp<List<MilvusResult<T>>> listMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
+            return listMilvusResp;
+        }
     }
-    public MilvusResp<List<T>> query() throws MilvusException{
-        QueryReq queryReq = buildQuery();
-        log.info("build query param-->{}", JSON.toJSONString(queryReq));
-        QueryResp query = client.query(queryReq);
-        MilvusResp<List<T>> listMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
-        return listMilvusResp;
-    }
-    public MilvusResp<List<T>> query(FieldFunction<T,?> ... outputFields) throws MilvusException{
+    public MilvusResp<List<MilvusResult<T>>> query(FieldFunction<T,?> ... outputFields) throws MilvusException{
         List<String> otf=new ArrayList<>();
         for (FieldFunction<T, ?> outputField : outputFields) {
             otf.add(outputField.getFieldName(outputField));
@@ -446,29 +447,17 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.outputFields=otf;
         return query();
     }
-    public MilvusResp<MilvusResultVo<T>> search(FieldFunction<T,?> ... outputFields) throws MilvusException {
-        List<String> otf=new ArrayList<>();
-        for (FieldFunction<T, ?> outputField : outputFields) {
-            otf.add(outputField.getFieldName(outputField));
-        }
-        this.outputFields=otf;
-        return search();
-    }
-    public MilvusResp<MilvusResultVo<T>> search(String ... outputFields) throws MilvusException {
-        this.outputFields=Arrays.stream(outputFields).collect(Collectors.toList());
-        return search();
-    }
-    public MilvusResp<List<T>> query(String ... outputFields) throws MilvusException{
+    public MilvusResp<List<MilvusResult<T>>> query(String ... outputFields) throws MilvusException{
         this.outputFields=Arrays.stream(outputFields).collect(Collectors.toList());
         return query();
     }
-    public MilvusResp<List<T>> getById(Serializable ... ids){
+    public MilvusResp<List<MilvusResult<T>>> getById(Serializable ... ids){
         GetReq getReq = GetReq.builder()
                 .collectionName(collectionName)
                 .ids(Arrays.asList(ids))
                 .build();
         GetResp getResp = client.get(getReq);
-        MilvusResp<List<T>> tMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
+        MilvusResp<List<MilvusResult<T>>> tMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
         return tMilvusResp;
 
     }
