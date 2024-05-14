@@ -1,9 +1,0 @@
-server:
-  port: 8131
-
-milvus:
-  uri: http://xxxxx:19530
-  token: root:xxxx
-  enable: true
-  packages:
-    - io.github.javpower.milvus.demo.model

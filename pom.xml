@@ -10,8 +10,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>milvus-demo</module>
+        <module>milvus-core-demo</module>
+        <module>milvus-spring-demo</module>
         <module>milvus-plus-boot-starter</module>
+        <module>milvus-plus-core</module>
     </modules>
 
 </project>

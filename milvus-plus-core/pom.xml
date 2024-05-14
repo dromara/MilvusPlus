@@ -3,9 +3,9 @@
              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
         <groupId>io.github.javpower</groupId>
-        <artifactId>milvus-plus-boot-starter</artifactId>
+        <artifactId>milvus-plus-core</artifactId>
         <version>2.4.0-SNAPSHOT</version>
-        <name>milvus-plus-boot-starter</name>
+        <name>milvus-plus-core</name>
         <description>a tool about milvus-plus</description>
         <url>https://github.com/javpower/milvus-plus</url>
         <licenses>
@@ -41,13 +41,41 @@
                 <artifactId>spring-boot-starter</artifactId>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>3.24.0</version>
             </dependency>
             <dependency>
-                <groupId>io.github.javpower</groupId>
-                <artifactId>milvus-plus-core</artifactId>
-                <version>2.4.0-SNAPSHOT</version>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.22</version>
+            </dependency>
+            <dependency>
+                <groupId>io.milvus</groupId>
+                <artifactId>milvus-sdk-java</artifactId>
+                <version>2.4.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-slf4j-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.hadoop</groupId>
+                        <artifactId>hadoop-client</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-csv</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.azure</groupId>
+                        <artifactId>azure-storage-blob</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.azure</groupId>
+                        <artifactId>azure-identity</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>net.dreamlu</groupId>
