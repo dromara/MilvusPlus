@@ -89,7 +89,7 @@ public class MilvusMapper<T> {
         if (collectionAnnotation == null) {
             throw new IllegalStateException("Entity type " + entityType.getName() + " is not annotated with @MilvusCollection.");
         }
-        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         String collectionName = conversionCache == null ? null : conversionCache.getCollectionName();
         // 使用SpringUtil获取MilvusClient实例
         MilvusClientV2 client = SpringUtils.getBean(MilvusClientV2.class);

@@ -1,6 +1,9 @@
 package io.github.javpower.milvus.plus.core;
 
 import io.github.javpower.milvus.plus.annotation.MilvusField;
+import io.github.javpower.milvus.plus.cache.ConversionCache;
+import io.github.javpower.milvus.plus.cache.MilvusCache;
+import io.github.javpower.milvus.plus.cache.PropertyCache;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -8,6 +11,7 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.function.Function;
 
 @FunctionalInterface
@@ -49,20 +53,31 @@ public interface FieldFunction<T,R> extends Function<T,R>, Serializable {
     }
 
     /**
-     * 获取实体类的字段名称
+     * 获取实体类的字段名称(集合字段名称)
      *
      * @param split  分隔符，多个字母自定义分隔符
      * @param toType 转换方式，多个字母以大小写方式返回 0.不做转换 1.大写 2.小写
      */
     default String getFieldName(FieldFunction<T, ?> fn, String split, Integer toType) {
         SerializedLambda serializedLambda = getSerializedLambdaOne(fn);
-
+        Map<String, ConversionCache> milvusCache = MilvusCache.milvusCache;
+        String implClass = serializedLambda.getImplClass().replace("/", ".");
+        String implMethodName = serializedLambda.getImplMethodName();
+        ConversionCache conversionCache = milvusCache.get(implClass);
+        String fieldName;
+        if(conversionCache!=null){
+            PropertyCache propertyCache = conversionCache.getPropertyCache();
+            fieldName = propertyCache.methodToPropertyMap.get(implMethodName);
+            if(StringUtils.isNotEmpty(fieldName)){
+                return fieldName;
+            }
+        }
         // 从lambda信息取出method、field、class等
-        String fieldName = serializedLambda.getImplMethodName().substring("get".length());
+        fieldName = implMethodName.substring("get".length());
         fieldName = fieldName.replaceFirst(fieldName.charAt(0) + "", (fieldName.charAt(0) + "").toLowerCase());
         Field field;
         try {
-            field = Class.forName(serializedLambda.getImplClass().replace("/", ".")).getDeclaredField(fieldName);
+            field = Class.forName(implClass).getDeclaredField(fieldName);
         } catch (ClassNotFoundException | NoSuchFieldException e) {
             throw new RuntimeException(e);
         }

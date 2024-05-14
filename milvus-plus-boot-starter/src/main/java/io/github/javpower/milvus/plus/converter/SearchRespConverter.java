@@ -33,7 +33,7 @@ public class SearchRespConverter {
      */
     public static <T> MilvusResp<List<MilvusResult<T>>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType) {
         // 从缓存中获取对应实体类型的转换缓存和属性缓存
-        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
 
         // 获取原始搜索结果列表，并将其转换为MilvusResult<T>类型的列表
@@ -113,7 +113,7 @@ public class SearchRespConverter {
      */
     private static <T> MilvusResp<List<MilvusResult<T>>> convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType){
         // 初始化转换缓存和属性缓存，用于帮助将查询结果映射到Java实体
-        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType);
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         List<T> entities = new ArrayList<>();
 

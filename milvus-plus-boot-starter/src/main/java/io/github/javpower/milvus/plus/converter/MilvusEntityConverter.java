@@ -59,6 +59,7 @@ public class MilvusEntityConverter {
                 String fieldName = fieldAnnotation.name().isEmpty() ? field.getName() : fieldAnnotation.name();
                 // 缓存属性名与函数名的映射
                 propertyCache.functionToPropertyMap.put(field.getName(),fieldName);
+                propertyCache.methodToPropertyMap.put(getGetMethodName(field),fieldName);
                 // 处理主键字段
                 if (fieldAnnotation.isPrimaryKey()) {
                     CollectionToPrimaryCache.collectionToPrimary.put(collectionName,fieldName);
@@ -104,7 +105,7 @@ public class MilvusEntityConverter {
         conversionCache.setMilvusEntity(milvus);
         conversionCache.setCollectionName(collectionName);
         conversionCache.setPropertyCache(propertyCache);
-        MilvusCache.milvusCache.put(entityClass,conversionCache);
+        MilvusCache.milvusCache.put(entityClass.getName(),conversionCache);
 
         return milvus;
     }
@@ -139,6 +140,25 @@ public class MilvusEntityConverter {
                 .metricType(fieldAnnotation.metricType()) // 默认使用L2距离，根据需要调整
                 .extraParams(map)
                 .build();
+    }
+    public static String getGetMethodName(Field field) {
+        // 检查字段是否为布尔类型
+        String prefix = field.getType() == boolean.class || field.getType() == Boolean.class ? "is" : "get";
+
+        // 确保字段名不为空或null
+        if (field == null) {
+            throw new IllegalArgumentException("Field must not be null.");
+        }
+        // 获取字段名的首字母大写形式
+        String fieldName = capitalizeFirstLetter(field.getName());
+        // 构建并返回getter方法名
+        return prefix + fieldName;
+    }
+    private static String capitalizeFirstLetter(String original) {
+        if (original == null || original.isEmpty()) {
+            return original;
+        }
+        return original.substring(0, 1).toUpperCase() + original.substring(1);
     }
 
 

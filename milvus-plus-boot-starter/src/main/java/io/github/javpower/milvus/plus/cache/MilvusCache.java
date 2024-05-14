@@ -9,6 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Data
 public class MilvusCache {
-    public static final Map<Class<?>,ConversionCache> milvusCache=new ConcurrentHashMap<>();
+    public static final Map<String,ConversionCache> milvusCache=new ConcurrentHashMap<>(); //类名-->缓存
 
 }

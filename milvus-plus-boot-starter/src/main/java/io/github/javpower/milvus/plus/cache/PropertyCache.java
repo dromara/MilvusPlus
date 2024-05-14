@@ -7,7 +7,9 @@ import java.util.Map;
  **/
 public class PropertyCache {
 
-    public Map<String, String> functionToPropertyMap = new HashMap<>(); //属性名称->表名称
+    public Map<String, String> functionToPropertyMap = new HashMap<>(); //属性名称->集合属性名称
+
+    public Map<String, String> methodToPropertyMap = new HashMap<>(); //属性get方法名称->集合属性名称
 
 
     // 根据值查找第一个匹配的键
