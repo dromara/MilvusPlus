@@ -1,0 +1,13 @@
+server.port: 8880
+
+solon.app:
+  name: 'milvus-plus-solon'
+  group: 'milvus'
+
+
+milvus:
+  uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
+  token: xxx
+  enable: true
+  packages:
+    - io.github.javpower.solon.test.model

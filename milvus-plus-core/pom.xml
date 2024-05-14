@@ -6,7 +6,7 @@
         <artifactId>milvus-plus-core</artifactId>
         <version>2.4.0-SNAPSHOT</version>
         <name>milvus-plus-core</name>
-        <description>a tool about milvus-plus</description>
+        <description>a tool about milvus-plus-core</description>
         <url>https://github.com/javpower/milvus-plus</url>
         <licenses>
             <license>
