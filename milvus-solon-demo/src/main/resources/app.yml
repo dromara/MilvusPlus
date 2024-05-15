@@ -7,7 +7,7 @@ solon.app:
 
 milvus:
   uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
-  token: xxx
+  token: xxxx
   enable: true
   packages:
     - io.github.javpower.solon.test.model

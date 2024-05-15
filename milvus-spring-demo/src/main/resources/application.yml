@@ -3,7 +3,7 @@ server:
 
 milvus:
   uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
-  token: 6fab5641a3156d2666feba14390e4ef4b6d376b5dce91faed303eec91a4bdb82239b70b29eb252b981daa3170516245818d4ee12
+  token: xxx
   enable: true
   packages:
     - io.github.javpower.milvus.demo.model

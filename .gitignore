@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/milvus-solon-demo/
+/milvus-plus-parent

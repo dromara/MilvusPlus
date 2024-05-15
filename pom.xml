@@ -12,8 +12,10 @@
     <modules>
         <module>milvus-core-demo</module>
         <module>milvus-spring-demo</module>
+        <module>milvus-solon-demo</module>
         <module>milvus-plus-boot-starter</module>
         <module>milvus-plus-core</module>
+        <module>milvus-plus-solon-plugin</module>
     </modules>
 
 </project>

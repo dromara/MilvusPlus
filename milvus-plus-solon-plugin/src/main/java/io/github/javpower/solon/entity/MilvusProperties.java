@@ -1,9 +1,7 @@
 package io.github.javpower.solon.entity;
 
-
-
 import lombok.Data;
-import org.noear.solon.annotation.Component;
+import org.noear.solon.annotation.Configuration;
 import org.noear.solon.annotation.Inject;
 
 import java.util.List;
@@ -12,14 +10,11 @@ import java.util.List;
  * @author xgc
  **/
 @Data
-@Component
+@Inject("${milvus}") //see https://solon.noear.org/article/326
+@Configuration
 public class MilvusProperties {
-    @Inject("${milvus.enable}")
     private boolean enable;
-    @Inject("${milvus.uri}")
     private String uri;
-    @Inject("${milvus.token}")
     private String token;
-    @Inject("${milvus.packages}")
     private List<String> packages;
 }
