@@ -200,12 +200,12 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 
 欢迎贡献！
 
-- 报告问题或建议功能，[创建一个 issue](https://github.com/yourusername/MilvusPlus/issues/new)。
-- 提交更改，[创建一个 pull request](https://github.com/yourusername/MilvusPlus/compare)。
+- 报告问题或建议功能，[创建一个 issue](https://gitee.com/giteeClass/MilvusPlus/issues/new)。
+- 提交更改，[创建一个 pull request](https://gitee.com/giteeClass/MilvusPlus/compare)。
 
 ## 许可证
 
-MilvusPlus 是开源的，遵循 [许可证](https://github.com/yourusername/MilvusPlus/blob/master/LICENSE)。
+MilvusPlus 是开源的，遵循 [许可证](https://gitee.com/giteeClass/MilvusPlus/blob/master/LICENSE)。
 
 ## 联系
 
