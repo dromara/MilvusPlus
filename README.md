@@ -23,6 +23,19 @@ MilvusPlus is a powerful Java library that streamlines interactions with Milvus 
 Add MilvusPlus to your project:
 
 **Maven:**
+
+Core：
+```xml
+<dependency>
+    <groupId>io.github.javpower</groupId>
+    <artifactId>milvus-plus-core</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+</dependency>
+```
+
+
+Spring：
+
 ```xml
 <dependency>
     <groupId>io.github.javpower</groupId>
@@ -30,6 +43,17 @@ Add MilvusPlus to your project:
     <version>2.4.0-SNAPSHOT</version>
 </dependency>
 ```
+
+Solon：
+
+```xml
+<dependency>
+    <groupId>io.github.javpower</groupId>
+    <artifactId>milvus-plus-solon-plugin</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+</dependency>
+```
+
 
 ## Application Scenarios
 
