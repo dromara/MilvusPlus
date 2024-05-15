@@ -22,12 +22,33 @@ MilvusPlus 是一个功能强大的 Java 库，旨在简化与 Milvus 向量数�
 
 ## 快速开始
 
-通过 Maven 将 MilvusPlus 添加到项目中：
+自定义扩展支持：
+
+```xml
+<dependency>
+    <groupId>io.github.javpower</groupId>
+    <artifactId>milvus-plus-core</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+</dependency>
+```
+
+
+Spring应用支持：
 
 ```xml
 <dependency>
     <groupId>io.github.javpower</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+</dependency>
+```
+
+Solon应用支持：
+
+```xml
+<dependency>
+    <groupId>io.github.javpower</groupId>
+    <artifactId>milvus-plus-solon-plugin</artifactId>
     <version>2.4.0-SNAPSHOT</version>
 </dependency>
 ```
