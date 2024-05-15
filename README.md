@@ -75,6 +75,7 @@ MilvusPlus introduces several annotations to map your Java entities to Milvus co
 
 Example usage:
 
+
 ```java
 
 @Data
@@ -84,7 +85,6 @@ public class Face {
             name = "person_id", // 字段名称
             dataType = DataType.Int64, // 数据类型为64位整数
             isPrimaryKey = true, // 标记为主键
-            autoID = true // 假设这个ID是自动生成的
     )
     private Long personId; // 人员的唯一标识符
 
@@ -92,7 +92,6 @@ public class Face {
             name = "face_vector", // 字段名称
             dataType = DataType.FloatVector, // 数据类型为浮点型向量
             dimension = 128, // 向量维度，假设人脸特征向量的维度是128
-            isPartitionKey = false // 假设这个字段不是分区键
     )
     @MilvusIndex(
             indexType = IndexParam.IndexType.IVF_FLAT, // 使用IVF_FLAT索引类型
@@ -112,46 +111,67 @@ public class FaceMilvusMapper extends MilvusMapper<Face> {
 }
 
 @Component
+@Slf4j
 public class ApplicationRunnerTest implements ApplicationRunner {
-    @Autowired
-    private FaceMilvusMapper mapper;
+    private final FaceMilvusMapper mapper;
+
+    public ApplicationRunnerTest(FaceMilvusMapper mapper) {
+        this.mapper = mapper;
+    }
+
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        List<Float> vector = Lists.newArrayList(0.1f,0.2f,0.3f);
-
-        //查询
-        MilvusResp<MilvusResultVo<Face>> query =  mapper.queryWrapper()
-                .eq(Face::getPersonId, 1l)
-                .vector(Face::getFaceVector,vector)
-                .limit(100l)
-                .query();
-        MilvusResp<List<Face>> query2 = mapper.getById(1l);
-
-
-        //删除
-        MilvusResp<DeleteResp> remove= mapper.deleteWrapper()
-                .eq(Face::getPersonId, 1l)
-                .id(111)
-                .remove();
-        MilvusResp<DeleteResp> remove2 = mapper.removeById(1l);
-
-        //更新
+    public void run(ApplicationArguments args){
         Face face=new Face();
-        face.setFaceVector(vector);
-        MilvusResp<UpsertResp> update = mapper.updateWrapper()
-                .eq(Face::getPersonId, 1l)
-                .update(face);
+        List<Float> vector = new ArrayList<>();
+        for (int i = 0; i < 128; i++) {
+            vector.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
+        }
         face.setPersonId(1l);
-        MilvusResp<UpsertResp> update2 = mapper.updateById(face);
-        
-         //新增
-        MilvusResp<InsertResp> insert = mapper.insertWrapper()
-                .put(Face::getFaceVector, vector)
-                .insert();
-        MilvusResp<InsertResp> insert2 = mapper.insert(face);
+        face.setFaceVector(vector);
+        //新增
+        List<Face> faces=new ArrayList<>();
+        for (int i = 1; i < 10 ;i++){
+            Face face1=new Face();
+            face1.setPersonId(Long.valueOf(i));
+            List<Float> vector1 = new ArrayList<>();
+            for (int j = 0; j < 128; j++) {
+                vector1.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
+            }
+            face1.setFaceVector(vector1);
+            faces.add(face1);
+        }
+        MilvusResp<InsertResp> insert = mapper.insert(faces.toArray(faces.toArray(new Face[0]))); log.info("insert--{}", JSONObject.toJSONString(insert));
+        //id查询
+        MilvusResp<List<MilvusResult<Face>>> query = mapper.getById(9l);
+        log.info("query--getById---{}", JSONObject.toJSONString(query));
+        //向量查询
+        MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper()
+                .vector(Face::getFaceVector, vector)
+                .ne(Face::getPersonId, 1L)
+                .topK(3)
+                .query();
+        log.info("向量查询 query--queryWrapper---{}", JSONObject.toJSONString(query1));
+        //标量查询
+        MilvusResp<List<MilvusResult<Face>>> query2 = mapper.queryWrapper()
+                .eq(Face::getPersonId, 2L)
+                .limit(3)
+                .query();
+        log.info("标量查询   query--queryWrapper---{}", JSONObject.toJSONString(query2));
+        //更新
+        vector.clear();
+        for (int i = 0; i < 128; i++) {
+            vector.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
+        }
+        MilvusResp<UpsertResp> update = mapper.updateById(face);log.info("update--{}", JSONObject.toJSONString(update));
+        //id查询
+        MilvusResp<List<MilvusResult<Face>>> query3 = mapper.getById(1L);log.info("query--getById---{}", JSONObject.toJSONString(query3));
+        //删除
+        MilvusResp<DeleteResp> remove = mapper.removeById(1L);log.info("remove--{}", JSONObject.toJSONString(remove));
+        //查询
+        MilvusResp<List<MilvusResult<Face>>> query4 = mapper.getById(1L);log.info("query--{}", JSONObject.toJSONString(query4));
+
     }
 }
-
 ```
 
 ## Contributing
