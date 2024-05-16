@@ -11,7 +11,9 @@ import io.milvus.v2.client.ConnectConfig;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.*;
-import io.milvus.v2.service.collection.response.DescribeCollectionResp;
+import io.milvus.v2.service.partition.request.CreatePartitionReq;
+import io.milvus.v2.service.partition.request.HasPartitionReq;
+import io.milvus.v2.service.partition.request.LoadPartitionsReq;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -20,12 +22,11 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder {
@@ -119,29 +120,12 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
                 boolean collectionExists = client.hasCollection(
                         HasCollectionReq.builder().collectionName(collectionName).build()
                 );
-                if (collectionExists) {
-                    // 获取集合的详细信息
-                    DescribeCollectionResp collectionInfo = client.describeCollection(
-                            DescribeCollectionReq.builder().collectionName(collectionName).build()
-                    );
-                    // 检查字段是否一致，这里需要实现字段比较逻辑
-                    List<String> existingFieldNames = collectionInfo.getFieldNames();
-                    List<AddFieldReq> requiredFields = milvusEntity.getMilvusFields();
-                    List<String> requiredFieldNames = requiredFields.stream().map(AddFieldReq::getFieldName).collect(Collectors.toList());
-                    if (!new HashSet<>(existingFieldNames).containsAll(requiredFieldNames) || !new HashSet<>(requiredFieldNames).containsAll(existingFieldNames)) {
-                        // 字段不一致，删除并重新创建集合
-                        client.dropCollection(
-                                DropCollectionReq.builder().collectionName(collectionName).build()
-                        );
-                        // 创建新集合
-                        create(milvusEntity,client);
-                    }
-                } else {
+                if (!collectionExists) {
                     // 创建新集合
                     create(milvusEntity,client);
                 }
                 //加载集合
-                loadStatus(collectionName);
+                loadStatus(milvusEntity);
             } catch (MilvusException e) {
                 throw new RuntimeException("Error handling Milvus collection", e);
             }
@@ -160,21 +144,59 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
             schemaBuilder.createIndex(indexParams);
             log.info("-------create index---------");
         }
+        List<String> partitionName = milvusEntity.getPartitionName();
+        if(!CollectionUtils.isEmpty(partitionName)){
+            for (String pn : partitionName) {
+                //创建分区
+                CreatePartitionReq req = CreatePartitionReq.builder()
+                        .collectionName(milvusEntity.getCollectionName())
+                        .partitionName(pn)
+                        .build();
+                client.createPartition(req);
+            }
+        }
     }
-    private void loadStatus(String collectionName){
+    private void loadStatus(MilvusEntity milvusEntity){
         //集合加载状态+加载集合
         GetLoadStateReq getLoadStateReq = GetLoadStateReq.builder()
-                .collectionName(collectionName)
+                .collectionName(milvusEntity.getCollectionName())
                 .build();
         Boolean resp = client.getLoadState(getLoadStateReq);
-        log.info("LoadState-->{}", resp);
+        log.info("load collection state-->{}", resp);
         if(!resp){
             LoadCollectionReq loadCollectionReq = LoadCollectionReq.builder()
-                    .collectionName(collectionName)
+                    .collectionName(milvusEntity.getCollectionName())
                     .build();
-            client.loadCollection(loadCollectionReq);
-            log.info("loadCollection-----");
-
+         client.loadCollection(loadCollectionReq);
+         log.info("load collection-----{}",milvusEntity.getCollectionName());
+        }
+        //加载分区
+        List<String> partitionName = milvusEntity.getPartitionName();
+        if(!CollectionUtils.isEmpty(partitionName)){
+            for (String pn : partitionName) {
+                HasPartitionReq hasPartitionReq = HasPartitionReq.builder()
+                        .collectionName(milvusEntity.getCollectionName())
+                        .partitionName(pn)
+                        .build();
+                Boolean hasPartition = client.hasPartition(hasPartitionReq);
+                log.info("has  partition -->{}---{}", pn,hasPartition);
+                if(!hasPartition){
+                    //创建分区
+                    CreatePartitionReq req = CreatePartitionReq.builder()
+                            .collectionName(milvusEntity.getCollectionName())
+                            .partitionName(pn)
+                            .build();
+                    client.createPartition(req);
+                    log.info("create  partition -->{}", pn);
+                }
+            }
+            //加载分区
+            LoadPartitionsReq loadPartitionsReq = LoadPartitionsReq.builder()
+                    .collectionName(milvusEntity.getCollectionName())
+                    .partitionNames(partitionName)
+                    .build();
+            client.loadPartitions(loadPartitionsReq);
+            log.info("load partition-----{}",milvusEntity.getPartitionName());
         }
     }
 }
