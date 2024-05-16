@@ -1,10 +1,8 @@
 package io.github.javpower.milvus.plus.converter;
 
 
-import io.github.javpower.milvus.plus.annotation.ExtraParam;
-import io.github.javpower.milvus.plus.annotation.MilvusCollection;
-import io.github.javpower.milvus.plus.annotation.MilvusField;
-import io.github.javpower.milvus.plus.annotation.MilvusIndex;
+import com.google.common.collect.Lists;
+import io.github.javpower.milvus.plus.annotation.*;
 import io.github.javpower.milvus.plus.cache.CollectionToPrimaryCache;
 import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
@@ -45,10 +43,16 @@ public class MilvusEntityConverter {
         if (collectionAnnotation == null) {
             throw new IllegalArgumentException("Entity must be annotated with @MilvusCollection");
         }
+        MilvusPartition milvusPartition = entityClass.getAnnotation(MilvusPartition.class);
+        if(milvusPartition!=null){
+            String[] name = milvusPartition.name();
+            milvus.setPartitionName(Lists.newArrayList(name));
+        }else {
+            milvus.setPartitionName(Lists.newArrayList());
+        }
         // 从注解中读取集合（表）名称
         String collectionName = collectionAnnotation.name();
         milvus.setCollectionName(collectionName);
-
         // 初始化字段列表和索引参数列表
         List<AddFieldReq> milvusFields = new ArrayList<>();
         List<IndexParam> indexParams=new ArrayList<>();

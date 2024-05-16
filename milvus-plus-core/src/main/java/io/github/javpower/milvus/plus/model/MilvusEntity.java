@@ -13,5 +13,6 @@ public class MilvusEntity {
     private String collectionName;
     private List<IndexParam> indexParams;
     private List<AddFieldReq> milvusFields;
+    private List<String> partitionName;
 
 }

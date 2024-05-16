@@ -15,6 +15,7 @@ import io.milvus.v2.service.vector.response.SearchResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
     private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
+    private String partitionName;
     private MilvusClientV2 client;
 
     public LambdaUpdateWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
@@ -40,6 +42,15 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
 
     public LambdaUpdateWrapper() {
 
+    }
+
+    public LambdaUpdateWrapper<T> partition(String partitionName){
+        this.partitionName=partitionName;
+        return this;
+    }
+    public LambdaUpdateWrapper<T> partition(FieldFunction<T,?> partitionName){
+        this.partitionName=partitionName.getFieldName(partitionName);
+        return this;
     }
     /**
      * 添加等于条件。
@@ -378,9 +389,13 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
     }
     private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects){
         log.info("update data--->{}", JSON.toJSONString(jsonObjects));
-        UpsertReq upsertReq = UpsertReq.builder()
+        UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
                 .collectionName(collectionName)
-                .data(jsonObjects)
+                .data(jsonObjects);
+        if(StringUtils.isNotEmpty(partitionName)){
+            builder.partitionName(partitionName);
+        }
+        UpsertReq upsertReq = builder
                 .build();
         UpsertResp upsert = client.upsert(upsertReq);
         MilvusResp<UpsertResp> resp=new MilvusResp();

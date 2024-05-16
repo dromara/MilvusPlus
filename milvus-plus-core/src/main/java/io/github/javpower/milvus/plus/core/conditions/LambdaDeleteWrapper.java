@@ -10,6 +10,7 @@ import io.milvus.v2.service.vector.request.DeleteReq;
 import io.milvus.v2.service.vector.response.DeleteResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
     private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
+    private String partitionName;
     private MilvusClientV2 client;
     private List<Object> ids=new ArrayList<>();
 
@@ -37,6 +39,14 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
 
     public LambdaDeleteWrapper() {
 
+    }
+    public LambdaDeleteWrapper<T> partition(String partitionName){
+        this.partitionName=partitionName;
+        return this;
+    }
+    public LambdaDeleteWrapper<T> partition(FieldFunction<T,?> partitionName){
+        this.partitionName=partitionName.getFieldName(partitionName);
+        return this;
     }
     /**
      * 添加等于条件。
@@ -338,6 +348,9 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {
             builder.filter(filterStr);
+        }
+        if(StringUtils.isNotEmpty(partitionName)){
+            builder.partitionName(partitionName);
         }
         if(ids.size()>0){
             builder.ids(this.ids);

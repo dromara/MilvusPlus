@@ -12,6 +12,7 @@ import io.milvus.v2.service.vector.request.InsertReq;
 import io.milvus.v2.service.vector.response.InsertResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +28,7 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
     private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
+    private String partitionName;
     private MilvusClientV2 client;
     private JSONObject entity=new JSONObject();
     public LambdaInsertWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
@@ -47,6 +49,14 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
         this.entity.put(fieldName,value);
         return this;
     }
+    public LambdaInsertWrapper<T> partition(String partitionName){
+        this.partitionName=partitionName;
+       return this;
+    }
+    public LambdaInsertWrapper<T> partition(FieldFunction<T,?> partitionName){
+        this.partitionName=partitionName.getFieldName(partitionName);
+        return this;
+    }
 
     /**
      * 构建完整的insert请求
@@ -62,9 +72,13 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
 
     private MilvusResp<InsertResp> insert(List<JSONObject> jsonObjects){
         log.info("insert data--->{}", JSON.toJSONString(jsonObjects));
-        InsertReq insertReq = InsertReq.builder()
+        InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
                 .collectionName(collectionName)
-                .data(jsonObjects)
+                .data(jsonObjects);
+        if(StringUtils.isNotEmpty(partitionName)){
+            builder.partitionName(partitionName);
+        }
+        InsertReq insertReq = builder
                 .build();
         InsertResp insert = client.insert(insertReq);
         MilvusResp<InsertResp> resp=new MilvusResp();

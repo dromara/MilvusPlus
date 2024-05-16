@@ -17,6 +17,7 @@ import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private List<String> outputFields;
     private Class<T> entityType;
     private String collectionName;
+    private List<String> partitionNames=new ArrayList<>();
+
     private String annsField;
     private int topK;
     private List<List<Float>> vectors = new ArrayList<>();
@@ -56,6 +59,18 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     public LambdaQueryWrapper() {
 
+    }
+    public LambdaQueryWrapper<T> partition(String ... partitionName){
+        for (String p : partitionName) {
+            this.partitionNames.add(p);
+        }
+        return this;
+    }
+    public LambdaQueryWrapper<T> partition(FieldFunction<T,?>  ... partitionName){
+        for (FieldFunction<T, ?> p : partitionName) {
+            this.partitionNames.add(p.getFieldName(p));
+        }
+        return this;
     }
     /**
      * 添加等于条件。
@@ -389,6 +404,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         if(limit>0){
             builder.limit(limit);
         }
+        if(!CollectionUtils.isEmpty(partitionNames)){
+            builder.partitionNames(partitionNames);
+        }
         if(outputFields!=null&&outputFields.size()>0){
             builder.outputFields(outputFields);
         }else {
@@ -410,6 +428,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         if(limit>0){
             builder.limit(limit);
+        }
+        if(!CollectionUtils.isEmpty(partitionNames)){
+            builder.partitionNames(partitionNames);
         }
         if(outputFields!=null&&outputFields.size()>0){
             builder.outputFields(outputFields);
@@ -452,9 +473,13 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         return query();
     }
     public MilvusResp<List<MilvusResult<T>>> getById(Serializable ... ids){
-        GetReq getReq = GetReq.builder()
+        GetReq.GetReqBuilder<?, ?> builder = GetReq.builder()
                 .collectionName(collectionName)
-                .ids(Arrays.asList(ids))
+                .ids(Arrays.asList(ids));
+        if(!CollectionUtils.isEmpty(partitionNames)){
+            builder.partitionName(partitionNames.get(0));
+        }
+        GetReq getReq = builder
                 .build();
         GetResp getResp = client.get(getReq);
         MilvusResp<List<MilvusResult<T>>> tMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
