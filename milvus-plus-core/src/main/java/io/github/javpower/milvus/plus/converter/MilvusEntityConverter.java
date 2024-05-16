@@ -35,6 +35,10 @@ public class MilvusEntityConverter {
      * @throws IllegalArgumentException 如果实体类没有@MilvusCollection注解，则抛出异常。
      */
     public static MilvusEntity convert(Class<?> entityClass) {
+        ConversionCache cache = MilvusCache.milvusCache.get(entityClass.getName());
+        if(cache!=null){
+            return cache.getMilvusEntity();
+        }
         MilvusEntity milvus=new MilvusEntity();
         // 获取实体类上的@MilvusCollection注解，校验其存在性
         MilvusCollection collectionAnnotation = entityClass.getAnnotation(MilvusCollection.class);
