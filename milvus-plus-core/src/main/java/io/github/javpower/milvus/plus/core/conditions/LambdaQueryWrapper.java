@@ -40,7 +40,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     private String annsField;
     private int topK;
-    private List<List<Float>> vectors = new ArrayList<>();
+    private List<List<?>> vectors = new ArrayList<>();
     private long offset;
     private long limit;
     private int roundDecimal;
@@ -358,16 +358,16 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.annsField=annsField.getFieldName(annsField);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(List<Float> vector) {
+    public LambdaQueryWrapper<T> vector(List<?> vector) {
         vectors.add(vector);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(String annsField, List<Float> vector) {
+    public LambdaQueryWrapper<T> vector(String annsField, List<?> vector) {
         this.annsField=annsField;
         vectors.add(vector);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(FieldFunction<T,?> annsField, List<Float> vector) {
+    public LambdaQueryWrapper<T> vector(FieldFunction<T,?> annsField, List<?> vector) {
         this.annsField=annsField.getFieldName(annsField);
         vectors.add(vector);
         return this;
