@@ -66,6 +66,8 @@ Solon应用支持：
 - `@MilvusCollection`：标识 Java 类为 Milvus 集合。
 - `@MilvusField`：映射 Java 字段到 Milvus 字段。
 - `@MilvusIndex`：在 Milvus 字段上定义索引。
+- `@MilvusPartition`：在 Java 类上定义分区。
+
 
 ## 索引与度量类型详解
 
