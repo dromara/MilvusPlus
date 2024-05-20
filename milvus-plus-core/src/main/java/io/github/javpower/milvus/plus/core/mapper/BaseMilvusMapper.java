@@ -6,6 +6,7 @@ import io.github.javpower.milvus.plus.cache.MilvusCache;
 import io.github.javpower.milvus.plus.core.conditions.*;
 import io.github.javpower.milvus.plus.model.vo.MilvusResp;
 import io.github.javpower.milvus.plus.model.vo.MilvusResult;
+import io.github.javpower.milvus.plus.service.IAMService;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.response.DeleteResp;
 import io.milvus.v2.service.vector.response.InsertResp;
@@ -21,7 +22,7 @@ import java.util.List;
  * @author xgc
  **/
 @Slf4j
-public abstract class BaseMilvusMapper<T> {
+public abstract class BaseMilvusMapper<T> implements IAMService {
 
 
     public abstract MilvusClientV2 getClient();
