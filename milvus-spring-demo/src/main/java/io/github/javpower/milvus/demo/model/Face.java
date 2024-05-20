@@ -1,9 +1,6 @@
 package io.github.javpower.milvus.demo.model;
 
-import io.github.javpower.milvus.plus.annotation.ExtraParam;
-import io.github.javpower.milvus.plus.annotation.MilvusCollection;
-import io.github.javpower.milvus.plus.annotation.MilvusField;
-import io.github.javpower.milvus.plus.annotation.MilvusIndex;
+import io.github.javpower.milvus.plus.annotation.*;
 import io.milvus.v2.common.DataType;
 import io.milvus.v2.common.IndexParam;
 import lombok.Data;
@@ -12,6 +9,7 @@ import java.util.List;
 
 @Data
 @MilvusCollection(name = "face_collection") // 指定Milvus集合的名称
+@MilvusPartition(name = {"face_001","face_002"})
 public class Face {
     @MilvusField(
             name = "person_id", // 字段名称
