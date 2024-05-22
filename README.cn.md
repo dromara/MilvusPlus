@@ -52,6 +52,27 @@ Solon应用支持：
 </dependency>
 ```
 
+快照版本需额外加入
+```
+<repositories>
+  <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
+      <snapshots>
+          <enabled>true</enabled>
+      </snapshots>
+  </repository>
+</repositories>
+```
+
+## 需知
+版本
+2.4.0 废除
+2.4.0-RC1 废除
+
 ## 配置文件
 
 ```
