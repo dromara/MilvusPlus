@@ -3,7 +3,6 @@ package io.github.javpower.milvus.plus.core;
 import io.github.javpower.milvus.plus.annotation.MilvusField;
 import io.github.javpower.milvus.plus.cache.ConversionCache;
 import io.github.javpower.milvus.plus.cache.MilvusCache;
-import io.github.javpower.milvus.plus.cache.PropertyCache;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -11,176 +10,128 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @FunctionalInterface
-public interface FieldFunction<T,R> extends Function<T,R>, Serializable {
+public interface FieldFunction<T, R> extends Function<T, R>, Serializable {
 
-    //默认配置
-    String defaultSplit = "";
-    Integer defaultToType = 0;
+    // 默认分隔符
+    String DEFAULT_SPLIT = "";
 
-    default String getFieldName() {
-        String methodName = getMethodName();
-        if (methodName.startsWith("get")) {
-            methodName = methodName.substring(3);
+    // 默认转换类型：0-不转换，1-大写，2-小写
+    int DEFAULT_TO_TYPE = 0;
+
+
+    /**
+     * 获取实体类的字段名称（带分隔符和转换类型）
+     * @param split  分隔符
+     * @param toType 转换类型
+     */
+    default String getFieldName(FieldFunction<T, ?> fn, String split, int toType) {
+        SerializedLambda lambda = getSerializedLambda(fn);
+        String implClass = lambda.getImplClass().replace("/", ".");
+        String implMethodName = lambda.getImplMethodName();
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(implClass);
+        String fieldName = conversionCache != null ?
+                conversionCache.getPropertyCache().methodToPropertyMap.get(implMethodName) :
+                extractFieldName(implClass, implMethodName);
+        if (StringUtils.isNotEmpty(fieldName)) {
+            return fieldName;
         }
-        return changeFirstCharCase(methodName,false);
-    }
-
-    /**
-     * 获取实体类的字段名称(实体声明的字段名称)
-     */
-    default String getFieldNameLine() {
-        return getFieldName(this, defaultSplit);
-    }
-
-    /**
-     * 获取实体类的字段名称
-     */
-
-    default String getFieldName(FieldFunction<T, ?> fn) {
-        return getFieldName(fn, defaultSplit, defaultToType);
+        return transformFieldName(fieldName, split, toType);
     }
     /**
-     * 获取实体类的字段名称
+     * 获取给定函数对象的序列化lambda表达式。
      *
-     * @param split 分隔符，多个字母自定义分隔符
+     * @param function 要序列化的函数对象
+     * @return 返回一个Optional对象，其中包含序列化后的lambda表达式
      */
-    default String getFieldName(FieldFunction<T, ?> fn, String split) {
-        return getFieldName(fn, split, defaultToType);
+    default SerializedLambda getSerializedLambda(FieldFunction<T, ?> function) {
+        // 检查传入的函数对象是否为null
+        return Optional.ofNullable(function)
+                .map(this::extractSerializedLambda)
+                .orElseThrow(() -> new RuntimeException("传入的函数对象为null或没有writeReplace方法"));
     }
 
     /**
-     * 获取实体类的字段名称(集合字段名称)
+     * 私有方法，用于提取函数对象的序列化lambda表达式。
      *
-     * @param split  分隔符，多个字母自定义分隔符
-     * @param toType 转换方式，多个字母以大小写方式返回 0.不做转换 1.大写 2.小写
+     * @param function 要序列化的函数对象
+     * @return 序列化后的lambda表达式
      */
-    default String getFieldName(FieldFunction<T, ?> fn, String split, Integer toType) {
-        SerializedLambda serializedLambda = getSerializedLambdaOne(fn);
-        Map<String, ConversionCache> milvusCache = MilvusCache.milvusCache;
-        String implClass = serializedLambda.getImplClass().replace("/", ".");
-        String implMethodName = serializedLambda.getImplMethodName();
-        ConversionCache conversionCache = milvusCache.get(implClass);
-        String fieldName;
-        if(conversionCache!=null){
-            PropertyCache propertyCache = conversionCache.getPropertyCache();
-            fieldName = propertyCache.methodToPropertyMap.get(implMethodName);
-            if(StringUtils.isNotEmpty(fieldName)){
-                return fieldName;
-            }
-        }
-        // 从lambda信息取出method、field、class等
-        fieldName = implMethodName.substring("get".length());
-        fieldName = fieldName.replaceFirst(fieldName.charAt(0) + "", (fieldName.charAt(0) + "").toLowerCase());
-        Field field;
+    default SerializedLambda extractSerializedLambda(FieldFunction<T, ?> function) {
+        Method writeReplaceMethod;
         try {
-            field = Class.forName(implClass).getDeclaredField(fieldName);
+            // 获取writeReplace方法，该方法是lambda表达式序列化的关键
+            writeReplaceMethod = function.getClass().getDeclaredMethod("writeReplace");
+        } catch (NoSuchMethodException e) {
+            // 如果没有找到writeReplace方法，抛出运行时异常
+            throw new RuntimeException("未找到writeReplace方法", e);
+        }
+        boolean isAccessible = writeReplaceMethod.isAccessible();
+        try {
+            // 设置writeReplace方法为可访问，以便可以调用它
+            writeReplaceMethod.setAccessible(true);
+            // 调用writeReplace方法并返回序列化后的lambda表达式
+            return (SerializedLambda) writeReplaceMethod.invoke(function);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            // 如果在访问或调用writeReplace方法时发生异常，抛出运行时异常
+            throw new RuntimeException("调用writeReplace方法失败", e);
+        } finally {
+            // 恢复writeReplace方法的原始访问性，以避免潜在的安全问题
+            writeReplaceMethod.setAccessible(isAccessible);
+        }
+    }
+
+
+    /**
+     * 将首字母大写或小写
+     */
+    default String capitalizeFirstLetter(String str, boolean capitalize) {
+        if (StringUtils.isBlank(str)) {
+            return str;
+        }
+        char firstChar = str.charAt(0);
+        char newChar = capitalize ? Character.toUpperCase(firstChar) : Character.toLowerCase(firstChar);
+        return newChar + str.substring(1);
+    }
+
+    /**
+     * 提取字段名称
+     */
+    default String extractFieldName(String className, String methodName) {
+        String fieldName = capitalizeFirstLetter(methodName.substring(3), false);
+        try {
+            Field field = Class.forName(className).getDeclaredField(fieldName);
+            MilvusField annotation = field.getAnnotation(MilvusField.class);
+            return annotation != null && StringUtils.isNotBlank(annotation.name()) ? annotation.name() : fieldName;
         } catch (ClassNotFoundException | NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
-        // 从field取出字段名
-        MilvusField collectionField = field.getAnnotation(MilvusField.class);
-        if (collectionField != null && StringUtils.isNotBlank(collectionField.name())) {
-            return collectionField.name();
-        }else {
-            //0.不做转换 1.大写 2.小写
-            switch (toType) {
-                case 1:
-                    return fieldName.replaceAll("[A-Z]", split + "$0").toUpperCase();
-                case 2:
-                    return fieldName.replaceAll("[A-Z]", split + "$0").toLowerCase();
-                default:
-                    return fieldName.replaceAll("[A-Z]", split + "$0");
-            }
+    }
 
+    /**
+     * 转换字段名称
+     */
+    default String transformFieldName(String fieldName, String split, int toType) {
+        switch (toType) {
+            case 1:
+                return fieldName.replaceAll("([A-Z])", split + "$1").toUpperCase();
+            case 2:
+                return fieldName.replaceAll("([A-Z])", split + "$1").toLowerCase();
+            default:
+                return fieldName.replaceAll("([A-Z])", split + "$1");
         }
-
     }
 
 
-    default String getMethodName() {
-        return getSerializedLambda().getImplMethodName();
-    }
 
-    default Class<?> getFieldClass() {
-        return getReturnType();
-    }
-
-    default SerializedLambda getSerializedLambda() {
-        Method method;
-        try {
-            method = getClass().getDeclaredMethod("writeReplace");
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        method.setAccessible(true);
-        try {
-            return (SerializedLambda) method.invoke(this);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    default SerializedLambda getSerializedLambdaOne(FieldFunction<T, ?> fn) {
-        // 从function取出序列化方法
-        Method writeReplaceMethod;
-        try {
-            writeReplaceMethod = fn.getClass().getDeclaredMethod("writeReplace");
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-
-        // 从序列化方法取出序列化的lambda信息
-        boolean isAccessible = writeReplaceMethod.isAccessible();
-        writeReplaceMethod.setAccessible(true);
-        SerializedLambda serializedLambda;
-        try {
-            serializedLambda = (SerializedLambda) writeReplaceMethod.invoke(fn);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-        writeReplaceMethod.setAccessible(isAccessible);
-        return serializedLambda;
-    }
-
-    default Class<?> getReturnType() {
-        SerializedLambda lambda = getSerializedLambda();
-        Class<?> className;
-        try {
-            className = Class.forName(lambda.getImplClass().replace("/", "."));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        Method method;
-        try {
-            method = className.getMethod(getMethodName());
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        return method.getReturnType();
-    }
-    default   String changeFirstCharCase(String str, boolean capitalize) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        char baseChar = str.charAt(0);
-        char updatedChar;
-        if (capitalize) {
-            updatedChar = Character.toUpperCase(baseChar);
-        } else {
-            updatedChar = Character.toLowerCase(baseChar);
-        }
-
-        if (baseChar == updatedChar) {
-            return str;
-        } else {
-            char[] chars = str.toCharArray();
-            chars[0] = updatedChar;
-            return new String(chars);
-        }
+    /**
+     * 获取实体类的字段名称
+     */
+    default String getFieldName(FieldFunction<T, ?> fn) {
+        return getFieldName(fn, DEFAULT_SPLIT, DEFAULT_TO_TYPE);
     }
 
 }
