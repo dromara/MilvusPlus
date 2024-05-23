@@ -26,9 +26,9 @@
 
 ```
 <dependency>
-    <groupId>io.github.javpower</groupId>
+    <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -36,9 +36,9 @@ Spring应用支持：
 
 ```
 <dependency>
-    <groupId>io.github.javpower</groupId>
+    <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -46,26 +46,10 @@ Solon应用支持：
 
 ```
 <dependency>
-    <groupId>io.github.javpower</groupId>
+    <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 </dependency>
-```
-
-快照版本需额外加入
-```
-<repositories>
-  <repository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-          <enabled>true</enabled>
-      </releases>
-      <snapshots>
-          <enabled>true</enabled>
-      </snapshots>
-  </repository>
-</repositories>
 ```
 
 ## 需知

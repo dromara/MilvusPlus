@@ -40,7 +40,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private List<List<?>> vectors = new ArrayList<>();
     private long offset;
     private long limit;
-    private int roundDecimal;
+    private int roundDecimal=-1;
     private long guaranteeTimestamp;
     private ConsistencyLevel consistencyLevel;
     private boolean ignoreGrowing;
@@ -73,6 +73,23 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.searchParams.putAll(searchParams);
         return this;
     }
+    public LambdaQueryWrapper<T> radius(Object radius){
+        this.searchParams.put("radius",radius);
+        return this;
+    }
+    public LambdaQueryWrapper<T> rangeFilter(Object rangeFilter){
+        this.searchParams.put("range_filter",rangeFilter);
+        return this;
+    }
+    public LambdaQueryWrapper<T> metricType(Object metric_type){
+        this.searchParams.put("metric_type",metric_type);
+        return this;
+    }
+    public LambdaQueryWrapper<T> roundDecimal(int roundDecimal){
+        this.roundDecimal=roundDecimal;
+        return this;
+    }
+
     /**
      * 添加等于条件。
      *
@@ -416,6 +433,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         if(searchParams.size()>0){
             builder.searchParams(searchParams);
+        }
+        if(roundDecimal!=-1){
+            builder.roundDecimal(roundDecimal);
         }
         // Set other parameters as needed
         return builder.build();
