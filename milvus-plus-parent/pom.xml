@@ -2,7 +2,7 @@
     <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
-        <groupId>io.github.javpower</groupId>
+        <groupId>org.dromara</groupId>
         <artifactId>milvus-plus-parent</artifactId>
         <version>${revision}</version>
         <packaging>pom</packaging>
@@ -49,17 +49,17 @@
         <dependencyManagement>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.javpower</groupId>
+                    <groupId>org.dromara</groupId>
                     <artifactId>milvus-plus-core</artifactId>
                     <version>${revision}</version>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.javpower</groupId>
+                    <groupId>org.dromara</groupId>
                     <artifactId>milvus-plus-boot-starter</artifactId>
                     <version>${revision}</version>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.javpower</groupId>
+                    <groupId>org.dromara</groupId>
                     <artifactId>milvus-plus-solon-plugin</artifactId>
                     <version>${revision}</version>
                 </dependency>
