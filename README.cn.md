@@ -342,6 +342,7 @@ CRUD模块是应用程序中用于处理数据的基本操作集合，即创建(
 - **逻辑操作**：支持AND、OR和NOT逻辑操作，以构建复杂的查询条件。
 - **类型安全**：泛型`T`确保了条件构造过程中的类型安全。
 - **易于扩展**：抽象类设计允许开发者根据需要扩展更多条件构造功能。
+- **自定义搜索行为和设置**：searchParams 提供了对搜索算法的精细控制，包括度量类型、相似度阈值和搜索范围等。通过合理配置这些参数，用户可以更有效地从集合中检索出与查询向量最相似的向量。
 
 ### 主要方法
 
@@ -382,12 +383,36 @@ CRUD模块是应用程序中用于处理数据的基本操作集合，即创建(
 
 - `buildFilters`：需要子类实现的具体过滤条件字符串构建逻辑。
 
-### 使用示例
+### 优化搜索
+- `searchParams`：提供了对搜索算法的精细控制，包括度量类型、相似度阈值和搜索范围等。通过合理配置这些参数，用户可以更有效地从集合中检索出与查询向量最相似的向量。
 
+- 以下是 searchParams 支持的参数及其说明：
+  - metric_type
+类型：String
+描述：指定搜索操作使用的度量类型。必须与索引向量字段时使用的度量类型一致。
+可选值：
+L2：欧几里得距离，适用于高维空间的向量搜索。
+IP：内积，适用于余弦相似度搜索。
+COSINE：余弦相似度，与内积相同，适用于测量向量间的夹角。
+示例：
+searchParams.put("metric_type", "L2");
+  -  radius
+类型：float
+描述：设置搜索操作的最小相似度阈值。当 metric_type 设置为 L2 时，此值应大于 range_filter；否则，应小于 range_filter。
+示例：
+searchParams.put("radius", 0.5f);
+  - range_filter
+类型：float
+描述：限定搜索操作的相似度范围。当 metric_type 设置为 IP 或 COSINE 时，此值应大于 radius；否则，应小于 radius。
+示例：
+searchParams.put("range_filter", 0.3f);
+使用示例
+   以下是一个使用 searchParams 的示例，展示如何构建搜索请求并设置特定的搜索参数：
 ```java
-ConditionBuilder<MyEntity> builder = new ConditionBuilder<>();
-builder.eq("name", "John").gt("age", 18).and(new ConditionBuilder<MyEntity>().like("email", "example.com"));
-String filters = builder.buildFilters();
+Map<String, Object> searchParams = new HashMap<>();
+searchParams.put("metric_type", "L2");
+searchParams.put("radius", 0.5f);
+searchParams.put("range_filter", 0.3f);
 ```
 
 
