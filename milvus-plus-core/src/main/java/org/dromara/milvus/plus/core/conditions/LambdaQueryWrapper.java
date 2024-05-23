@@ -1,11 +1,6 @@
 package org.dromara.milvus.plus.core.conditions;
 
 import com.alibaba.fastjson.JSON;
-import org.dromara.milvus.plus.cache.ConversionCache;
-import org.dromara.milvus.plus.converter.SearchRespConverter;
-import org.dromara.milvus.plus.core.FieldFunction;
-import org.dromara.milvus.plus.model.vo.MilvusResp;
-import org.dromara.milvus.plus.model.vo.MilvusResult;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
@@ -17,13 +12,15 @@ import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.milvus.plus.cache.ConversionCache;
+import org.dromara.milvus.plus.converter.SearchRespConverter;
+import org.dromara.milvus.plus.core.FieldFunction;
+import org.dromara.milvus.plus.model.vo.MilvusResp;
+import org.dromara.milvus.plus.model.vo.MilvusResult;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,11 +41,11 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private long offset;
     private long limit;
     private int roundDecimal;
-    private String searchParams;
     private long guaranteeTimestamp;
     private ConsistencyLevel consistencyLevel;
     private boolean ignoreGrowing;
     private MilvusClientV2 client;
+    private Map<String,Object> searchParams=new HashMap<>(16);
 
     public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
@@ -70,6 +67,10 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         for (FieldFunction<T, ?> p : partitionName) {
             this.partitionNames.add(p.getFieldName(p));
         }
+        return this;
+    }
+    public LambdaQueryWrapper<T> searchParams(Map<String,Object> searchParams){
+        this.searchParams.putAll(searchParams);
         return this;
     }
     /**
@@ -412,6 +413,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }else {
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
+        }
+        if(searchParams.size()>0){
+            builder.searchParams(searchParams);
         }
         // Set other parameters as needed
         return builder.build();
