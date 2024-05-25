@@ -1,10 +1,10 @@
 package org.dromara.milvus.plus.service;
 
-import org.dromara.milvus.plus.converter.MilvusConverter;
-import org.dromara.milvus.plus.model.MilvusEntity;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.collection.request.HasCollectionReq;
+import org.dromara.milvus.plus.converter.MilvusConverter;
+import org.dromara.milvus.plus.model.MilvusEntity;
 
 public interface ICMService {
 

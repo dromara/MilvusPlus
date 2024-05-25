@@ -2,13 +2,6 @@ package org.dromara.milvus.plus.converter;
 
 
 import com.google.common.collect.Lists;
-import org.dromara.milvus.plus.annotation.*;
-import org.dromara.milvus.plus.builder.CollectionSchemaBuilder;
-import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
-import org.dromara.milvus.plus.cache.ConversionCache;
-import org.dromara.milvus.plus.cache.MilvusCache;
-import org.dromara.milvus.plus.cache.PropertyCache;
-import org.dromara.milvus.plus.model.MilvusEntity;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
@@ -19,6 +12,13 @@ import io.milvus.v2.service.partition.request.HasPartitionReq;
 import io.milvus.v2.service.partition.request.LoadPartitionsReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.milvus.plus.annotation.*;
+import org.dromara.milvus.plus.builder.CollectionSchemaBuilder;
+import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
+import org.dromara.milvus.plus.cache.ConversionCache;
+import org.dromara.milvus.plus.cache.MilvusCache;
+import org.dromara.milvus.plus.cache.PropertyCache;
+import org.dromara.milvus.plus.model.MilvusEntity;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -179,18 +179,19 @@ public class MilvusConverter {
         return original.substring(0, 1).toUpperCase() + original.substring(1);
     }
     public static void create(MilvusEntity milvusEntity, MilvusClientV2 client){
+       List<IndexParam> indexParams = milvusEntity.getIndexParams();
+       if(indexParams==null||indexParams.isEmpty()){
+           throw new IllegalArgumentException("the index does not exist, please define the index");
+       }
         // 创建新集合
         CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
                 milvusEntity.getCollectionName(), client
         );
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
-        List<IndexParam> indexParams = milvusEntity.getIndexParams();
         log.info("-------create schema---------");
         schemaBuilder.createSchema();
-        if (indexParams != null && !indexParams.isEmpty()) {
-            schemaBuilder.createIndex(indexParams);
-            log.info("-------create index---------");
-        }
+        schemaBuilder.createIndex(indexParams);
+        log.info("-------create index---------");
         List<String> partitionName = milvusEntity.getPartitionName();
         if(!CollectionUtils.isEmpty(partitionName)){
             for (String pn : partitionName) {
@@ -203,6 +204,7 @@ public class MilvusConverter {
             }
         }
     }
+
     public static void loadStatus(MilvusEntity milvusEntity, MilvusClientV2 client){
         //集合加载状态+加载集合
         GetLoadStateReq getLoadStateReq = GetLoadStateReq.builder()
