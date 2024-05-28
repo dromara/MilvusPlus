@@ -1,3 +1,5 @@
+
+
 #  MilvusPlus：向量数据库增强操作库
 
 ## 项目简介
@@ -11,12 +13,11 @@
 - **无侵入**：只做增强不做改变，引入它不会对现有工程产生影响，如丝般顺滑
 - **损耗小**：启动即会自动注入基本 CURD，性能基本无损耗，直接面向对象操作
 - **强大的 CRUD 操作**：通用 MilvusMapper，仅仅通过少量配置即可实现 CRUD 操作，更有强大的条件构造器，满足各类使用需求
+- **直观的 API**：直接的 API 设计简化数据库操作，MilvusService 提供丰富的API。
 - **支持 Lambda 形式调用**：通过 Lambda 表达式，方便的编写各类查询条件，无需再担心字段写错
 - **支持主键自动生成**：完美解决主键问题
 - **支持自定义全局通用操作**：支持全局通用方法注入
-
 - **注解式配置**：采用与 MyBatis-Plus 类似的注解方式配置实体模型。
-- **直观的 API**：直接的 API 设计简化数据库操作。
 - **易于扩展**：核心设计注重可扩展性。
 - **类型安全**：利用 Java 类型安全减少错误。
 
@@ -53,7 +54,9 @@ Solon应用支持：
 ```
 
 ## 需知
-该版本必须使用索引注解定义索引，不然启动报错后，再添加无效，需要先删除集合
+
+- 2.0.0版本必须使用索引注解定义索引，不然启动报错后，再添加无效，需要先删除集合
+- 2.0.0版本暂未发布 MilvusService 功能
 
 ## 配置文件
 
@@ -67,10 +70,10 @@ milvus:
 ```
 
 - `milvus`：定义了与Milvus服务相关的配置。
-    - `uri`：Milvus服务的URI，应用程序通过这个URI与Milvus服务进行通信。
-    - `token`：用于验证和授权的令牌（Token），确保访问Milvus服务的安全性。
-    - `enable`：一个布尔值，用于指示Milvus模块是否应该被启用。
-    - `packages`：这些包包含了自定义注解对应的Java类。
+  - `uri`：Milvus服务的URI，应用程序通过这个URI与Milvus服务进行通信。
+  - `token`：用于验证和授权的令牌（Token），确保访问Milvus服务的安全性。
+  - `enable`：一个布尔值，用于指示Milvus模块是否应该被启用。
+  - `packages`：这些包包含了自定义注解对应的Java类。
 
 ## 应用场景
 
@@ -94,310 +97,46 @@ milvus:
 
 - **用途**：定义索引或其他自定义功能的额外参数。
 - **属性**：
-    - `key()`: 参数的键名。
-    - `value()`: 参数的值。
+  - `key()`: 参数的键名。
+  - `value()`: 参数的值。
 
 ### @MilvusCollection 注解
 
 - **用途**：定义Milvus数据库中的集合。
 - **属性**：
-    - `name()`: 集合的名称。
+  - `name()`: 集合的名称。
 
 ### @MilvusField 注解
 
 - **用途**：定义Milvus集合中的字段。
 - **属性**：
-    - `name()`: 字段名称，默认为Java字段名。
-    - `dataType()`: 数据类型，默认为`FLOAT_VECTOR`。
-    - `dimension()`: 向量维度，默认为-1。
-    - `isPrimaryKey()`: 是否为主键，默认为false。
-    - `autoID()`: 是否自动生成ID，默认为false。
-    - `description()`: 字段描述，默认为空。
-    - `elementType()`: 元素类型，默认为`None`。
-    - `maxLength()`: 最大长度，默认为-1。
-    - `maxCapacity()`: 最大容量，默认为-1。
-    - `isPartitionKey()`: 是否为分区键，默认为false。
+  - `name()`: 字段名称，默认为Java字段名。
+  - `dataType()`: 数据类型，默认为`FLOAT_VECTOR`。
+  - `dimension()`: 向量维度，默认为-1。
+  - `isPrimaryKey()`: 是否为主键，默认为false。
+  - `autoID()`: 是否自动生成ID，默认为false。
+  - `description()`: 字段描述，默认为空。
+  - `elementType()`: 元素类型，默认为`None`。
+  - `maxLength()`: 最大长度，默认为-1。
+  - `maxCapacity()`: 最大容量，默认为-1。
+  - `isPartitionKey()`: 是否为分区键，默认为false。
 
 ### @MilvusIndex 注解
 
 - **用途**：定义Milvus集合中的索引。
 - **属性**：
-    - `indexType()`: 索引类型，默认为`FLAT`。
-    - `metricType()`: 度量类型，默认为`L2`。
-    - `indexName()`: 索引名称，默认为空。
-    - `extraParams()`: 额外参数，使用`ExtraParam`注解定义。
+  - `indexType()`: 索引类型，默认为`FLAT`。
+  - `metricType()`: 度量类型，默认为`L2`。
+  - `indexName()`: 索引名称，默认为空。
+  - `extraParams()`: 额外参数，使用`ExtraParam`注解定义。
 
 ### @MilvusPartition 注解
 
 - **用途**：定义Milvus集合的分区。
 - **属性**：
-    - `name()`: 分区的名称数组。
+  - `name()`: 分区的名称数组。
 
 通过这些注解，开发者可以轻松地定义和管理Milvus数据库的结构，实现项目启动时自动构建所需数据库结构的目标。
-
-## CRUD模块介绍
-
-CRUD模块是应用程序中用于处理数据的基本操作集合，即创建(Create)、读取(Read)、更新(Update)和删除(Delete)。在本模块中，我们通过抽象类`BaseMilvusMapper<T>`封装了与Milvus数据库交互的CRUD操作，提供了一种类型安全且易于使用的接口。
-
-### 抽象类`BaseMilvusMapper<T>`
-
-`BaseMilvusMapper<T>`是一个抽象类，它实现了`IAMService`接口，并定义了一系列用于操作Milvus数据库的方法。这个类是所有与Milvus数据库交互的Mapper类的基类。
-
-### 抽象方法`getClient()`
-
-- **功能**：返回一个`MilvusClientV2`实例，用于与Milvus数据库进行通信。
-
-### 方法`queryWrapper()`
-
-- **功能**：创建并返回一个`LambdaQueryWrapper<T>`实例，用于构建查询操作。
-
-### 方法`deleteWrapper()`
-
-- **功能**：创建并返回一个`LambdaDeleteWrapper<T>`实例，用于构建删除操作。
-
-### 方法`updateWrapper()`
-
-- **功能**：创建并返回一个`LambdaUpdateWrapper<T>`实例，用于构建更新操作。
-
-### 方法`insertWrapper()`
-
-- **功能**：创建并返回一个`LambdaInsertWrapper<T>`实例，用于构建插入操作。
-
-### 方法`getById(Serializable ... ids)`
-
-- **功能**：根据提供的ID列表查询数据。
-- **参数**：`ids` - 一个可序列化的ID列表。
-- **返回**：`MilvusResp<List<MilvusResult<T>>>` - 包含查询结果的响应。
-
-### 方法`removeById(Serializable ... ids)`
-
-- **功能**：根据提供的ID列表删除数据。
-- **参数**：`ids` - 一个可序列化的ID列表。
-- **返回**：`MilvusResp<DeleteResp>` - 删除操作的响应。
-
-### 方法`updateById(T ... entity)`
-
-- **功能**：根据提供的实体更新数据。
-- **参数**：`entity` - 一个实体对象列表。
-- **返回**：`MilvusResp<UpsertResp>` - 更新操作的响应。
-
-### 方法`insert(T ... entity)`
-
-- **功能**：插入提供的实体到数据库。
-- **参数**：`entity` - 一个实体对象列表。
-- **返回**：`MilvusResp<InsertResp>` - 插入操作的响应。
-
-### 方法`lambda(Wrapper<W, T> wrapper)`
-
-- **功能**：创建一个通用的构建器实例，用于不同类型的操作。
-- **参数**：`wrapper` - 一个构建器实例。
-- **返回**：`W` - 返回构建器实例。
-
-### 流程说明
-
-1. **获取客户端**：通过`getClient()`方法获取与Milvus数据库通信的客户端。
-2. **创建构建器**：使用`queryWrapper()`、`deleteWrapper()`、`updateWrapper()`、`insertWrapper()`方法创建相应的操作构建器。
-3. **执行操作**：使用构建器构建具体的CRUD操作，并执行。
-4. **获取集合名称**：通过实体类上的`@MilvusCollection`注解获取集合名称。
-5. **初始化构建器**：使用`lambda()`方法初始化构建器，设置集合名称、客户端、转换缓存和实体类型。
-
-### 优势
-
-- **类型安全**：通过泛型`T`确保操作的数据类型一致性。
-- **简化操作**：封装CRUD操作，简化代码编写和数据库交互。
-- **易于扩展**：抽象类设计使得扩展新的操作或自定义行为变得简单。
-- **注解驱动**：利用`@MilvusCollection`注解自动获取集合名称，减少硬编码。
-
-通过`BaseMilvusMapper<T>`类，开发者可以方便地实现与Milvus数据库的交互，提高开发效率并降低出错率。
-
-## IAMService接口模块介绍
-
-`IAMService`接口模块提供了一套完整的身份认证与访问管理（Identity and Access Management, IAM）功能，用于管理Milvus数据库中的角色、用户以及权限。该模块允许开发者通过简单的方法调用来执行用户和角色的创建、查询、删除、权限授予和撤销等操作。
-
-### 方法`getClient()`
-
-- **功能**：获取`MilvusClientV2`实例，用于与Milvus服务进行通信。
-
-### 默认方法`createRole(String roleName)`
-
-- **功能**：创建一个新的角色。
-- **参数**：`roleName` - 要创建的角色名称。
-
-### 默认方法`createUser(String userName, String password)`
-
-- **功能**：创建一个新的用户。
-- **参数**：
-    - `userName` - 要创建的用户的名称。
-    - `password` - 用户的密码。
-
-### 默认方法`describeRole(String roleName)`
-
-- **功能**：获取指定角色的权限信息。
-- **参数**：`roleName` - 要查询的角色名称。
-- **返回**：`DescribeRoleResp` - 包含角色权限信息的对象。
-
-### 默认方法`describeUser(String userName)`
-
-- **功能**：获取指定用户的详细信息。
-- **参数**：`userName` - 要查询的用户名称。
-- **返回**：`DescribeUserResp` - 包含用户详细信息的对象。
-
-### 默认方法`dropRole(String roleName)`
-
-- **功能**：删除指定的自定义角色。
-- **参数**：`roleName` - 要删除的角色名称。
-
-### 默认方法`dropUser(String userName)`
-
-- **功能**：删除指定的用户。
-- **参数**：`userName` - 要删除的用户名。
-
-### 默认方法`grantPrivilege(String roleName, String objectType, String privilege, String objectName)`
-
-- **功能**：授予角色特定的权限。
-- **参数**：
-    - `roleName` - 要授予权限的角色名称。
-    - `objectType` - 权限对象的类型。
-    - `privilege` - 要授予的权限名称。
-    - `objectName` - 权限适用的对象名称。
-
-### 默认方法`grantRole(String roleName, String userName)`
-
-- **功能**：授予用户特定角色。
-- **参数**：
-    - `roleName` - 要授予给用户的角色名称。
-    - `userName` - 已存在的用户名称。
-
-### 默认方法`listRoles()`
-
-- **功能**：列出所有自定义角色。
-- **返回**：角色名称的列表。
-
-### 默认方法`listUsers()`
-
-- **功能**：列出所有现有用户的用户名。
-- **返回**：用户名的列表。
-
-### 默认方法`revokePrivilege(String roleName, String objectType, String privilege, String objectName, String databaseName)`
-
-- **功能**：撤销已分配给角色的权限。
-- **参数**：
-    - `roleName` - 要从中撤销权限的角色名称。
-    - `objectType` - 权限对象的类型。
-    - `privilege` - 要撤销的权限名称。
-    - `objectName` - 要撤销权限的API名称。
-    - `databaseName` - 可选的数据库名称。
-
-### 默认方法`revokeRole(String roleName, String userName)`
-
-- **功能**：撤销用户的角色。
-- **参数**：
-    - `roleName` - 要撤销的角色名称。
-    - `userName` - 现有用户的用户名。
-
-### 默认方法`updatePassword(String userName, String password, String newPassword)`
-
-- **功能**：更新指定用户的密码。
-- **参数**：
-    - `userName` - 现有用户的用户名。
-    - `password` - 用户当前的密码。
-    - `newPassword` - 用户的新密码。
-
-### 优势
-
-- **简化管理**：通过统一的接口简化了用户和角色的管理。
-- **类型安全**：接口方法使用明确的参数类型，减少了错误。
-- **易于集成**：默认方法使得实现细节可以轻松集成到现有系统中。
-- **细粒度控制**：支持细粒度的权限控制，增强了安全性。
-- **异常处理**：方法中包含异常处理机制，确保了操作的稳定性。
-
-`IAMService`接口模块是构建安全、可靠且易于管理的Milvus数据库访问控制系统的基础。
-
-## 条件构造器
-
-条件构造器模块是一个用于动态构建查询条件的抽象基类`ConditionBuilder<T>`。它提供了一套丰富的方法来生成各种查询条件，从而简化数据库查询的构建过程。
-
-### 功能概述
-
-- **动态属性映射**：自动将实体对象的属性映射为查询条件。
-- **支持多种条件**：包括等于、不等于、大于、小于、范围、空值检查、IN条件、LIKE条件等。
-- **逻辑操作**：支持AND、OR和NOT逻辑操作，以构建复杂的查询条件。
-- **类型安全**：泛型`T`确保了条件构造过程中的类型安全。
-- **易于扩展**：抽象类设计允许开发者根据需要扩展更多条件构造功能。
-- **自定义搜索行为和设置**：searchParams 提供了对搜索算法的精细控制，包括度量类型、相似度阈值和搜索范围等。通过合理配置这些参数，用户可以更有效地从集合中检索出与查询向量最相似的向量。
-
-### 主要方法
-
-### `getPropertiesMap(T t)`
-
-- **功能**：将实体对象的属性及其值映射为Map。
-
-### 基本条件方法
-
-- `eq`、`ne`、`gt`、`ge`、`lt`、`le`：分别用于添加等于、不等于、大于、大于等于、小于、小于等于条件。
-
-### 范围和空值检查
-
-- `between`：添加范围条件。
-- `isNull`、`isNotNull`：添加空值检查条件。
-
-### IN条件和LIKE条件
-
-- `in`：添加IN条件，用于匹配字段值是否在给定的列表中。
-- `like`：添加LIKE条件，用于执行模式匹配查询。
-
-### JSON和数组操作
-
-- `jsonContains`、`jsonContainsAll`、`jsonContainsAny`：用于处理JSON字段的包含检查。
-- `arrayContains`、`arrayContainsAll`、`arrayContainsAny`：用于处理数组字段的包含检查。
-- `arrayLength`：检查数组字段的长度。
-
-### 逻辑操作
-
-- `and`、`or`、`not`：用于组合多个条件构造器对象，执行逻辑AND、OR和NOT操作。
-
-### 辅助方法
-
-- `convertValue`、`convertValues`：用于将值转换为适合查询的格式。
-- `wrapFieldName`：用于包装字段名，可能需要根据具体的查询语言调整。
-
-### 抽象方法
-
-- `buildFilters`：需要子类实现的具体过滤条件字符串构建逻辑。
-
-### 优化搜索
-- `searchParams`：提供了对搜索算法的精细控制，包括度量类型、相似度阈值和搜索范围等。通过合理配置这些参数，用户可以更有效地从集合中检索出与查询向量最相似的向量。
-
-- 以下是 searchParams 支持的参数及其说明：
-  - metric_type
-类型：String
-描述：指定搜索操作使用的度量类型。必须与索引向量字段时使用的度量类型一致。
-可选值：
-L2：欧几里得距离，适用于高维空间的向量搜索。
-IP：内积，适用于余弦相似度搜索。
-COSINE：余弦相似度，与内积相同，适用于测量向量间的夹角。
-示例：
-searchParams.put("metric_type", "L2");
-  -  radius
-类型：float
-描述：设置搜索操作的最小相似度阈值。当 metric_type 设置为 L2 时，此值应大于 range_filter；否则，应小于 range_filter。
-示例：
-searchParams.put("radius", 0.5f);
-  - range_filter
-类型：float
-描述：限定搜索操作的相似度范围。当 metric_type 设置为 IP 或 COSINE 时，此值应大于 radius；否则，应小于 radius。
-示例：
-searchParams.put("range_filter", 0.3f);
-使用示例
-   以下是一个使用 searchParams 的示例，展示如何构建搜索请求并设置特定的搜索参数：
-```java
-Map<String, Object> searchParams = new HashMap<>();
-searchParams.put("metric_type", "L2");
-searchParams.put("radius", 0.5f);
-searchParams.put("range_filter", 0.3f);
-```
-
-
 
 ## 索引与度量类型详解
 
@@ -426,7 +165,273 @@ searchParams.put("range_filter", 0.3f);
 - **HAMMING**：汉明距离，适用于二进制向量。
 - **JACCARD**：杰卡德相似系数，适用于集合相似度计算。
 
+## MilvusMapper 功能
 
+`MilvusMapper` 是一个用于操作 Milvus 数据库的通用接口，提供了一系列的数据操作方法，包括查询、删除、更新和插入。以下是对 `MilvusMapper` 及其相关类的功能描述：
+
+### MilvusMapper<T>
+
+`MilvusMapper` 是一个泛型抽象类，继承自 `BaseMilvusMapper`，提供了与 Milvus 客户端交互的基本方法。
+
+- **获取 Milvus 客户端**: `getClient()` - 返回 `MilvusClientV2` 实例。
+
+### BaseMilvusMapper<T>
+
+`BaseMilvusMapper` 是一个抽象类，定义了与 Milvus 数据库交互的基础操作。
+
+- **创建搜索构建器实例**: `queryWrapper()` - 创建 `LambdaQueryWrapper` 实例。
+- **创建删除构建器实例**: `deleteWrapper()` - 创建 `LambdaDeleteWrapper` 实例。
+- **创建更新构建器实例**: `updateWrapper()` - 创建 `LambdaUpdateWrapper` 实例。
+- **创建新增构建器实例**: `insertWrapper()` - 创建 `LambdaInsertWrapper` 实例。
+
+#### 数据操作
+
+-  通过 ID 获取数据`getById(Serializable ... ids)`
+
+​   	    `功能`：根据提供的ID列表查询数据。
+
+​		`参数`：`ids` - 一个可序列化的ID列表。
+
+​		`返回`：`MilvusResp<List<MilvusResult<T>>>` - 包含查询结果的响应。
+
+- 删除数据`removeById(Serializable ... ids)`
+
+​        `功能`：根据提供的ID列表删除数据。
+
+​		`参数`：`ids` - 一个可序列化的ID列表。
+
+​		`返回`：`MilvusResp<DeleteResp>` - 删除操作的响应。
+
+- 更新数据`updateById(T ... entity)`
+
+​	  `功能`：根据提供的实体更新数据。
+
+​		`参数`：`entity` - 一个实体对象列表。
+
+​		`返回`：`MilvusResp<UpsertResp>` - 更新操作的响应。
+
+- 插入数据`insert(T ... entity)`
+
+​		`功能`：插入提供的实体到数据库。
+
+​		`参数`：`entity` - 一个实体对象列表。
+
+​		`返回`：`MilvusResp<InsertResp>` - 插入操作的响应。
+
+#### 构建器方法
+
+- **创建通用构建器实例**: `lambda(Wrapper<W, T> wrapper)` - 初始化并返回构建器实例。
+
+### LambdaQueryWrapper<T> 类功能文档
+
+`LambdaQueryWrapper<T>` 是一个用于构建和执行 Milvus 搜索查询的构建器类。它提供了一系列方法来设置查询参数，并最终执行查询。
+
+#### 构造函数
+
+- **LambdaQueryWrapper()**: 无参构造函数。
+- **LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType)**: 构造函数，初始化集合名称、Milvus 客户端、类型转换缓存和实体类型。
+
+#### 分区设置
+
+- **partition(String ... partitionName)**: 添加一个或多个分区名称到查询中。
+- **partition(FieldFunction<T,?>... partitionName)**: 根据提供的字段函数添加分区名称。
+
+#### 搜索参数设置
+
+- **searchParams(Map<String, Object> searchParams)**: 设置搜索参数。
+
+- 以下是 searchParams 支持的参数及其说明：
+  - metric_type
+    类型：String
+    描述：指定搜索操作使用的度量类型。必须与索引向量字段时使用的度量类型一致。
+    可选值：
+    L2：欧几里得距离，适用于高维空间的向量搜索。
+    IP：内积，适用于余弦相似度搜索。
+    COSINE：余弦相似度，与内积相同，适用于测量向量间的夹角。
+    示例：
+    searchParams.put("metric_type", "L2");
+  - radius
+    类型：float
+    描述：设置搜索操作的最小相似度阈值。当 metric_type 设置为 L2 时，此值应大于 range_filter；否则，应小于 range_filter。
+    示例：
+    searchParams.put("radius", 0.5f);
+  - range_filter
+    类型：float
+    描述：限定搜索操作的相似度范围。当 metric_type 设置为 IP 或 COSINE 时，此值应大于 radius；否则，应小于 radius。
+    示例：
+    searchParams.put("range_filter", 0.3f);
+    使用示例
+    以下是一个使用 searchParams 的示例，展示如何构建搜索请求并设置特定的搜索参数：
+
+```java
+Map<String, Object> searchParams = new HashMap<>();
+        searchParams.put("metric_type", "L2");
+        searchParams.put("radius", 0.5f);
+        searchParams.put("range_filter", 0.3f);
+```
+
+- **radius(Object radius)**: 设置搜索半径。
+- **rangeFilter(Object rangeFilter)**: 设置范围过滤器。
+- **metricType(Object metric_type)**: 设置度量类型。
+
+#### 结果设置
+
+- **outputFields(List<String> outputFields)**: 设置要返回的字段。
+- **roundDecimal(int roundDecimal)**: 设置返回的距离值的小数位数。
+
+#### 查询条件构建
+
+- **eq(String fieldName, Object value)**: 添加等于条件。
+- **ne(String fieldName, Object value)**: 添加不等于条件。
+- **gt(String fieldName, Object value)**: 添加大于条件。
+- **ge(String fieldName, Object value)**: 添加大于等于条件。
+- **lt(String fieldName, Object value)**: 添加小于条件。
+- **le(String fieldName, Object value)**: 添加小于等于条件。
+- **between(String fieldName, Object start, Object end)**: 添加范围条件。
+- **isNull(String fieldName)**: 添加空值检查条件。
+- **isNotNull(String fieldName)**: 添加非空值检查条件。
+- **in(String fieldName, List<?> values)**: 添加 IN 条件。
+- **like(String fieldName, String value)**: 添加 LIKE 条件。
+
+#### JSON 和数组操作
+
+- **jsonContains(String fieldName, Object value)**: 添加 JSON 包含条件。
+- **jsonContainsAll(String fieldName, List<?> values)**: 添加 JSON 包含所有值的条件。
+- **jsonContainsAny(String fieldName, List<?> values)**: 添加 JSON 包含任意值的条件。
+- **arrayContains(String fieldName, Object value)**: 添加数组包含条件。
+- **arrayContainsAll(String fieldName, List<?> values)**: 添加数组包含所有值的条件。
+- **arrayContainsAny(String fieldName, List<?> values)**: 添加数组包含任意值的条件。
+- **arrayLength(String fieldName, int length)**: 添加数组长度条件。
+
+#### 逻辑操作
+
+- **and(ConditionBuilder<T> other)**: 添加 AND 条件。
+- **or(ConditionBuilder<T> other)**: 添加 OR 条件。
+- **not()**: 添加 NOT 条件。
+
+#### 向量搜索设置
+
+- **annsField(String annsField)**: 设置要搜索的向量字段。
+- **vector(List<?> vector)**: 添加要搜索的向量。
+- **vector(String annsField, List<?> vector)**: 设置向量字段并添加要搜索的向量。
+- **topK(Integer topK)**: 设置返回的 top-k 结果。
+- **limit(Long limit)**: 设置查询结果的数量限制。
+
+#### 执行查询
+
+- **query()**: 构建并执行搜索请求，返回封装的 `MilvusResp` 对象，其中包含查询结果。
+- **query(FieldFunction<T,?> ... outputFields)**: 设置输出字段并执行查询。
+- **query(String ... outputFields)**: 设置输出字段并执行查询。
+- **getById(Serializable ... ids)**: 通过 ID 获取数据。
+
+#### 辅助方法
+
+- **buildSearch()**: 构建完整的搜索请求对象。
+- **buildQuery()**: 构建查询请求对象。
+
+`LambdaQueryWrapper<T>` 类提供了丰富的方法来构建复杂的搜索查询，支持各种条件、逻辑操作、JSON 和数组操作，以及向量搜索。通过链式调用这些方法，用户可以灵活地构造搜索请求并获取所需的查询结果。
+
+### LambdaDeleteWrapper<T>
+
+`LambdaDeleteWrapper` 是一个构建器类，用于构建和执行删除操作。
+
+- **添加分区**: `partition(String partitionName)`
+- **添加等于条件**: `eq(String fieldName, Object value)`
+- **添加不等于条件**: `ne(String fieldName, Object value)`
+- **添加 ID 到删除列表**: `id(Object id)`
+
+#### 执行删除
+
+- **执行删除**: `remove()` - 构建并执行删除请求。
+- **通过 ID 删除**: `removeById(Serializable ... ids)`
+
+### LambdaUpdateWrapper<T>
+
+`LambdaUpdateWrapper` 是一个构建器类，用于构建和执行更新操作。
+
+- **添加分区**: `partition(String partitionName)`
+- **设置更新条件**: 与 `LambdaDeleteWrapper` 相同
+
+#### 执行更新
+
+- **更新数据**: `update(T t)` - 构建并执行更新请求。
+- **通过 ID 更新**: `updateById(T ... t)`
+
+### LambdaInsertWrapper<T>
+
+`LambdaInsertWrapper` 是一个构建器类，用于构建和执行插入操作。
+
+- **添加分区**: `partition(String partitionName)`
+- **添加字段值**: `put(String fieldName, Object value)`
+
+#### 执行插入
+
+- **插入数据**: `insert()` - 构建并执行插入请求。
+- **插入多个数据**: `insert(T ... t)`
+
+## MilvusService 功能
+
+`MilvusService` 是一个综合性服务，提供对 Milvus 数据库的全面管理，它实现了多个接口：`IAMService`（身份访问管理服务）、`ICMService`（集合管理服务）和 `IVecMService`（向量管理服务）。
+
+### 身份访问管理 (IAMService)
+
+`IAMService` 接口提供用户和角色的创建、删除、查询以及权限的授予和撤销等功能。
+
+- **创建角色**: `createRole(String roleName)`
+- **创建用户**: `createUser(String userName, String password)`
+- **查询角色权限**: `describeRole(String roleName)`
+- **查询用户信息**: `describeUser(String userName)`
+- **删除角色**: `dropRole(String roleName)`
+- **删除用户**: `dropUser(String userName)`
+- **授予角色权限**: `grantPrivilege(String roleName, String objectType, String privilege, String objectName)`
+- **授予用户角色**: `grantRole(String roleName, String userName)`
+- **列出所有角色**: `listRoles()`
+- **列出所有用户**: `listUsers()`
+- **撤销角色权限**: `revokePrivilege(String roleName, String objectType, String privilege, String objectName, String databaseName)`
+- **撤销用户角色**: `revokeRole(String roleName, String userName)`
+- **更新用户密码**: `updatePassword(String userName, String password, String newPassword)`
+
+### 集合管理 (ICMService)
+
+`ICMService` 接口提供集合的创建、删除、查询、重命名、索引创建和管理等功能。
+
+- **创建集合**: `createCollection(MilvusEntity milvusEntity)`
+- **添加字段**: `addField(String collectionName, AddFieldReq ... addFieldReq)`
+- **获取字段**: `getField(String collectionName, String fieldName)`
+- **获取集合详细信息**: `describeCollection(String collectionName)`
+- **删除集合**: `dropCollection(String collectionName)`
+- **检查集合是否存在**: `hasCollection(String collectionName)`
+- **获取集合统计信息**: `getCollectionStats(String collectionName)`
+- **重命名集合**: `renameCollection(String oldCollectionName, String newCollectionName)`
+- **为集合创建索引**: `createIndex(String collectionName, List<IndexParam> indexParams)`
+- **获取集合索引信息**: `describeIndex(String collectionName, String fieldName)`
+- **删除集合索引**: `dropIndex(String collectionName, String fieldName)`
+- **获取集合或分区的加载状态**: `getLoadState(String collectionName, String partitionName)`
+- **加载集合数据到内存**: `loadCollection(String collectionName)`
+- **从内存中释放集合数据**: `releaseCollection(String collectionName)`
+- **创建集合分区**: `createPartition(String collectionName, String partitionName)`
+- **删除集合分区**: `dropPartition(String collectionName, String partitionName)`
+- **检查分区是否存在**: `hasPartition(String collectionName, String partitionName)`
+- **列出集合中的所有分区**: `listPartitions(String collectionName)`
+- **加载集合分区到内存**: `loadPartitions(String collectionName, List<String> partitionNames)`
+- **从内存中释放集合分区**: `releasePartitions(String collectionName, List<String> partitionNames)`
+
+### 向量管理 (IVecMService)
+
+`IVecMService` 接口提供向量的插入、更新、查询、删除以及相似性搜索等功能。
+
+- **删除实体**: `delete(String collectionName, String partitionName, String filter, List<Object> ids)`
+- **根据ID获取实体**: `get(String collectionName, String partitionName, List<Object> ids, List<String> outputFields)`
+- **插入数据**: `insert(String collectionName, List<JSONObject> data, String partitionName)`
+- **根据标量过滤条件查询**: `query(String collectionName, List<String> partitionNames, List<String> outputFields, List<Object> ids, String filter, ConsistencyLevel consistencyLevel, long offset, long limit)`
+- **执行向量相似性搜索**: `search(String collectionName, List<String> partitionNames, String annsField, int topK, String filter, List<String> outputFields, List<Object> data, long offset, long limit, int roundDecimal, Map<String, Object> searchParams, long guaranteeTimestamp, long gracefulTime, ConsistencyLevel consistencyLevel, boolean ignoreGrowing)`
+- **插入或更新数据**: `upsert(String collectionName, String partitionName, List<JSONObject> data)`
+
+### 公共方法
+
+除了上述功能，`MilvusService` 还提供了一个公共方法来获取 `MilvusClientV2` 实例：
+
+- **获取 Milvus 客户端**: `getClient()
 
 ## 使用案例
 
