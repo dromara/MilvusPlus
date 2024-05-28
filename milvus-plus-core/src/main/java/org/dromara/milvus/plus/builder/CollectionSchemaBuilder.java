@@ -31,7 +31,9 @@ public class CollectionSchemaBuilder {
         }
         return this;
     }
-
+    public CreateCollectionReq.FieldSchema getField(String fileName){
+        return schema.getField(fileName);
+    }
     public void createSchema() throws MilvusException {
         CreateCollectionReq req=CreateCollectionReq.builder().collectionName(this.collectionName).collectionSchema(this.schema).build();
         wrapper.createCollection(req);
