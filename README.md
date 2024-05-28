@@ -104,7 +104,7 @@ public class Face {
     private List<Float> faceVector; // 存储人脸特征的向量
 }
 ```
-```
+```java
 @Component
 public class FaceMilvusMapper extends MilvusMapper<Face> {
     
