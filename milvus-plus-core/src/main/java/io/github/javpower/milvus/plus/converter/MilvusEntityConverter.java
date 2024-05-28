@@ -141,25 +141,24 @@ public class MilvusEntityConverter {
                 .extraParams(map)
                 .build();
     }
-    public static String getGetMethodName(Field field) {
-        // 检查字段是否为布尔类型
-        String prefix = field.getType() == boolean.class || field.getType() == Boolean.class ? "is" : "get";
 
+    public static String getGetMethodName(Field field) {
         // 确保字段名不为空或null
         if (field == null) {
             throw new IllegalArgumentException("Field must not be null.");
         }
+        // 检查字段是否为布尔类型
+        String prefix = field.getType() == boolean.class || field.getType() == Boolean.class ? "is" : "get";
         // 获取字段名的首字母大写形式
         String fieldName = capitalizeFirstLetter(field.getName());
         // 构建并返回getter方法名
         return prefix + fieldName;
     }
+
     private static String capitalizeFirstLetter(String original) {
         if (original == null || original.isEmpty()) {
             return original;
         }
         return original.substring(0, 1).toUpperCase() + original.substring(1);
     }
-
-
 }
