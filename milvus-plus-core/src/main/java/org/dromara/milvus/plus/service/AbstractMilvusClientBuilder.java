@@ -38,6 +38,9 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
             ConnectConfig connectConfig = ConnectConfig.builder()
                     .uri(properties.getUri())
                     .token(properties.getToken())
+                    .dbName(properties.getDbName())
+                    .username(properties.getUsername())
+                    .password(properties.getPassword())
                     .build();
             client = new MilvusClientV2(connectConfig);
             // 初始化逻辑

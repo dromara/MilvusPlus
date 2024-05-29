@@ -29,7 +29,7 @@ Core：
 <dependency>
     <groupId>io.github.javpower</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.4.0</version>
 </dependency>
 ```
 
@@ -40,7 +40,7 @@ Spring：
 <dependency>
     <groupId>io.github.javpower</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.4.0</version>
 </dependency>
 ```
 
@@ -50,7 +50,7 @@ Solon：
 <dependency>
     <groupId>io.github.javpower</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.4.0</version>
 </dependency>
 ```
 
@@ -79,29 +79,29 @@ Example usage:
 ```java
 
 @Data
-@MilvusCollection(name = "face_collection") // 指定Milvus集合的名称
+@MilvusCollection(name = "face_collection") // Specifies the name of the Milvus collection
 public class Face {
     @MilvusField(
-            name = "person_id", // 字段名称
-            dataType = DataType.Int64, // 数据类型为64位整数
-            isPrimaryKey = true, // 标记为主键
+            name = "person_id", // Field Name
+            dataType = DataType.Int64, // Data type is 64-bit integer
+            isPrimaryKey = true // Mark as Primary Key
     )
-    private Long personId; // 人员的唯一标识符
+    private Long personId; // Unique identifier of the person
 
     @MilvusField(
-            name = "face_vector", // 字段名称
-            dataType = DataType.FloatVector, // 数据类型为浮点型向量
-            dimension = 128, // 向量维度，假设人脸特征向量的维度是128
+            name = "face_vector", // Field Name
+            dataType = DataType.FloatVector, // The data type is a floating point vector
+            dimension = 128 // Vector dimension, assuming that the dimension of the face feature vector is 128
     )
     @MilvusIndex(
-            indexType = IndexParam.IndexType.IVF_FLAT, // 使用IVF_FLAT索引类型
-            metricType = IndexParam.MetricType.L2, // 使用L2距离度量类型
-            indexName = "face_index", // 索引名称
-            extraParams = { // 指定额外的索引参数
-                    @ExtraParam(key = "nlist", value = "100") // 例如，IVF的nlist参数
+            indexType = IndexParam.IndexType.IVF_FLAT, // Using the IVF FLAT index type
+            metricType = IndexParam.MetricType.L2, // Using the L 2 Distance Metric Type
+            indexName = "face_index", // Index Name
+            extraParams = { // Specify additional index parameters
+                    @ExtraParam(key = "nlist", value = "100") // For example, the nlist parameter for IVF
             }
     )
-    private List<Float> faceVector; // 存储人脸特征的向量
+    private List<Float> faceVector; // Storing vectors of face features
 }
 ```
 ```
@@ -124,50 +124,58 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         Face face=new Face();
         List<Float> vector = new ArrayList<>();
         for (int i = 0; i < 128; i++) {
-            vector.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
+            vector.add((float) (Math.random() * 100)); // Using random numbers here as an example only
         }
         face.setPersonId(1l);
         face.setFaceVector(vector);
-        //新增
+        
+        // add
         List<Face> faces=new ArrayList<>();
         for (int i = 1; i < 10 ;i++){
             Face face1=new Face();
             face1.setPersonId(Long.valueOf(i));
             List<Float> vector1 = new ArrayList<>();
             for (int j = 0; j < 128; j++) {
-                vector1.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
+                vector1.add((float) (Math.random() * 100)); // Using random numbers here as an example only
             }
             face1.setFaceVector(vector1);
             faces.add(face1);
         }
         MilvusResp<InsertResp> insert = mapper.insert(faces.toArray(faces.toArray(new Face[0]))); log.info("insert--{}", JSONObject.toJSONString(insert));
-        //id查询
+        
+        // id query
         MilvusResp<List<MilvusResult<Face>>> query = mapper.getById(9l);
         log.info("query--getById---{}", JSONObject.toJSONString(query));
-        //向量查询
+        
+        // VECTOR QUERY
         MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper()
                 .vector(Face::getFaceVector, vector)
                 .ne(Face::getPersonId, 1L)
                 .topK(3)
                 .query();
-        log.info("向量查询 query--queryWrapper---{}", JSONObject.toJSONString(query1));
-        //标量查询
+        log.info("VectorQuery query--queryWrapper---{}", JSONObject.toJSONString(query1));
+        
+        // SCALAR QUERY
         MilvusResp<List<MilvusResult<Face>>> query2 = mapper.queryWrapper()
                 .eq(Face::getPersonId, 2L)
                 .limit(3)
                 .query();
-        log.info("标量查询   query--queryWrapper---{}", JSONObject.toJSONString(query2));
-        //更新
+        log.info("ScalarQuery   query--queryWrapper---{}", JSONObject.toJSONString(query2));
+        
+        // update
         vector.clear();
         for (int i = 0; i < 128; i++) {
-            vector.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
+            vector.add((float) (Math.random() * 100)); // Using random numbers here as an example only
         }
         MilvusResp<UpsertResp> update = mapper.updateById(face);log.info("update--{}", JSONObject.toJSONString(update));
-        //id查询
+        
+        // id Query
         MilvusResp<List<MilvusResult<Face>>> query3 = mapper.getById(1L);log.info("query--getById---{}", JSONObject.toJSONString(query3));
-        //删除
+        
+        // del
         MilvusResp<DeleteResp> remove = mapper.removeById(1L);log.info("remove--{}", JSONObject.toJSONString(remove));
-        //查询
+        
+        // query
         MilvusResp<List<MilvusResult<Face>>> query4 = mapper.getById(1L);log.info("query--{}", JSONObject.toJSONString(query4));
 
     }
