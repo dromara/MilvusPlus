@@ -66,14 +66,14 @@ milvus:
   token: x'x'x'x
   enable: true
   packages:
-    - io.github.javpower.milvus.demo.model
+    - com.example.entity
 ```
 
 - `milvus`：定义了与Milvus服务相关的配置。
   - `uri`：Milvus服务的URI，应用程序通过这个URI与Milvus服务进行通信。
   - `token`：用于验证和授权的令牌（Token），确保访问Milvus服务的安全性。
   - `enable`：一个布尔值，用于指示Milvus模块是否应该被启用。
-  - `packages`：这些包包含了自定义注解对应的Java类。
+  - `packages`：这些包包含了自定义注解对应的Java类，你可以认为这是你自定义的实体类所在的包。
 
 ## 应用场景
 
