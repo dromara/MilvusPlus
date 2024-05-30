@@ -175,14 +175,16 @@ public class MilvusConverter {
         }
         return original.substring(0, 1).toUpperCase() + original.substring(1);
     }
-
-    public static void create(MilvusEntity milvusEntity, MilvusClientV2 client) {
+    public static void create(MilvusEntity milvusEntity, MilvusClientV2 client){
+       List<IndexParam> indexParams = milvusEntity.getIndexParams();
+       if(indexParams==null||indexParams.isEmpty()){
+           throw new IllegalArgumentException("the index does not exist, please define the index");
+       }
         // 创建新集合
         CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
                 milvusEntity.getCollectionName(), client
         );
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
-        List<IndexParam> indexParams = milvusEntity.getIndexParams();
         log.info("-------create schema---------");
         schemaBuilder.createSchema();
         if (indexParams != null && !indexParams.isEmpty()) {

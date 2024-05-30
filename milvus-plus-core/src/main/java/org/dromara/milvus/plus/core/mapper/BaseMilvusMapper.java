@@ -11,7 +11,6 @@ import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.core.conditions.*;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
-import org.dromara.milvus.plus.service.IAMService;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -22,7 +21,7 @@ import java.util.List;
  * @author xgc
  **/
 @Slf4j
-public abstract class BaseMilvusMapper<T> implements IAMService {
+public abstract class BaseMilvusMapper<T>{
 
 
     public abstract MilvusClientV2 getClient();

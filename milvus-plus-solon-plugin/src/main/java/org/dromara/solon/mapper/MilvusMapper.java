@@ -1,7 +1,7 @@
 package org.dromara.solon.mapper;
 
-import org.dromara.milvus.plus.core.mapper.BaseMilvusMapper;
 import io.milvus.v2.client.MilvusClientV2;
+import org.dromara.milvus.plus.core.mapper.BaseMilvusMapper;
 import org.noear.solon.Solon;
 
 public class MilvusMapper<T> extends BaseMilvusMapper<T> {
