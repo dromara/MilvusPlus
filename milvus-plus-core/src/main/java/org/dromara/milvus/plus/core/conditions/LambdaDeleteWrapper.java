@@ -55,7 +55,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> eq(String fieldName, Object value) {
+    public LambdaDeleteWrapper<T> eq(String fieldName, Object value) {
         super.eq(fieldName,value);
         return this;
     }
@@ -67,7 +67,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> ne(String fieldName, Object value) {
+    public LambdaDeleteWrapper<T> ne(String fieldName, Object value) {
         super.ne(fieldName,value);
         return this;
     }
@@ -79,7 +79,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> gt(String fieldName, Object value) {
+    public LambdaDeleteWrapper<T> gt(String fieldName, Object value) {
         super.gt(fieldName,value);
         return this;
     }
@@ -91,7 +91,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> ge(String fieldName, Object value) {
+    public LambdaDeleteWrapper<T> ge(String fieldName, Object value) {
         super.ge(fieldName,value);
         return this;
     }
@@ -103,7 +103,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> lt(String fieldName, Object value) {
+    public LambdaDeleteWrapper<T> lt(String fieldName, Object value) {
         super.lt(fieldName,value);
         return this;
     }
@@ -115,7 +115,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> le(String fieldName, Object value) {
+    public LambdaDeleteWrapper<T> le(String fieldName, Object value) {
         super.le(fieldName,value);
         return this;
     }
@@ -128,7 +128,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param end       范围结束值
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> between(String fieldName, Object start, Object end) {
+    public LambdaDeleteWrapper<T> between(String fieldName, Object start, Object end) {
         super.between(fieldName,start,end);
         return this;
     }
@@ -139,7 +139,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> isNull(String fieldName) {
+    public LambdaDeleteWrapper<T> isNull(String fieldName) {
         super.isNull(fieldName);
         return this;
     }
@@ -150,7 +150,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> isNotNull(String fieldName) {
+    public LambdaDeleteWrapper<T> isNotNull(String fieldName) {
         super.isNotNull(fieldName);
         return this;
     }
@@ -162,7 +162,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param values    要检查的值列表
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> in(String fieldName, List<?> values) {
+    public LambdaDeleteWrapper<T> in(String fieldName, List<?> values) {
         super.in(fieldName,values);
         return this;
     }
@@ -174,7 +174,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要匹配的模式
      * @return 当前条件构建器对象
      */
-    protected LambdaDeleteWrapper<T> like(String fieldName, String value) {
+    public LambdaDeleteWrapper<T> like(String fieldName, String value) {
         super.like(fieldName,value);
         return this;
     }

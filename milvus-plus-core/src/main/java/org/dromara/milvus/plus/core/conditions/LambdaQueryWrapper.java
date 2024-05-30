@@ -97,7 +97,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> eq(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> eq(String fieldName, Object value) {
         super.eq(fieldName,value);
         return this;
     }
@@ -109,7 +109,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> ne(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> ne(String fieldName, Object value) {
         super.ne(fieldName,value);
         return this;
     }
@@ -121,7 +121,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> gt(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> gt(String fieldName, Object value) {
         super.gt(fieldName,value);
         return this;
     }
@@ -133,7 +133,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> ge(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> ge(String fieldName, Object value) {
         super.ge(fieldName,value);
         return this;
     }
@@ -145,7 +145,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> lt(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> lt(String fieldName, Object value) {
         super.lt(fieldName,value);
         return this;
     }
@@ -157,7 +157,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> le(String fieldName, Object value) {
+    public LambdaQueryWrapper<T> le(String fieldName, Object value) {
         super.le(fieldName,value);
         return this;
     }
@@ -170,7 +170,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param end       范围结束值
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> between(String fieldName, Object start, Object end) {
+    public LambdaQueryWrapper<T> between(String fieldName, Object start, Object end) {
         super.between(fieldName,start,end);
         return this;
     }
@@ -181,7 +181,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> isNull(String fieldName) {
+    public LambdaQueryWrapper<T> isNull(String fieldName) {
         super.isNull(fieldName);
         return this;
     }
@@ -192,7 +192,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> isNotNull(String fieldName) {
+    public LambdaQueryWrapper<T> isNotNull(String fieldName) {
         super.isNotNull(fieldName);
         return this;
     }
@@ -204,7 +204,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param values    要检查的值列表
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> in(String fieldName, List<?> values) {
+    public LambdaQueryWrapper<T> in(String fieldName, List<?> values) {
         super.in(fieldName,values);
         return this;
     }
@@ -216,7 +216,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * @param value     要匹配的模式
      * @return 当前条件构建器对象
      */
-    protected LambdaQueryWrapper<T> like(String fieldName, String value) {
+    public LambdaQueryWrapper<T> like(String fieldName, String value) {
         super.like(fieldName,value);
         return this;
     }

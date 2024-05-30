@@ -59,7 +59,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> eq(String fieldName, Object value) {
+    public LambdaUpdateWrapper<T> eq(String fieldName, Object value) {
         super.eq(fieldName,value);
         return this;
     }
@@ -71,7 +71,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> ne(String fieldName, Object value) {
+    public LambdaUpdateWrapper<T> ne(String fieldName, Object value) {
         super.ne(fieldName,value);
         return this;
     }
@@ -83,7 +83,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> gt(String fieldName, Object value) {
+    public LambdaUpdateWrapper<T> gt(String fieldName, Object value) {
         super.gt(fieldName,value);
         return this;
     }
@@ -95,7 +95,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> ge(String fieldName, Object value) {
+    public LambdaUpdateWrapper<T> ge(String fieldName, Object value) {
         super.ge(fieldName,value);
         return this;
     }
@@ -107,7 +107,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> lt(String fieldName, Object value) {
+    public LambdaUpdateWrapper<T> lt(String fieldName, Object value) {
         super.lt(fieldName,value);
         return this;
     }
@@ -119,7 +119,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要比较的值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> le(String fieldName, Object value) {
+    public LambdaUpdateWrapper<T> le(String fieldName, Object value) {
         super.le(fieldName,value);
         return this;
     }
@@ -132,7 +132,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param end       范围结束值
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> between(String fieldName, Object start, Object end) {
+    public LambdaUpdateWrapper<T> between(String fieldName, Object start, Object end) {
         super.between(fieldName,start,end);
         return this;
     }
@@ -143,7 +143,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> isNull(String fieldName) {
+    public LambdaUpdateWrapper<T> isNull(String fieldName) {
         super.isNull(fieldName);
         return this;
     }
@@ -154,7 +154,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param fieldName 字段名
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> isNotNull(String fieldName) {
+    public LambdaUpdateWrapper<T> isNotNull(String fieldName) {
         super.isNotNull(fieldName);
         return this;
     }
@@ -166,7 +166,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param values    要检查的值列表
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> in(String fieldName, List<?> values) {
+    public LambdaUpdateWrapper<T> in(String fieldName, List<?> values) {
         super.in(fieldName,values);
         return this;
     }
@@ -178,7 +178,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
      * @param value     要匹配的模式
      * @return 当前条件构建器对象
      */
-    protected LambdaUpdateWrapper<T> like(String fieldName, String value) {
+    public LambdaUpdateWrapper<T> like(String fieldName, String value) {
         super.like(fieldName,value);
         return this;
     }
