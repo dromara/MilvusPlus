@@ -10,4 +10,4 @@ milvus:
   token: xxxx
   enable: true
   packages:
-    - io.github.javpower.solon.test.model
+    - org.dromara.solon.test.model

@@ -2,13 +2,13 @@
     <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
-        <groupId>io.github.javpower</groupId>
+        <groupId>org.dromara</groupId>
         <artifactId>milvus-plus-parent</artifactId>
         <version>${revision}</version>
         <packaging>pom</packaging>
         <name>${project.artifactId}</name>
         <description>a tool about milvus-plus</description>
-        <url>https://github.com/javpower/milvus-plus</url>
+        <url>https://github.com/dromara/MilvusPlus</url>
         <licenses>
             <license>
                 <name> The Apache Software License, Version 2.0 </name>
@@ -17,20 +17,20 @@
             </license>
         </licenses>
         <scm>
-            <url>https://github.com/javpower/milvus-plus</url>
-            <connection>scm:git@github.com/javpower/milvus-plus.git</connection>
-            <developerConnection>scm:git@github.com/javpower/milvus-plus.git</developerConnection>
+            <connection>scm:git:git@github.com:dromara/MilvusPlus.git</connection>
+            <developerConnection>scm:git:git@github.com:dromara/MilvusPlus.git</developerConnection>
+            <url>git@github.com:dromara/MilvusPlus.git</url>
         </scm>
         <developers>
             <developer>
                 <name>gc.x</name>
                 <email>javpower@163.com</email>
-                <organization> https://github.com/javpower</organization>
+                <organization>https://github.com/javpower</organization>
                 <timezone>+8</timezone>
             </developer>
         </developers>
         <properties>
-            <revision>2.4.0-SNAPSHOT</revision>
+            <revision>2.0.0</revision>
             <maven.compiler.source>${java.version}</maven.compiler.source>
             <maven.compiler.target>${java.version}</maven.compiler.target>
             <maven-compiler.version>3.11.0</maven-compiler.version>
@@ -42,6 +42,7 @@
             <spring-boot.version>2.7.13</spring-boot.version>
             <mica-auto.vaersion>2.3.2</mica-auto.vaersion>
             <java.version>1.8</java.version>
+            <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
         </properties>
         <dependencies>
 
@@ -49,17 +50,17 @@
         <dependencyManagement>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.javpower</groupId>
+                    <groupId>org.dromara</groupId>
                     <artifactId>milvus-plus-core</artifactId>
                     <version>${revision}</version>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.javpower</groupId>
+                    <groupId>org.dromara</groupId>
                     <artifactId>milvus-plus-boot-starter</artifactId>
                     <version>${revision}</version>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.javpower</groupId>
+                    <groupId>org.dromara</groupId>
                     <artifactId>milvus-plus-solon-plugin</artifactId>
                     <version>${revision}</version>
                 </dependency>
@@ -74,14 +75,14 @@
         </dependencyManagement>
 
         <distributionManagement>
-            <snapshotRepository>
-                <id>ossrh</id>
-                <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-            </snapshotRepository>
             <repository>
-                <id>ossrh</id>
-                <url> https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                <id>oss</id>
+                <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
             </repository>
+            <snapshotRepository>
+                <id>oss</id>
+                <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            </snapshotRepository>
         </distributionManagement>
 
         <build>
@@ -104,12 +105,13 @@
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.7</version>
+                    <version>${nexus-staging-maven-plugin.version}</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <serverId>ossrh</serverId>
-                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                        <serverId>oss</serverId>
+                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -164,6 +166,32 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.8.2</version>
+                </plugin>
+                <!-- 版本号管理 -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>1.2.7</version>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
             </plugins>
