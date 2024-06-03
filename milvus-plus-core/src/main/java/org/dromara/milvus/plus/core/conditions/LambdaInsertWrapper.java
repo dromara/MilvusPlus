@@ -2,10 +2,6 @@ package org.dromara.milvus.plus.core.conditions;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.dromara.milvus.plus.cache.ConversionCache;
-import org.dromara.milvus.plus.cache.PropertyCache;
-import org.dromara.milvus.plus.core.FieldFunction;
-import org.dromara.milvus.plus.model.vo.MilvusResp;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.InsertReq;
@@ -13,6 +9,10 @@ import io.milvus.v2.service.vector.response.InsertResp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.milvus.plus.cache.ConversionCache;
+import org.dromara.milvus.plus.cache.PropertyCache;
+import org.dromara.milvus.plus.core.FieldFunction;
+import org.dromara.milvus.plus.model.vo.MilvusResp;
 
 import java.util.*;
 
@@ -83,7 +83,10 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
         resp.setSuccess(true);
         return resp;
     }
-
+    public MilvusResp<InsertResp> insert(T ... entity) throws MilvusException {
+        Iterator<T> iterator = new ArrayIterator<>(entity);
+        return insert(iterator);
+    }
     public MilvusResp<InsertResp> insert(Iterator<T> iterator) throws MilvusException {
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         List<JSONObject> jsonObjects=new ArrayList<>();
