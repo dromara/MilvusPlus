@@ -10,10 +10,7 @@ import org.dromara.milvus.plus.cache.PropertyCache;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,42 +33,28 @@ public class SearchRespConverter {
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
 
-        // 获取原始搜索结果列表，并将其转换为MilvusResult<T>类型的列表
-        List<List<SearchResp.SearchResult>> searchResults = searchResp.getSearchResults();
-        List<List<MilvusResult<T>>> milvusResults = searchResults.stream()
-                .map(innerList -> innerList.stream()
-                        .map(searchResult -> {
-                            try {
-                                // 根据属性缓存，将实体Map中的键转换为对应的Java实体类字段名
-                                Map<String, Object> entityMap = searchResult.getEntity();
-                                Map<String, Object> entityMap2=new HashMap<>();
-                                for (Map.Entry<String, Object> entry : entityMap.entrySet()) {
-                                    String key = propertyCache.findKeyByValue(entry.getKey());
-                                    entityMap2.put(key,entry.getValue());
-                                }
-                                // 将转换后的Map转换为Java实体类T
-                                T entity = objectMapper.convertValue(entityMap2, entityType);
-                                // 创建MilvusResult对象并设置相关字段
-                                MilvusResult<T> tMilvusResult = new MilvusResult<>();
-                                tMilvusResult.setId(searchResult.getId());
-                                tMilvusResult.setDistance(searchResult.getDistance());
-                                tMilvusResult.setEntity(entity);
-                                return tMilvusResult;
-                            } catch (IllegalArgumentException e) {
-                                // 抛出转换过程中的异常
-                                throw new RuntimeException(e);
-                            }
-                        })
-                        .collect(Collectors.toList()))
-                .collect(Collectors.toList());
-
-        // 将嵌套的列表展平为单个列表
-        List<MilvusResult<T>> results = milvusResults
-                .stream()
+        List<MilvusResult<T>> results = Optional.ofNullable(searchResp.getSearchResults())
+                .orElseGet(ArrayList::new)
+                .parallelStream()
                 .flatMap(List::stream)
+                .map(searchResult -> {
+                    // 根据属性缓存，将实体Map中的键转换为对应的Java实体类字段名
+                    Map<String, Object> entityMap = new HashMap<>();
+                    for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
+                        String key = propertyCache.findKeyByValue(entry.getKey());
+                        entityMap.put(key, entry.getValue());
+                    }
+                    // 将转换后的Map转换为Java实体类T
+                    T entity = objectMapper.convertValue(entityMap, entityType);
+
+                    MilvusResult<T> tMilvusResult = new MilvusResult<>();
+                    tMilvusResult.setId(searchResult.getId());
+                    tMilvusResult.setDistance(searchResult.getDistance());
+                    tMilvusResult.setEntity(entity);
+                    return tMilvusResult;
+                })
                 .collect(Collectors.toList());
 
-        // 创建并填充MilvusResp对象
         MilvusResp<List<MilvusResult<T>>> milvusResp = new MilvusResp<>();
         milvusResp.setData(results);
         milvusResp.setSuccess(true);
