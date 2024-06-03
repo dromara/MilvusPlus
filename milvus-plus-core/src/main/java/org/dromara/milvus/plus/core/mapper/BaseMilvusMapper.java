@@ -99,7 +99,4 @@ public abstract class BaseMilvusMapper<T>{
         wrapper.init(collectionName,client, conversionCache, entityType);
         return wrapper.wrapper();
     }
-
-
-
 }
