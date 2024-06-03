@@ -1,4 +1,4 @@
-package org.dromara.milvus.demo.test;
+package org.dromara.milvus.demo.mapper;
 
 import org.dromara.milvus.demo.model.Face;
 import org.dromara.milvus.plus.mapper.MilvusMapper;

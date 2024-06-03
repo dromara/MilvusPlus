@@ -15,7 +15,10 @@ import org.dromara.milvus.plus.model.vo.MilvusResult;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * @author xgc
@@ -58,6 +61,25 @@ public abstract class BaseMilvusMapper<T>{
     public LambdaInsertWrapper<T> insertWrapper() {
         return lambda(new LambdaInsertWrapper<>());
     }
+    private static class ArrayIterator<T> implements Iterator<T> {
+        private final T[] array;
+        private int index = 0;
+
+        public ArrayIterator(T[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index < array.length;
+        }
+
+        @Override
+        public T next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            return array[index++];
+        }
+    }
 
 
     public MilvusResp<List<MilvusResult<T>>> getById(Serializable ... ids) {
@@ -68,15 +90,25 @@ public abstract class BaseMilvusMapper<T>{
         LambdaDeleteWrapper<T> lambda = deleteWrapper();
         return lambda.removeById(ids);
     }
-    public MilvusResp<UpsertResp> updateById(T ... entity){
-        LambdaUpdateWrapper<T> lambda = updateWrapper();
-        return lambda.updateById(entity);
-    }
     public MilvusResp<InsertResp> insert(T ... entity){
         LambdaInsertWrapper<T> lambda = insertWrapper();
-        return lambda.insert(entity);
+        Iterator<T> iterator = new ArrayIterator<>(entity);
+        return lambda.insert(iterator);
+    }
+    public MilvusResp<InsertResp> insert(Collection<T> entity){
+        LambdaInsertWrapper<T> lambda = insertWrapper();
+        return lambda.insert(entity.iterator());
     }
 
+    public MilvusResp<UpsertResp> updateById(T... entity) {
+        LambdaUpdateWrapper<T> lambda = updateWrapper();
+        Iterator<T> iterator = new ArrayIterator<>(entity);
+        return lambda.updateById(iterator);
+    }
+    public MilvusResp<UpsertResp> updateById(Collection<T> entity) {
+        LambdaUpdateWrapper<T> lambda = updateWrapper();
+        return lambda.updateById(entity.iterator());
+    }
 
     /**
      * 创建通用构建器实例
@@ -99,7 +131,4 @@ public abstract class BaseMilvusMapper<T>{
         wrapper.init(collectionName,client, conversionCache, entityType);
         return wrapper.wrapper();
     }
-
-
-
 }

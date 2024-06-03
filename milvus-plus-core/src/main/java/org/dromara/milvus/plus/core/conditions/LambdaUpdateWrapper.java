@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -404,26 +405,29 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
         return resp;
     }
 
-    public MilvusResp<UpsertResp> updateById(T ...t) throws MilvusException {
+    public MilvusResp<UpsertResp> updateById(Iterator<T> iterator) throws MilvusException {
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
-        List<JSONObject> jsonObjects=new ArrayList<>();
-        for (T t1 : t) {
+        List<JSONObject> jsonObjects = new ArrayList<>();
+        // 使用迭代器遍历可变参数
+        while (iterator.hasNext()) {
+            T t1 = iterator.next();
             Map<String, Object> propertiesMap = getPropertiesMap(t1);
-            JSONObject jsonObject=new JSONObject();
+            JSONObject jsonObject = new JSONObject();
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
+                // 根据PropertyCache转换属性名
                 String tk = propertyCache.functionToPropertyMap.get(key);
-                jsonObject.put(tk,value);
+                jsonObject.put(tk, value);
             }
+            // 检查是否包含主键
             if (!jsonObject.containsKey(pk)) {
-                throw new MilvusException("not find primary key",400);
+                throw new MilvusException("not find primary key", 400);
             }
             jsonObjects.add(jsonObject);
-
         }
-       return update(jsonObjects);
+        return update(jsonObjects);
     }
 
     @Override

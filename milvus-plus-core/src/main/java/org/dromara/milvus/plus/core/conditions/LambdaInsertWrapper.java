@@ -14,10 +14,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * 构建器内部类，用于构建insert请求
@@ -87,10 +84,11 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
         return resp;
     }
 
-    public MilvusResp<InsertResp> insert(T ...t) throws MilvusException {
+    public MilvusResp<InsertResp> insert(Iterator<T> iterator) throws MilvusException {
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         List<JSONObject> jsonObjects=new ArrayList<>();
-        for (T t1 : t) {
+        while (iterator.hasNext()) {
+            T t1 = iterator.next();
             Map<String, Object> propertiesMap = getPropertiesMap(t1);
             JSONObject jsonObject=new JSONObject();
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
@@ -100,7 +98,6 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
                 jsonObject.put(tk,value);
             }
             jsonObjects.add(jsonObject);
-
         }
        return insert(jsonObjects);
     }
