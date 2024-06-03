@@ -187,10 +187,8 @@ public class MilvusConverter {
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
         log.info("-------create schema---------");
         schemaBuilder.createSchema();
-        if (indexParams != null && !indexParams.isEmpty()) {
-            schemaBuilder.createIndex(indexParams);
-            log.info("-------create index---------");
-        }
+        schemaBuilder.createIndex(indexParams);
+        log.info("-------create index---------");
         // 创建分区
         List<String> partitionName = milvusEntity.getPartitionName();
         if (CollectionUtils.isEmpty(partitionName)) {
