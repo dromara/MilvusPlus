@@ -49,7 +49,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         //新增
         MilvusResp<InsertResp> insert = mapper.insertWrapper()
                 .partition("face_001")
-                .insert(faces.toArray(new Face[0]));
+                .insert(faces.iterator());
         log.info("insert--{}", JSONObject.toJSONString(insert));
     }
 
