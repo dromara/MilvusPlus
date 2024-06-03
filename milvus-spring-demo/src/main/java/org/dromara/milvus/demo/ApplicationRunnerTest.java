@@ -1,18 +1,20 @@
 package org.dromara.milvus.demo;
 
 import com.alibaba.fastjson.JSONObject;
-import org.dromara.milvus.demo.model.Face;
-import org.dromara.milvus.demo.test.FaceMilvusMapper;
-import org.dromara.milvus.plus.model.vo.MilvusResp;
-import org.dromara.milvus.plus.model.vo.MilvusResult;
 import io.milvus.v2.service.vector.response.InsertResp;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.milvus.demo.mapper.FaceMilvusMapper;
+import org.dromara.milvus.demo.model.Face;
+import org.dromara.milvus.plus.model.vo.MilvusResp;
+import org.dromara.milvus.plus.model.vo.MilvusResult;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 @Component
 @Slf4j
@@ -24,53 +26,58 @@ public class ApplicationRunnerTest implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args){
-       face();
+    public void run(ApplicationArguments args) {
+        insertFace();
+        getByIdTest();
+        vectorQuery();
+        scalarQuery();
     }
-    private void face(){
-        Face face=new Face();
-        List<Float> vector = new ArrayList<>();
-        for (int i = 0; i < 128; i++) {
-            vector.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
-        }
-        face.setPersonId(1l);
-        face.setFaceVector(vector);
+
+    private void insertFace() {
+        List<Face> faces = LongStream.range(1, 10)
+                .mapToObj(i -> {
+                    Face faceTmp = new Face();
+                    faceTmp.setPersonId(i);
+                    List<Float> vectorTmp = IntStream.range(0, 128)
+                            .mapToObj(j -> (float) (Math.random() * 100))
+                            .collect(Collectors.toList());
+                    faceTmp.setFaceVector(vectorTmp);
+                    faceTmp.setPersonName(i % 2 == 0 ? "张三" + i : "李四" + i);
+                    return faceTmp;
+                })
+                .collect(Collectors.toList());
         //新增
-        List<Face> faces=new ArrayList<>();
-        for (int i = 1; i < 10 ;i++){
-            Face face1=new Face();
-            face1.setPersonId(Long.valueOf(i));
-            List<Float> vector1 = new ArrayList<>();
-            for (int j = 0; j < 128; j++) {
-                vector1.add((float) (Math.random() * 100)); // 这里仅作为示例使用随机数
-            }
-            face1.setFaceVector(vector1);
-            if(i%2==0){
-                face1.setPersonName("张三"+i);
-            }else {
-                face1.setPersonName("李四"+i);
-            }
-            faces.add(face1);
-        }
-        MilvusResp<InsertResp> insert = mapper.insertWrapper().partition("face_001").insert(faces.toArray(new Face[0]));
+        MilvusResp<InsertResp> insert = mapper.insertWrapper()
+                .partition("face_001")
+                .insert(faces.toArray(new Face[0]));
         log.info("insert--{}", JSONObject.toJSONString(insert));
-        //MilvusResp<InsertResp> insert = mapper.insert(faces.toArray(faces.toArray(new Face[0]))); log.info("insert--{}", JSONObject.toJSONString(insert));
+    }
+
+    public void getByIdTest() {
         //id查询
-        MilvusResp<List<MilvusResult<Face>>> query = mapper.getById(9l);
+        MilvusResp<List<MilvusResult<Face>>> query = mapper.getById(9L);
         log.info("query--getById---{}", JSONObject.toJSONString(query));
+    }
+
+    public void vectorQuery() {
         //向量查询
+        List<Float> vector = IntStream.range(0, 128)
+                .mapToObj(i -> (float) (Math.random() * 100))
+                .collect(Collectors.toList());
         MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper()
                 .vector(Face::getFaceVector, vector)
                 .like(Face::getPersonName, "张三")
                 .topK(3)
                 .query();
         log.info("向量查询 query--queryWrapper---{}", JSONObject.toJSONString(query1));
+    }
+
+    public void scalarQuery() {
         //标量查询
         MilvusResp<List<MilvusResult<Face>>> query2 = mapper.queryWrapper()
                 .eq(Face::getPersonId, 2L)
-                .limit(3l)
+                .limit(3L)
                 .query();
         log.info("标量查询   query--queryWrapper---{}", JSONObject.toJSONString(query2));
-
     }
 }
