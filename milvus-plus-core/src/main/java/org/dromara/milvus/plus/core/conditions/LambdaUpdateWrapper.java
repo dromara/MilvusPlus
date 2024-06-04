@@ -9,6 +9,7 @@ import io.milvus.v2.service.vector.request.UpsertReq;
 import io.milvus.v2.service.vector.response.SearchResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
@@ -23,11 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
-     * 构建器内部类，用于构建update请求
-     */
+ * 构建器内部类，用于构建update请求
+ */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaUpdateWrapper<T>,T>{
+public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaUpdateWrapper<T>, T> {
     private ConversionCache conversionCache;
     private Class<T> entityType;
     private String collectionName;
@@ -37,22 +39,24 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
     public LambdaUpdateWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
-        this.conversionCache=conversionCache;
-        this.entityType=entityType;
+        this.conversionCache = conversionCache;
+        this.entityType = entityType;
     }
 
     public LambdaUpdateWrapper() {
 
     }
 
-    public LambdaUpdateWrapper<T> partition(String partitionName){
-        this.partitionName=partitionName;
+    public LambdaUpdateWrapper<T> partition(String partitionName) {
+        this.partitionName = partitionName;
         return this;
     }
-    public LambdaUpdateWrapper<T> partition(FieldFunction<T,?> partitionName){
-        this.partitionName=partitionName.getFieldName(partitionName);
+
+    public LambdaUpdateWrapper<T> partition(FieldFunction<T, ?> partitionName) {
+        this.partitionName = partitionName.getFieldName(partitionName);
         return this;
     }
+
     /**
      * 添加等于条件。
      *
@@ -330,8 +334,10 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
         super.not();
         return this;
     }
+
     /**
      * 构建完整的删除请求
+     *
      * @return 搜索请求对象
      */
     private SearchResp build() {
@@ -339,22 +345,22 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
         if (filterStr != null && !filterStr.isEmpty()) {
             SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                     .collectionName(collectionName).filter(filterStr);
-            SearchResp search = client.search(builder.build());
-            return search;
-        }else {
+            return client.search(builder.build());
+        } else {
             return null;
         }
     }
 
     /**
      * 执行更新
+     *
      * @return 更新响应对象
      */
     public MilvusResp<UpsertResp> update(T t) throws MilvusException {
-        List<JSONObject> jsonObjects=new ArrayList<>();
+        List<JSONObject> jsonObjects = new ArrayList<>();
         SearchResp searchResp = build();
-        List<Object> ids=new ArrayList<>();
-        if(searchResp!=null){
+        List<Object> ids = new ArrayList<>();
+        if (searchResp != null) {
             for (List<SearchResp.SearchResult> searchResult : searchResp.getSearchResults()) {
                 for (SearchResp.SearchResult result : searchResult) {
                     ids.add(result.getId());
@@ -364,50 +370,53 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
         Map<String, Object> propertiesMap = getPropertiesMap(t);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
-        Boolean havePk=false;
-        JSONObject jsonObject=new JSONObject();
+        boolean havePk = false;
+        JSONObject jsonObject = new JSONObject();
         for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             String tk = propertyCache.functionToPropertyMap.get(key);
-            if(pk.equals(tk)){
-                havePk=true;
+            if (pk.equals(tk)) {
+                havePk = true;
             }
-            jsonObject.put(tk,value);
+            jsonObject.put(tk, value);
         }
-        if(!havePk&&ids.size()==0){
-            throw new MilvusException("not find primary key",400);
+        if (!havePk && ids.isEmpty()) {
+            throw new MilvusException("not find primary key", 400);
         }
-        if(havePk){
+        if (havePk) {
             jsonObjects.add(jsonObject);
-        }else {
+        } else {
             for (Object id : ids) {
-                jsonObject.put(pk,id);
+                jsonObject.put(pk, id);
                 jsonObjects.add(jsonObject);
             }
         }
         return update(jsonObjects);
     }
-    private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects){
+
+    private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects) {
         log.info("update data--->{}", JSON.toJSONString(jsonObjects));
         UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
                 .collectionName(collectionName)
                 .data(jsonObjects);
-        if(StringUtils.isNotEmpty(partitionName)){
+        if (StringUtils.isNotEmpty(partitionName)) {
             builder.partitionName(partitionName);
         }
         UpsertReq upsertReq = builder
                 .build();
         UpsertResp upsert = client.upsert(upsertReq);
-        MilvusResp<UpsertResp> resp=new MilvusResp();
+        MilvusResp<UpsertResp> resp = new MilvusResp<>();
         resp.setData(upsert);
         resp.setSuccess(true);
         return resp;
     }
+
     public MilvusResp<UpsertResp> updateById(T... entity) throws MilvusException {
         Iterator<T> iterator = new ArrayIterator<>(entity);
         return updateById(iterator);
     }
+
     public MilvusResp<UpsertResp> updateById(Iterator<T> iterator) throws MilvusException {
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
@@ -434,7 +443,7 @@ public  class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements 
     }
 
     @Override
-    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);

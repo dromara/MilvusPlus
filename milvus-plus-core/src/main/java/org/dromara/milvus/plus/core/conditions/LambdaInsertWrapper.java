@@ -7,6 +7,7 @@ import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.InsertReq;
 import io.milvus.v2.service.vector.response.InsertResp;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.ConversionCache;
@@ -19,6 +20,7 @@ import java.util.*;
 /**
 * 构建器内部类，用于构建insert请求
 */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
 public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaInsertWrapper<T>,T>{
@@ -60,7 +62,7 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
      * @return 搜索请求对象
      */
     public MilvusResp<InsertResp> insert() {
-        if(entity.size()>0){
+        if (!entity.isEmpty()) {
             return insert(Collections.singletonList(entity));
         }
         throw new MilvusException("not insert data",400);
@@ -78,7 +80,7 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
         InsertReq insertReq = builder
                 .build();
         InsertResp insert = client.insert(insertReq);
-        MilvusResp<InsertResp> resp=new MilvusResp();
+        MilvusResp<InsertResp> resp = new MilvusResp<>();
         resp.setData(insert);
         resp.setSuccess(true);
         return resp;
@@ -106,7 +108,7 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
     }
 
     @Override
-    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);

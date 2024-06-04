@@ -11,6 +11,7 @@ import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.converter.SearchRespConverter;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 /**
      * 搜索构建器内部类，用于构建搜索请求
      */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
 public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>,T>{
@@ -58,9 +60,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     }
     public LambdaQueryWrapper<T> partition(String ... partitionName){
-        for (String p : partitionName) {
-            this.partitionNames.add(p);
-        }
+        this.partitionNames.addAll(Arrays.asList(partitionName));
         return this;
     }
     public LambdaQueryWrapper<T> partition(FieldFunction<T,?>... partitionName){
@@ -406,7 +406,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                 .collectionName(collectionName);
 
-        if(annsField!=null&&!annsField.isEmpty()){
+        if (annsField != null && !annsField.isEmpty()) {
             builder.annsField(annsField);
         }
         if (!vectors.isEmpty()) {
@@ -416,49 +416,50 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         if (filterStr != null && !filterStr.isEmpty()) {
             builder.filter(filterStr);
         }
-        if(topK>0){
+        if (topK > 0) {
             builder.topK(topK);
         }
-        if(limit>0){
+        if (limit > 0) {
             builder.limit(limit);
         }
-        if(!CollectionUtils.isEmpty(partitionNames)){
+        if (!CollectionUtils.isEmpty(partitionNames)) {
             builder.partitionNames(partitionNames);
         }
-        if(outputFields!=null&&outputFields.size()>0){
+        if (outputFields != null && !outputFields.isEmpty()) {
             builder.outputFields(outputFields);
-        }else {
+        } else {
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
         }
-        if(searchParams.size()>0){
+        if (!searchParams.isEmpty()) {
             builder.searchParams(searchParams);
         }
-        if(roundDecimal!=-1){
+        if (roundDecimal != -1) {
             builder.roundDecimal(roundDecimal);
         }
         // Set other parameters as needed
         return builder.build();
     }
-    public QueryReq buildQuery(){
+
+    public QueryReq buildQuery() {
         QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
                 .collectionName(collectionName);
         String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {
             builder.filter(filterStr);
         }
-        if(topK>0){
+        if (topK > 0) {
             builder.limit(topK);
         }
-        if(limit>0){
+        if (limit > 0) {
             builder.limit(limit);
         }
-        if(!CollectionUtils.isEmpty(partitionNames)){
+        if (!CollectionUtils.isEmpty(partitionNames)) {
             builder.partitionNames(partitionNames);
         }
-        if(outputFields!=null&&outputFields.size()>0){
+        if (outputFields != null && !outputFields.isEmpty()) {
             builder.outputFields(outputFields);
-        }else {
+        } else {
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
         }
@@ -469,19 +470,17 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      * 执行搜索
      * @return 搜索响应对象
      */
-    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException{
+    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException {
         if (!vectors.isEmpty()) {
             SearchReq searchReq = buildSearch();
-            log.info("build query param-->{}", JSON.toJSONString(searchReq));
+            log.info("build search param-->{}", JSON.toJSONString(searchReq));
             SearchResp search = client.search(searchReq);
-            MilvusResp<List<MilvusResult<T>>> tMilvusResp = SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
-            return tMilvusResp;
-        }else {
+            return SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
+        } else {
             QueryReq queryReq = buildQuery();
             log.info("build query param-->{}", JSON.toJSONString(queryReq));
             QueryResp query = client.query(queryReq);
-            MilvusResp<List<MilvusResult<T>>> listMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
-            return listMilvusResp;
+            return SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
         }
     }
     public MilvusResp<List<MilvusResult<T>>> query(FieldFunction<T,?> ... outputFields) throws MilvusException{
@@ -506,9 +505,8 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         GetReq getReq = builder
                 .build();
         GetResp getResp = client.get(getReq);
-        MilvusResp<List<MilvusResult<T>>> tMilvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
-        return tMilvusResp;
 
+        return SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
     }
     @Override
     public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
