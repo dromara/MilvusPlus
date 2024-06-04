@@ -5,8 +5,11 @@ import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.collection.request.ReleaseCollectionReq;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.annotation.MilvusCollection;
 import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
+import org.dromara.milvus.plus.converter.MilvusConverter;
+import org.dromara.milvus.plus.model.MilvusEntity;
 import org.dromara.milvus.plus.model.MilvusProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -20,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder, ICMService {
+public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder, ICMService, ICAliasService {
 
     @Setter
     protected MilvusProperties properties;
@@ -48,7 +51,7 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
     @Override
     public void close() throws InterruptedException {
         if (client != null) {
-            //释放集合+释放client
+            // 释放集合+释放client
             Set<String> co = CollectionToPrimaryCache.collectionToPrimary.keySet();
             if (!co.isEmpty()) {
                 for (String name : co) {
@@ -77,7 +80,7 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
         return client;
     }
 
-    //获取指定包下实体类
+    // 获取指定包下实体类
     private List<Class<?>> getClass(List<String> packages) {
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         return Optional.ofNullable(packages)
@@ -107,10 +110,15 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
                 .collect(Collectors.toList());
     }
 
-    //缓存 + 是否构建集合
+    // 缓存 + 是否构建集合
     public void performBusinessLogic(List<Class<?>> annotatedClasses) {
         for (Class<?> milvusClass : annotatedClasses) {
-            createCollection(milvusClass);
+            MilvusEntity milvusEntity = MilvusConverter.convert(milvusClass);
+            createCollection(milvusEntity);
+            if (StringUtils.isBlank(milvusEntity.getAlias())) {
+                continue;
+            }
+            createAlias(milvusEntity);
         }
     }
 }

@@ -8,7 +8,7 @@ import org.dromara.milvus.plus.annotation.*;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection") // 指定Milvus集合的名称
+@MilvusCollection(name = "face_collection", alias = "my_face")
 @MilvusPartition(name = {"face_001","face_002"})
 public class Face {
     @MilvusField(
