@@ -22,6 +22,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder {
     // Spring会调用这个方法来初始化client
     @PostConstruct
     public void initialize() {
+        printBanner();
         MilvusProperties milvusProperties = new MilvusProperties();
         BeanUtils.copyProperties(milvusPropertiesConfiguration, milvusProperties);
         super.setProperties(milvusProperties);
@@ -37,7 +38,6 @@ public class MilvusInit extends AbstractMilvusClientBuilder {
 
     @Bean
     public MilvusClientV2 milvusClientV2() {
-        printBanner();
         return client;
     }
 
