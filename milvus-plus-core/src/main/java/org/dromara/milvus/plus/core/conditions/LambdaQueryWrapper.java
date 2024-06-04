@@ -25,51 +25,64 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
-     * 搜索构建器内部类，用于构建搜索请求
-     */
+ * 搜索构建器内部类，用于构建搜索请求
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>,T>{
+public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>, T> {
     private ConversionCache conversionCache;
     private List<String> outputFields;
     private Class<T> entityType;
     private String collectionName;
-    private List<String> partitionNames=new ArrayList<>();
+    private List<String> partitionNames = new ArrayList<>();
 
     private String annsField;
     private int topK;
     private List<List<?>> vectors = new ArrayList<>();
     private long offset;
     private long limit;
-    private int roundDecimal=-1;
+    private int roundDecimal = -1;
     private long guaranteeTimestamp;
     private ConsistencyLevel consistencyLevel;
     private boolean ignoreGrowing;
     private MilvusClientV2 client;
-    private Map<String,Object> searchParams=new HashMap<>(16);
+    private Map<String, Object> searchParams = new HashMap<>(16);
 
     public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
-        this.conversionCache=conversionCache;
-        this.entityType=entityType;
+        this.conversionCache = conversionCache;
+        this.entityType = entityType;
     }
 
     public LambdaQueryWrapper() {
 
     }
-    public LambdaQueryWrapper<T> partition(String ... partitionName){
+
+    public LambdaQueryWrapper<T> partition(String... partitionName) {
         this.partitionNames.addAll(Arrays.asList(partitionName));
         return this;
     }
-    public LambdaQueryWrapper<T> partition(FieldFunction<T,?>... partitionName){
-        for (FieldFunction<T, ?> p : partitionName) {
+
+    public LambdaQueryWrapper<T> partition(FieldFunction<T, ?>... partitionName) {
+        Iterator<FieldFunction<T, ?>> iterator = new ArrayIterator<>(partitionName);
+        while (iterator.hasNext()) {
+            FieldFunction<T, ?> p = iterator.next();
             this.partitionNames.add(p.getFieldName(p));
         }
         return this;
     }
-    public LambdaQueryWrapper<T> searchParams(Map<String,Object> searchParams){
+
+    public LambdaQueryWrapper<T> partition(Collection<FieldFunction<T, ?>> partitionName) {
+        if (CollectionUtils.isEmpty(partitionName)) {
+            throw new RuntimeException("partition collection is empty");
+        }
+        partitionName.forEach(f -> this.partitionNames.add(f.getFieldName(f)));
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> searchParams(Map<String, Object> searchParams) {
         this.searchParams.putAll(searchParams);
         return this;
     }
