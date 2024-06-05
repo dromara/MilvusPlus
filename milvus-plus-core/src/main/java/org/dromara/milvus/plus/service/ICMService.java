@@ -11,6 +11,11 @@ import io.milvus.v2.service.index.request.DescribeIndexReq;
 import io.milvus.v2.service.index.request.DropIndexReq;
 import io.milvus.v2.service.index.response.DescribeIndexResp;
 import io.milvus.v2.service.partition.request.*;
+import io.milvus.v2.service.utility.request.AlterAliasReq;
+import io.milvus.v2.service.utility.request.CreateAliasReq;
+import io.milvus.v2.service.utility.request.DropAliasReq;
+import io.milvus.v2.service.utility.request.ListAliasesReq;
+import io.milvus.v2.service.utility.response.ListAliasResp;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.builder.CollectionSchemaBuilder;
 import org.dromara.milvus.plus.converter.MilvusConverter;
@@ -423,5 +428,52 @@ public interface ICMService {
         releasePartitions(collectionName, Collections.singletonList(partitionName));
     }
 
+    /**
+     * create aliases
+     */
+    default void createAlias(MilvusEntity milvusEntity) {
+        MilvusClientV2 client = getClient();
+        for (String alias : milvusEntity.getAlias()) {
+            CreateAliasReq createAliasReq = CreateAliasReq.builder().alias(alias)
+                    .collectionName(milvusEntity.getCollectionName()).build();
+            client.createAlias(createAliasReq);
+        }
+    }
 
+    default void createAlias(Class<?> milvusClass) {
+        MilvusEntity milvusEntity = MilvusConverter.convert(milvusClass);
+        createAlias(milvusEntity);
+    }
+
+    /**
+     * drop aliases
+     */
+    default void dropAlias(MilvusEntity milvusEntity) {
+        MilvusClientV2 client = getClient();
+        for (String alias : milvusEntity.getAlias()) {
+            client.dropAlias(DropAliasReq.builder().alias(alias).build());
+        }
+    }
+
+    /**
+     * alter aliases
+     */
+    default void alterAlias(MilvusEntity milvusEntity) {
+        MilvusClientV2 client = getClient();
+        for (String alias : milvusEntity.getAlias()) {
+            client.alterAlias(AlterAliasReq.builder()
+                    .collectionName(milvusEntity.getCollectionName())
+                    .alias(alias).build());
+        }
+    }
+
+    /**
+     * list aliases
+     *
+     * @return List<String> alias names
+     */
+    default ListAliasResp listAliases(MilvusEntity milvusEntity) {
+        MilvusClientV2 client = getClient();
+        return client.listAliases(ListAliasesReq.builder().collectionName(milvusEntity.getCollectionName()).build());
+    }
 }

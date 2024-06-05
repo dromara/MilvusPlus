@@ -17,7 +17,7 @@ public @interface MilvusCollection {
     String name();
 
     /**
-     * 集合别名
+     *
      */
-    String alias() default "";
+    String[] alias() default {};
 }

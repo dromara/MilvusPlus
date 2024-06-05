@@ -8,8 +8,8 @@ import org.dromara.milvus.plus.annotation.*;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection", alias = "my_face")
-@MilvusPartition(name = {"face_001","face_002"})
+@MilvusCollection(name = "face_collection", alias = {"alias_face"})
+@MilvusPartition(name = {"face_001", "face_002"})
 public class Face {
     @MilvusField(
             name = "person_id", // 字段名称

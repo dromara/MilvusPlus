@@ -39,6 +39,7 @@ public class MilvusConverter {
      *
      * @param entityClass 需要转换的Java实体类的Class对象。
      * @return 转换后的MilvusEntity对象，包含了Milvus表的结构信息和索引参数。
+     *
      * @throws IllegalArgumentException 如果实体类没有@MilvusCollection注解，则抛出异常。
      */
     public static MilvusEntity convert(Class<?> entityClass) {
@@ -65,8 +66,8 @@ public class MilvusConverter {
         String collectionName = collectionAnnotation.name();
         milvus.setCollectionName(collectionName);
         // 集合别名
-        if (!StringUtils.isBlank(collectionAnnotation.alias())) {
-            milvus.setAlias(collectionAnnotation.alias());
+        if (collectionAnnotation.alias().length > 0) {
+            milvus.setAlias(Arrays.asList(collectionAnnotation.alias()));
         }
         // 初始化字段列表和索引参数列表
         List<AddFieldReq> milvusFields = new ArrayList<>();

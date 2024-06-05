@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class MilvusEntity {
     private String collectionName;
-    private String alias;
+    private List<String> alias;
     private List<IndexParam> indexParams;
     private List<AddFieldReq> milvusFields;
     private List<String> partitionName;

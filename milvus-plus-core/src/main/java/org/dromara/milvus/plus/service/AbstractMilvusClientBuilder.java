@@ -3,6 +3,7 @@ package org.dromara.milvus.plus.service;
 import io.milvus.v2.client.ConnectConfig;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.collection.request.ReleaseCollectionReq;
+import io.milvus.v2.service.utility.response.ListAliasResp;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder, ICMService, ICAliasService {
+public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder, ICMService {
 
     @Setter
     protected MilvusProperties properties;
@@ -115,10 +116,25 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
         for (Class<?> milvusClass : annotatedClasses) {
             MilvusEntity milvusEntity = MilvusConverter.convert(milvusClass);
             createCollection(milvusEntity);
-            if (StringUtils.isBlank(milvusEntity.getAlias())) {
-                continue;
-            }
-            createAlias(milvusEntity);
+            aliasProcess(milvusEntity);
         }
+    }
+
+    private void aliasProcess(MilvusEntity milvusEntity) {
+        if (StringUtils.isBlank(milvusEntity.getCollectionName()) || milvusEntity.getAlias().isEmpty()) {
+            return;
+        }
+        ListAliasResp listAliasResp = listAliases(milvusEntity);
+        Optional.ofNullable(listAliasResp)
+                .ifPresent(aliasInfo -> {
+                    // 获取不存在的别名
+                    List<String> aliasList = milvusEntity.getAlias().stream()
+                            .filter(e -> !aliasInfo.getAlias().contains(e))
+                            .filter(StringUtils::isNotBlank)
+                            .collect(Collectors.toList());
+                    log.info("processing alias: {}", aliasList);
+                    milvusEntity.setAlias(aliasList);
+                    createAlias(milvusEntity);
+                });
     }
 }
