@@ -1,4 +1,4 @@
-package org.dromara.milvus.plus.entity;
+package org.dromara.milvus.plus.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,9 +10,9 @@ import java.util.List;
  * @author xgc
  **/
 @Data
-@ConfigurationProperties(prefix = "milvus")
 @Component
-public class MilvusProperties {
+@ConfigurationProperties(prefix = "milvus")
+public class MilvusPropertiesConfiguration {
     private boolean enable;
     private String uri;
     private String dbName;
