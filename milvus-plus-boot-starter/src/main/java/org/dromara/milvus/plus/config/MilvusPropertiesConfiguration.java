@@ -21,4 +21,5 @@ public class MilvusPropertiesConfiguration {
     private String token;
     private List<String> packages;
     private boolean openLog;
+    private String logLevel;
 }

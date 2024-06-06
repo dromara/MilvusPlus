@@ -24,7 +24,11 @@ public class MilvusInit extends AbstractMilvusClientBuilder {
     @PostConstruct
     public void initialize() {
         printBanner();
-        LogLevelController.setLoggingEnabledForPackage("org.dromara.milvus.plus", milvusPropertiesConfiguration.isOpenLog());
+
+        LogLevelController.setLoggingEnabledForPackage("org.dromara.milvus.plus",
+                milvusPropertiesConfiguration.isOpenLog(),
+                milvusPropertiesConfiguration.getLogLevel());
+
         MilvusProperties milvusProperties = new MilvusProperties();
         BeanUtils.copyProperties(milvusPropertiesConfiguration, milvusProperties);
         super.setProperties(milvusProperties);
