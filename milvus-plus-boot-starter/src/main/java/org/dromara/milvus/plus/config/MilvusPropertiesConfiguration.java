@@ -20,4 +20,5 @@ public class MilvusPropertiesConfiguration {
     private String password;
     private String token;
     private List<String> packages;
+    private boolean openLog;
 }

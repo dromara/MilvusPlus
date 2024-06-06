@@ -2,6 +2,7 @@ package org.dromara.milvus.plus.service;
 
 import io.milvus.v2.client.MilvusClientV2;
 import org.dromara.milvus.plus.config.MilvusPropertiesConfiguration;
+import org.dromara.milvus.plus.log.LogLevelController;
 import org.dromara.milvus.plus.model.MilvusProperties;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder {
     @PostConstruct
     public void initialize() {
         printBanner();
+        LogLevelController.setLoggingEnabledForPackage("org.dromara.milvus.plus", milvusPropertiesConfiguration.isOpenLog());
         MilvusProperties milvusProperties = new MilvusProperties();
         BeanUtils.copyProperties(milvusPropertiesConfiguration, milvusProperties);
         super.setProperties(milvusProperties);
