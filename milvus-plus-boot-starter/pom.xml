@@ -30,6 +30,18 @@
             <version>${mica-auto.vaersion}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>${javapoet.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto.service.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
 
     </dependencies>
 

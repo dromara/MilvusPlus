@@ -1,16 +1,17 @@
 package org.dromara.milvus.plus.core.conditions;
 
 import com.alibaba.fastjson.JSON;
-import org.dromara.milvus.plus.cache.ConversionCache;
-import org.dromara.milvus.plus.core.FieldFunction;
-import org.dromara.milvus.plus.model.vo.MilvusResp;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.DeleteReq;
 import io.milvus.v2.service.vector.response.DeleteResp;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.milvus.plus.cache.ConversionCache;
+import org.dromara.milvus.plus.core.FieldFunction;
+import org.dromara.milvus.plus.model.vo.MilvusResp;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 /**
      * 构建器内部类，用于构建remove请求
      */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
 public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaDeleteWrapper<T>,T>{
@@ -352,7 +354,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         if(StringUtils.isNotEmpty(partitionName)){
             builder.partitionName(partitionName);
         }
-        if(ids.size()>0){
+        if (!ids.isEmpty()) {
             builder.ids(this.ids);
         }
         // Set other parameters as needed
@@ -367,18 +369,19 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         DeleteReq deleteReq = build();
         log.info("build remove param-->{}", JSON.toJSONString(deleteReq));
         DeleteResp delete = client.delete(deleteReq);
-        MilvusResp<DeleteResp> resp=new MilvusResp();
+        MilvusResp<DeleteResp> resp = new MilvusResp<>();
         resp.setData(delete);
         resp.setSuccess(true);
         return resp;
     }
-    public MilvusResp<DeleteResp> removeById(Serializable ... ids) throws MilvusException {
+
+    public MilvusResp<DeleteResp> removeById(Serializable... ids) throws MilvusException {
         this.id(ids);
         return remove();
     }
 
     @Override
-    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class entityType) {
+    public void init(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         setClient(client);
         setCollectionName(collectionName);
         setEntityType(entityType);
