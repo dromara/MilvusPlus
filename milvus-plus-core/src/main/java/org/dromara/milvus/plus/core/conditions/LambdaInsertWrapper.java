@@ -10,10 +10,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
 import org.dromara.milvus.plus.cache.ConversionCache;
+import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
+import org.dromara.milvus.plus.util.IdWorkerUtils;
 
 import java.util.*;
 
@@ -90,7 +93,9 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
         return insert(iterator);
     }
     public MilvusResp<InsertResp> insert(Iterator<T> iterator) throws MilvusException {
+        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
+        String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
         List<JSONObject> jsonObjects=new ArrayList<>();
         while (iterator.hasNext()) {
             T t1 = iterator.next();
@@ -101,6 +106,9 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
                 Object value = entry.getValue();
                 String tk = propertyCache.functionToPropertyMap.get(key);
                 jsonObject.put(tk,value);
+            }
+            if(conversionCache.isAutoID()){
+                jsonObject.put(pk, IdWorkerUtils.nextId());
             }
             jsonObjects.add(jsonObject);
         }

@@ -121,7 +121,7 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
     }
 
     private void aliasProcess(MilvusEntity milvusEntity) {
-        if (StringUtils.isBlank(milvusEntity.getCollectionName()) || milvusEntity.getAlias().isEmpty()) {
+        if (StringUtils.isBlank(milvusEntity.getCollectionName()) || milvusEntity.getAlias()==null|| milvusEntity.getAlias().isEmpty()) {
             return;
         }
         ListAliasResp listAliasResp = listAliases(milvusEntity);

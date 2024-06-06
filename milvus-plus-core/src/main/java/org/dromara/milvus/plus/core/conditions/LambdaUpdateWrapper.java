@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
-import io.milvus.v2.service.vector.request.SearchReq;
+import io.milvus.v2.service.vector.request.QueryReq;
 import io.milvus.v2.service.vector.request.UpsertReq;
-import io.milvus.v2.service.vector.response.SearchResp;
+import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -340,12 +340,12 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
      *
      * @return 搜索请求对象
      */
-    private SearchResp build() {
+    private QueryResp build() {
         String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {
-            SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
+            QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
                     .collectionName(collectionName).filter(filterStr);
-            return client.search(builder.build());
+            return client.query(builder.build());
         } else {
             return null;
         }
@@ -356,43 +356,74 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
      *
      * @return 更新响应对象
      */
-    public MilvusResp<UpsertResp> update(T t) throws MilvusException {
-        List<JSONObject> jsonObjects = new ArrayList<>();
-        SearchResp searchResp = build();
-        List<Object> ids = new ArrayList<>();
-        if (searchResp != null) {
-            for (List<SearchResp.SearchResult> searchResult : searchResp.getSearchResults()) {
-                for (SearchResp.SearchResult result : searchResult) {
-                    ids.add(result.getId());
+    public MilvusResp<UpsertResp> update(T entity) throws MilvusException {
+        // 获取主键字段
+        String primaryKeyField = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
+        // 将实体转换为属性映射
+        Map<String, Object> propertiesMap = getPropertiesMap(entity);
+        PropertyCache propertyCache = conversionCache.getPropertyCache();
+        // 初始化主键标识和主键值
+        boolean hasPrimaryKey = false;
+        Object  primaryKeyValue = null;
+
+        // 准备更新的数据列表
+        List<JSONObject> updateDataList = new ArrayList<>();
+
+        // 构建单个更新对象
+        JSONObject updateObject = new JSONObject();
+        for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
+            String field = entry.getKey();
+            Object value = entry.getValue();
+            String tableNameColumn = propertyCache.functionToPropertyMap.get(field);
+            // 检查是否为主键字段
+            if (primaryKeyField.equals(tableNameColumn)) {
+                hasPrimaryKey = true;
+                primaryKeyValue = value;
+            }
+            // 添加到更新对象
+            updateObject.put(tableNameColumn, value);
+        }
+
+        // 检查是否需要构建查询条件
+        boolean needBuildQuery = !hasPrimaryKey;
+        if (hasPrimaryKey) {
+            for (Map.Entry<String, String> property : propertyCache.functionToPropertyMap.entrySet()) {
+                if (updateObject.get(property.getValue()) == null) {
+                    needBuildQuery = true;
+                    eq(primaryKeyField,primaryKeyValue);
+                    break;
                 }
             }
         }
-        Map<String, Object> propertiesMap = getPropertiesMap(t);
-        PropertyCache propertyCache = conversionCache.getPropertyCache();
-        String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
-        boolean havePk = false;
-        JSONObject jsonObject = new JSONObject();
-        for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            String tk = propertyCache.functionToPropertyMap.get(key);
-            if (pk.equals(tk)) {
-                havePk = true;
+
+        // 如果需要构建查询条件，则执行查询并准备更新数据
+        if (needBuildQuery) {
+            QueryResp queryResp = build();
+            if (queryResp != null) {
+                for (QueryResp.QueryResult result : queryResp.getQueryResults()) {
+                    Map<String, Object> existingEntity = result.getEntity();
+                    JSONObject existingData = new JSONObject();
+
+                    for (Map.Entry<String, Object> existingEntry : existingEntity.entrySet()) {
+                        String existingField = existingEntry.getKey();
+                        Object existingValue = existingEntry.getValue();
+                        Object updateValue = updateObject.get(existingField);
+                        existingData.put(existingField, updateValue != null ? updateValue : existingValue);
+                    }
+
+                    updateDataList.add(existingData);
+                }
             }
-            jsonObject.put(tk, value);
-        }
-        if (!havePk && ids.isEmpty()) {
-            throw new MilvusException("not find primary key", 400);
-        }
-        if (havePk) {
-            jsonObjects.add(jsonObject);
         } else {
-            for (Object id : ids) {
-                jsonObject.put(pk, id);
-                jsonObjects.add(jsonObject);
-            }
+            updateDataList.add(updateObject);
         }
-        return update(jsonObjects);
+
+        // 检查是否有数据需要更新
+        if (updateDataList.isEmpty()) {
+            return new MilvusResp<>();
+        }
+        // 执行更新操作
+        return update(updateDataList);
     }
 
     private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects) {
