@@ -470,7 +470,38 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
             }
             jsonObjects.add(jsonObject);
         }
-        return update(jsonObjects);
+        // 准备更新的数据列表
+        List<JSONObject> updateDataList = new ArrayList<>();
+        for (JSONObject updateObject : jsonObjects) {
+            boolean isBuild=false;
+            for (Map.Entry<String, String> property : propertyCache.functionToPropertyMap.entrySet()) {
+                if (updateObject.get(property.getValue()) == null) {
+                    //缺少数据需要
+                    isBuild=true;
+                }
+            }
+            if(isBuild){
+                QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
+                        .collectionName(collectionName).filter(pk+" == "+updateObject.get(pk));
+                QueryResp queryResp= client.query(builder.build());
+                if (queryResp != null) {
+                    for (QueryResp.QueryResult result : queryResp.getQueryResults()) {
+                        Map<String, Object> existingEntity = result.getEntity();
+                        JSONObject existingData = new JSONObject();
+                        for (Map.Entry<String, Object> existingEntry : existingEntity.entrySet()) {
+                            String existingField = existingEntry.getKey();
+                            Object existingValue = existingEntry.getValue();
+                            Object updateValue = updateObject.get(existingField);
+                            existingData.put(existingField, updateValue != null ? updateValue : existingValue);
+                        }
+                        updateDataList.add(existingData);
+                    }
+                }
+            }else {
+                updateDataList.add(updateObject);
+            }
+        }
+        return update(updateDataList);
     }
 
     @Override
