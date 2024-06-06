@@ -73,6 +73,10 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
             log.warn("initialize handler over!");
         }
         List<Class<?>> classes = getClass(properties.getPackages());
+        if (classes.isEmpty()) {
+            log.warn("no any collections have been initialized, see if the [packages] parameter is configured correctly. :( !");
+            return;
+        }
         performBusinessLogic(classes);
     }
 
