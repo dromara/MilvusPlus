@@ -65,6 +65,10 @@ milvus:
   uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
   token: x'x'x'x
   enable: true
+  open-log: true （默认 false 不打印）
+  db-name: (可选)
+  username: (可选)
+  password: (可选)
   packages:
     - com.example.entity
 ```
