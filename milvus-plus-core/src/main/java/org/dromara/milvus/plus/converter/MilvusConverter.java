@@ -48,6 +48,7 @@ public class MilvusConverter {
             return cache.getMilvusEntity();
         }
         MilvusEntity milvus = new MilvusEntity();
+        boolean autoID=false;
         // 集合名称
         MilvusCollection collectionAnnotation = entityClass.getAnnotation(MilvusCollection.class);
         if (Objects.isNull(collectionAnnotation)) {
@@ -97,7 +98,8 @@ public class MilvusConverter {
                     .isPrimaryKey(fieldAnnotation.isPrimaryKey())
                     .isPartitionKey(fieldAnnotation.isPartitionKey())
                     .elementType(fieldAnnotation.elementType())
-                    .autoID(fieldAnnotation.autoID());
+                    .autoID(false);
+            autoID=autoID?autoID:fieldAnnotation.autoID();
             // 描述
             Optional.of(fieldAnnotation.description())
                     .filter(StringUtils::isNotEmpty).ifPresent(builder::description);
@@ -124,6 +126,7 @@ public class MilvusConverter {
         conversionCache.setMilvusEntity(milvus);
         conversionCache.setCollectionName(collectionName);
         conversionCache.setPropertyCache(propertyCache);
+        conversionCache.setAutoID(autoID);
         MilvusCache.milvusCache.put(entityClass.getName(), conversionCache);
 
         return milvus;
