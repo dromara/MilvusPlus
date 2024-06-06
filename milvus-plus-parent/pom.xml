@@ -42,6 +42,8 @@
             <spring-boot.version>2.7.13</spring-boot.version>
             <mica-auto.vaersion>2.3.2</mica-auto.vaersion>
             <java.version>1.8</java.version>
+            <javapoet.version>1.13.0</javapoet.version>
+            <auto.service.version>1.0</auto.service.version>
             <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
         </properties>
         <dependencies>
