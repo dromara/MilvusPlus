@@ -48,11 +48,12 @@ public class MilvusConverter {
             return cache.getMilvusEntity();
         }
         MilvusEntity milvus = new MilvusEntity();
-        // 获取实体类上的@MilvusCollection注解，校验其存在性
+        // 集合名称
         MilvusCollection collectionAnnotation = entityClass.getAnnotation(MilvusCollection.class);
         if (Objects.isNull(collectionAnnotation)) {
             throw new IllegalArgumentException("Entity must be annotated with @MilvusCollection");
         }
+        // 分区信息
         MilvusPartition milvusPartition = entityClass.getAnnotation(MilvusPartition.class);
         if (Objects.nonNull(milvusPartition)) {
             String[] name = milvusPartition.name();
@@ -60,9 +61,14 @@ public class MilvusConverter {
         } else {
             milvus.setPartitionName(Lists.newArrayList());
         }
-        // 从注解中读取集合（表）名称
+
+        // 集合名称
         String collectionName = collectionAnnotation.name();
         milvus.setCollectionName(collectionName);
+        // 集合别名
+        if (collectionAnnotation.alias().length > 0) {
+            milvus.setAlias(Arrays.asList(collectionAnnotation.alias()));
+        }
         // 初始化字段列表和索引参数列表
         List<AddFieldReq> milvusFields = new ArrayList<>();
         List<IndexParam> indexParams = new ArrayList<>();
@@ -175,11 +181,12 @@ public class MilvusConverter {
         }
         return original.substring(0, 1).toUpperCase() + original.substring(1);
     }
-    public static void create(MilvusEntity milvusEntity, MilvusClientV2 client){
-       List<IndexParam> indexParams = milvusEntity.getIndexParams();
-       if(indexParams==null||indexParams.isEmpty()){
-           throw new IllegalArgumentException("the index does not exist, please define the index");
-       }
+
+    public static void create(MilvusEntity milvusEntity, MilvusClientV2 client) {
+        List<IndexParam> indexParams = milvusEntity.getIndexParams();
+        if (indexParams == null || indexParams.isEmpty()) {
+            throw new IllegalArgumentException("the index does not exist, please define the index");
+        }
         // 创建新集合
         CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
                 milvusEntity.getCollectionName(), client

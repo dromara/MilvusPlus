@@ -15,4 +15,9 @@ public @interface MilvusCollection {
      * 集合的名称
      */
     String name();
+
+    /**
+     *
+     */
+    String[] alias() default {};
 }
