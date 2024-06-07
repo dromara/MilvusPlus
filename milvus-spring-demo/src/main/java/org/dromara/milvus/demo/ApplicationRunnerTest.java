@@ -64,7 +64,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         List<Float> vector = IntStream.range(0, 128)
                 .mapToObj(i -> (float) (Math.random() * 100))
                 .collect(Collectors.toList());
-        MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper()
+        MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper().alias("alias_face")
                 .vector(Face::getFaceVector, vector)
                 .like(Face::getPersonName, "张三")
                 .topK(3)
