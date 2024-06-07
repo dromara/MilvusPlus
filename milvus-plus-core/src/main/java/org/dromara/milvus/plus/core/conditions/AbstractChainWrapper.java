@@ -1,10 +1,12 @@
 package org.dromara.milvus.plus.core.conditions;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class AbstractChainWrapper<T> extends ConditionBuilder<T>{
     protected static class ArrayIterator<T> implements Iterator<T> {
