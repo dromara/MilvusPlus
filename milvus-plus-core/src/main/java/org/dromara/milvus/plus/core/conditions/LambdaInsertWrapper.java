@@ -9,6 +9,7 @@ import io.milvus.v2.service.vector.response.InsertResp;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
 import org.dromara.milvus.plus.cache.ConversionCache;
@@ -104,6 +105,11 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
+                if (!ClassUtils.isPrimitiveOrWrapper(value.getClass()) && !(value instanceof String)&& !(value instanceof Collection)) {
+                    //对象类型转成JSONObject
+                    String jv = JSONObject.toJSONString(value);
+                    value = JSONObject.parseObject(jv);
+                }
                 String tk = propertyCache.functionToPropertyMap.get(key);
                 jsonObject.put(tk,value);
             }
