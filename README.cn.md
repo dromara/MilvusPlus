@@ -4,7 +4,9 @@
 
 ## 项目简介
 
-![MilvusPlus](./logo/MilvusPlus.jpg)
+<div style="display: inline-block; border: 4px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin: 10px; padding: 10px;">
+  <img src="./logo/milvus.png" alt="MilvusPlus" style="border-radius: 10px;" />
+</div>
 
 > 🔥🔥🔥[MilvusPlus](https://gitee.com/dromara/MilvusPlus)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
 
