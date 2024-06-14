@@ -75,9 +75,9 @@ public class MilvusConverter {
         List<IndexParam> indexParams = new ArrayList<>();
         // 用于存储属性与函数映射的缓存
         PropertyCache propertyCache = new PropertyCache();
-
+        List<Field> fields = getAllFieldsFromClass(entityClass);
         // 遍历实体类的所有字段，读取@MilvusField注解信息
-        for (Field field : entityClass.getDeclaredFields()) {
+        for (Field field : fields) {
             MilvusField fieldAnnotation = field.getAnnotation(MilvusField.class);
             if (Objects.isNull(fieldAnnotation)) {
                 continue;
@@ -131,7 +131,24 @@ public class MilvusConverter {
 
         return milvus;
     }
-
+    /**
+     * 递归获取类及其所有父类的所有字段。
+     *
+     * @param clazz 要检查的类。
+     * @return 包含所有字段的列表。
+     */
+    public static List<Field> getAllFieldsFromClass(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        // 递归地获取字段直到Object类
+        while (clazz != null && clazz != Object.class) {
+            // 获取当前类的所有字段并添加到列表中
+            fields.addAll(Stream.of(clazz.getDeclaredFields())
+                    .peek(field -> field.setAccessible(true)) // 确保可以访问私有字段
+                    .collect(Collectors.toList()));
+            clazz = clazz.getSuperclass(); // 移动到父类
+        }
+        return fields;
+    }
 
     /**
      * 根据字段信息和字段名称创建索引参数对象。
