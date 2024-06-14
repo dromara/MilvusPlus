@@ -8,14 +8,15 @@ import org.dromara.milvus.plus.annotation.*;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection", alias = {"alias_face"})
+@MilvusCollection(name = "face_collection")
 @MilvusPartition(name = {"face_001", "face_002"})
+@GenerateMilvusMapper
 public class Face {
     @MilvusField(
             name = "person_id", // 字段名称
             dataType = DataType.Int64, // 数据类型为64位整数
             isPrimaryKey = true, // 标记为主键
-            autoID = false // 假设这个ID是自动生成的
+            autoID = true // 假设这个ID是自动生成的
     )
     private Long personId; // 人员的唯一标识符
 
@@ -24,6 +25,12 @@ public class Face {
             dataType = DataType.VarChar
     )
     private String personName; // 人员姓名
+
+    @MilvusField(
+            name = "person_info",
+            dataType = DataType.JSON
+    )
+    private Person person;
 
     @MilvusField(
             name = "face_vector", // 字段名称

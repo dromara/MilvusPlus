@@ -1,10 +1,15 @@
 package org.dromara.milvus.demo;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import io.milvus.v2.service.vector.response.InsertResp;
+import io.milvus.v2.service.vector.response.UpsertResp;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.milvus.demo.mapper.FaceMilvusMapper;
 import org.dromara.milvus.demo.model.Face;
+import org.dromara.milvus.demo.model.FaceConstants;
+import org.dromara.milvus.demo.model.FaceMilvusMapper;
+import org.dromara.milvus.demo.model.Person;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
 import org.springframework.boot.ApplicationArguments;
@@ -27,22 +32,28 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        insertFace();
-        getByIdTest();
-        vectorQuery();
+ //       insertFace();
+//        getByIdTest();
+//        vectorQuery();
         scalarQuery();
+  //        update();
     }
 
     private void insertFace() {
         List<Face> faces = LongStream.range(1, 10)
                 .mapToObj(i -> {
                     Face faceTmp = new Face();
-                    faceTmp.setPersonId(i);
+                   // faceTmp.setPersonId(i);
                     List<Float> vectorTmp = IntStream.range(0, 128)
                             .mapToObj(j -> (float) (Math.random() * 100))
                             .collect(Collectors.toList());
                     faceTmp.setFaceVector(vectorTmp);
                     faceTmp.setPersonName(i % 2 == 0 ? "张三" + i : "李四" + i);
+                    Person person=new Person();
+                    person.setName(faceTmp.getPersonName());
+                    person.setAge((int) (i*100));
+                    person.setImages(Lists.newArrayList("https://baidu.com"));
+                    faceTmp.setPerson(person);
                     return faceTmp;
                 })
                 .collect(Collectors.toList());
@@ -64,7 +75,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         List<Float> vector = IntStream.range(0, 128)
                 .mapToObj(i -> (float) (Math.random() * 100))
                 .collect(Collectors.toList());
-        MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper().alias("alias_face")
+        MilvusResp<List<MilvusResult<Face>>> query1 = mapper.queryWrapper()
                 .vector(Face::getFaceVector, vector)
                 .like(Face::getPersonName, "张三")
                 .topK(3)
@@ -75,9 +86,20 @@ public class ApplicationRunnerTest implements ApplicationRunner {
     public void scalarQuery() {
         //标量查询
         MilvusResp<List<MilvusResult<Face>>> query2 = mapper.queryWrapper()
-                .eq(Face::getPersonId, 2L)
+               // .eq(Face::getPersonId, 2L)
+                .jsonContains("person_info[\"images\"]","https://baidu.com")
                 .limit(3L)
                 .query();
         log.info("标量查询   query--queryWrapper---{}", JSONObject.toJSONString(query2));
+    }
+    public void update(){
+        Face faceTmp = new Face();
+        List<Float> vectorTmp = IntStream.range(0, 128)
+                .mapToObj(j -> (float) (Math.random() * 100))
+                .collect(Collectors.toList());
+        faceTmp.setFaceVector(vectorTmp);
+        faceTmp.setPersonName("赵六");
+        MilvusResp<UpsertResp> resp = mapper.updateWrapper().eq(FaceConstants.PERSON_NAME,"张三").update(faceTmp);
+        System.out.printf("===="+ JSON.toJSONString(resp));
     }
 }
