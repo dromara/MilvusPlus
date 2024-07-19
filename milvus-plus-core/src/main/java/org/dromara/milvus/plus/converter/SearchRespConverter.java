@@ -1,6 +1,8 @@
 package org.dromara.milvus.plus.converter;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
@@ -42,14 +44,19 @@ public class SearchRespConverter {
                     Map<String, Object> entityMap = new HashMap<>();
                     for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
                         String key = propertyCache.findKeyByValue(entry.getKey());
-                        entityMap.put(key, entry.getValue());
+                        Object value = entry.getValue();
+                        if (value instanceof JsonObject) {
+                            JSONObject v = JSONObject.parseObject(value.toString());
+                            entityMap.put(key,v);
+                        } else {
+                            entityMap.put(key,value);
+                        }
                     }
                     // 将转换后的Map转换为Java实体类T
                     T entity = objectMapper.convertValue(entityMap, entityType);
-
                     MilvusResult<T> tMilvusResult = new MilvusResult<>();
                     tMilvusResult.setId(searchResult.getId());
-                    tMilvusResult.setDistance(searchResult.getDistance());
+                    tMilvusResult.setDistance(searchResult.getScore());
                     tMilvusResult.setEntity(entity);
                     return tMilvusResult;
                 })
@@ -107,7 +114,13 @@ public class SearchRespConverter {
             // 通过属性缓存转换键名，以适应Java实体的字段命名
             for (Map.Entry<String, Object> entry : entityMap.entrySet()) {
                 String key = propertyCache.findKeyByValue(entry.getKey());
-                entityMap2.put(key,entry.getValue());
+                Object value = entry.getValue();
+                if (value instanceof JsonObject) {
+                    JSONObject v = JSONObject.parseObject(value.toString());
+                    entityMap2.put(key,v);
+                } else {
+                    entityMap2.put(key,value);
+                }
             }
             // 使用转换工具将映射后的Map转换为指定类型的实体
             T entity =  objectMapper.convertValue(entityMap2, entityType);

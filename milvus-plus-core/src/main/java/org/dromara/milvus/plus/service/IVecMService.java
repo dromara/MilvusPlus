@@ -1,10 +1,11 @@
 package org.dromara.milvus.plus.service;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.service.vector.request.*;
+import io.milvus.v2.service.vector.request.data.BaseVector;
 import io.milvus.v2.service.vector.response.*;
 
 import java.util.Collections;
@@ -110,7 +111,7 @@ public interface IVecMService {
      */
     default InsertResp insert(
             String collectionName,
-            List<JSONObject> data,
+            List<JsonObject> data,
             String partitionName
     ) throws MilvusException {
         MilvusClientV2 client = getClient();
@@ -129,7 +130,7 @@ public interface IVecMService {
      * @return InsertResp对象，包含插入实体的数量信息
      * @throws MilvusException 如果操作过程中发生错误
      */
-    default InsertResp insert(String collectionName, JSONObject data) throws MilvusException {
+    default InsertResp insert(String collectionName, JsonObject data) throws MilvusException {
         return insert(collectionName, Collections.singletonList(data), null);
     }
 
@@ -219,7 +220,7 @@ public interface IVecMService {
             int topK,
             String filter,
             List<String> outputFields,
-            List<Object> data,
+            List<BaseVector> data,
             long offset,
             long limit,
             int roundDecimal,
@@ -258,7 +259,7 @@ public interface IVecMService {
      * @return 搜索结果对象列表
      * @throws MilvusException 如果操作过程中发生错误
      */
-    default SearchResp search(String collectionName, List<Object> data, int topK) throws MilvusException {
+    default SearchResp search(String collectionName, List<BaseVector> data, int topK) throws MilvusException {
         return search(collectionName, Collections.emptyList(), null, topK, "", Collections.emptyList(), data, 0, 0, -1, Collections.emptyMap(), 0, 0, ConsistencyLevel.BOUNDED, false);
     }
 
@@ -273,7 +274,7 @@ public interface IVecMService {
     default UpsertResp upsert(
             String collectionName,
             String partitionName,
-            List<JSONObject> data) throws MilvusException {
+            List<JsonObject> data) throws MilvusException {
         MilvusClientV2 client = getClient();
         UpsertReq upsertReq = UpsertReq.builder()
                 .collectionName(collectionName)
@@ -290,7 +291,7 @@ public interface IVecMService {
      * @return UpsertResp对象，包含插入或更新实体的数量信息
      * @throws MilvusException 如果操作过程中发生错误
      */
-    default UpsertResp upsert(String collectionName, JSONObject data) throws MilvusException {
+    default UpsertResp upsert(String collectionName, JsonObject data) throws MilvusException {
         return upsert(collectionName, null, Collections.singletonList(data));
     }
 

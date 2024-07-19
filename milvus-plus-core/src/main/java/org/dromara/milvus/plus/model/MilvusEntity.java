@@ -1,5 +1,6 @@
 package org.dromara.milvus.plus.model;
 
+import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
 import lombok.Data;
@@ -16,5 +17,5 @@ public class MilvusEntity {
     private List<IndexParam> indexParams;
     private List<AddFieldReq> milvusFields;
     private List<String> partitionName;
-
+    private ConsistencyLevel consistencyLevel;
 }

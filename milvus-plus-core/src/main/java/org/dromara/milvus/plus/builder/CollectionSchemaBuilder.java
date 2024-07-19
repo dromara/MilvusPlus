@@ -2,6 +2,7 @@ package org.dromara.milvus.plus.builder;
 
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
+import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
 import io.milvus.v2.service.collection.request.CreateCollectionReq;
@@ -14,6 +15,7 @@ public class CollectionSchemaBuilder {
     private final String collectionName;
     private final MilvusClientV2 wrapper;
     private final CreateCollectionReq.CollectionSchema  schema;
+    private ConsistencyLevel consistencyLevel=ConsistencyLevel.BOUNDED;
 
     public CollectionSchemaBuilder(String collectionName, MilvusClientV2 wrapper) {
         this.collectionName = collectionName;
@@ -31,11 +33,19 @@ public class CollectionSchemaBuilder {
         }
         return this;
     }
+    public void addConsistencyLevel(ConsistencyLevel level){
+        this.consistencyLevel=level;
+    }
+
     public CreateCollectionReq.FieldSchema getField(String fileName){
         return schema.getField(fileName);
     }
     public void createSchema() throws MilvusException {
-        CreateCollectionReq req=CreateCollectionReq.builder().collectionName(this.collectionName).collectionSchema(this.schema).build();
+        CreateCollectionReq req=CreateCollectionReq.builder().
+                collectionName(this.collectionName).
+                collectionSchema(this.schema).
+                consistencyLevel(this.consistencyLevel)
+                .build();
         wrapper.createCollection(req);
     }
     public void createIndex(java.util.List<IndexParam> indexParams) throws MilvusException {

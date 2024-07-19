@@ -2,6 +2,8 @@ package org.dromara.milvus.plus.core.conditions;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.InsertReq;
@@ -9,7 +11,6 @@ import io.milvus.v2.service.vector.response.InsertResp;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
 import org.dromara.milvus.plus.cache.ConversionCache;
@@ -20,6 +21,7 @@ import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.util.IdWorkerUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
 * 构建器内部类，用于构建insert请求
@@ -74,10 +76,12 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
 
 
     private MilvusResp<InsertResp> insert(List<JSONObject> jsonObjects){
-        log.info("insert data--->{}", JSON.toJSONString(jsonObjects));
+        JsonParser jsonParser = new JsonParser();
+        log.info("update data--->{}", JSON.toJSONString(jsonObjects));
+        List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
         InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
                 .collectionName(collectionName)
-                .data(jsonObjects);
+                .data(objects);
         if(StringUtils.isNotEmpty(partitionName)){
             builder.partitionName(partitionName);
         }
@@ -105,11 +109,6 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                if (!ClassUtils.isPrimitiveOrWrapper(value.getClass()) && !(value instanceof String)&& !(value instanceof Collection)) {
-                    //对象类型转成JSONObject
-                    String jv = JSONObject.toJSONString(value);
-                    value = JSONObject.parseObject(jv);
-                }
                 String tk = propertyCache.functionToPropertyMap.get(key);
                 jsonObject.put(tk,value);
             }
