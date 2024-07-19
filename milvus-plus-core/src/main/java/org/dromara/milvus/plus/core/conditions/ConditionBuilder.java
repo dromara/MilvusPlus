@@ -203,8 +203,6 @@ public abstract class ConditionBuilder<T> {
         return this;
     }
 
-
-
     public ConditionBuilder<T> eq(FieldFunction<T,?> fieldName, Object value) {
         return addFilter(fieldName, "==", value);
     }

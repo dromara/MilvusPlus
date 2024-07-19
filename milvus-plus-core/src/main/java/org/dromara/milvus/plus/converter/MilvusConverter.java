@@ -3,6 +3,7 @@ package org.dromara.milvus.plus.converter;
 
 import com.google.common.collect.Lists;
 import io.milvus.v2.client.MilvusClientV2;
+import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
 import io.milvus.v2.service.collection.request.GetLoadStateReq;
@@ -22,6 +23,8 @@ import org.dromara.milvus.plus.model.MilvusEntity;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,6 +69,9 @@ public class MilvusConverter {
         // 集合名称
         String collectionName = collectionAnnotation.name();
         milvus.setCollectionName(collectionName);
+        //一致性级别
+        ConsistencyLevel level = collectionAnnotation.level();
+        milvus.setConsistencyLevel(level);
         // 集合别名
         if (collectionAnnotation.alias().length > 0) {
             milvus.setAlias(Arrays.asList(collectionAnnotation.alias()));
@@ -105,7 +111,13 @@ public class MilvusConverter {
                     .filter(StringUtils::isNotEmpty).ifPresent(builder::description);
             // 处理向量字段的维度
             Optional.of(fieldAnnotation.dimension())
-                    .filter(dimension -> dimension > 0).ifPresent(builder::dimension);
+                    .filter(dimension -> dimension > 0).ifPresent(
+                            dimension -> {
+                                builder.dimension(dimension);
+                               if (!isListFloat(field)) {
+                                   throw new IllegalArgumentException("Vector field type mismatch");
+                                }
+                            } );
             // 数组字段的最大长度
             Optional.of(fieldAnnotation.maxLength())
                     .filter(maxLength -> maxLength > 0).ifPresent(builder::maxLength);
@@ -120,7 +132,6 @@ public class MilvusConverter {
         // 设置Milvus字段和索引参数
         milvus.setMilvusFields(milvusFields);
         milvus.setIndexParams(indexParams);
-
         // 缓存转换结果和集合信息
         ConversionCache conversionCache = new ConversionCache();
         conversionCache.setMilvusEntity(milvus);
@@ -212,6 +223,7 @@ public class MilvusConverter {
                 milvusEntity.getCollectionName(), client
         );
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
+        schemaBuilder.addConsistencyLevel(milvusEntity.getConsistencyLevel());
         log.info("-------create schema---------");
         schemaBuilder.createSchema();
         schemaBuilder.createIndex(indexParams);
@@ -273,5 +285,37 @@ public class MilvusConverter {
                 .build();
         client.loadPartitions(loadPartitionsReq);
         log.info("load partition--{}", milvusEntity.getPartitionName());
+    }
+    /**
+     * 判断字段是否是 List<Float> 类型。
+     *
+     * @param field 要检查的字段
+     * @return 如果字段是 List<Float> 类型返回 true，否则返回 false
+     */
+    public static boolean isListFloat(Field field) {
+        // 确保字段不是 null
+        if (field == null) {
+            return false;
+        }
+        // 获取字段的泛型类型
+        Type genericType = field.getGenericType();
+
+        // 检查是否是参数化类型
+        if (!(genericType instanceof ParameterizedType)) {
+            return false;
+        }
+        // 类型转换
+        ParameterizedType parameterizedType = (ParameterizedType) genericType;
+        // 获取参数化类型的原始类型
+        Type rawType = parameterizedType.getRawType();
+
+        // 检查原始类型是否是 List.class
+        if (!(rawType instanceof Class) || !List.class.isAssignableFrom((Class<?>) rawType)) {
+            return false;
+        }
+        // 获取类型参数
+        Type[] typeArguments = parameterizedType.getActualTypeArguments();
+        // 检查类型参数是否正好有一个，并且是 Float.TYPE
+        return typeArguments.length == 1 && typeArguments[0] == Float.class;
     }
 }

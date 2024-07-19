@@ -1,5 +1,6 @@
 package org.dromara.milvus.demo.model;
 
+import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.common.DataType;
 import io.milvus.v2.common.IndexParam;
 import lombok.Data;
@@ -8,7 +9,7 @@ import org.dromara.milvus.plus.annotation.*;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection")
+@MilvusCollection(name = "face_collection",level = ConsistencyLevel.STRONG)
 @MilvusPartition(name = {"face_001", "face_002"})
 @GenerateMilvusMapper
 public class Face {

@@ -1,12 +1,14 @@
 package org.dromara.milvus.plus.core.conditions;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.service.vector.request.GetReq;
 import io.milvus.v2.service.vector.request.QueryReq;
 import io.milvus.v2.service.vector.request.SearchReq;
+import io.milvus.v2.service.vector.request.data.BaseVector;
+import io.milvus.v2.service.vector.request.data.FloatVec;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
@@ -15,6 +17,8 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.ConversionCache;
+import org.dromara.milvus.plus.cache.MilvusCache;
+import org.dromara.milvus.plus.converter.MilvusConverter;
 import org.dromara.milvus.plus.converter.SearchRespConverter;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
@@ -41,7 +45,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     private String annsField;
     private int topK;
-    private List<List<?>> vectors = new ArrayList<>();
+    private List<BaseVector> vectors = new ArrayList<>();
     private long offset;
     private long limit;
     private int roundDecimal = -1;
@@ -75,6 +79,10 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     public LambdaQueryWrapper<T> partition(String... partitionName) {
         this.partitionNames.addAll(Arrays.asList(partitionName));
+        return this;
+    }
+    public LambdaQueryWrapper<T>  consistencyLevel(ConsistencyLevel level){
+        this.consistencyLevel=level;
         return this;
     }
 
@@ -402,16 +410,34 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.annsField=annsField.getFieldName(annsField);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(List<?> vector) {
+    public LambdaQueryWrapper<T> vector(List<? extends Float> vector) {
+        BaseVector baseVector = new FloatVec((List<Float>) vector);
+        vectors.add(baseVector);
+        return this;
+    }
+    public LambdaQueryWrapper<T> vector(String annsField, List<? extends Float> vector) {
+        this.annsField=annsField;
+        BaseVector baseVector = new FloatVec((List<Float>) vector);
+        vectors.add(baseVector);
+        return this;
+    }
+    public LambdaQueryWrapper<T> vector(FieldFunction<T,?> annsField, List<? extends Float> vector) {
+        this.annsField=annsField.getFieldName(annsField);
+        BaseVector baseVector = new FloatVec((List<Float>) vector);
+        vectors.add(baseVector);
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> vector(BaseVector vector) {
         vectors.add(vector);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(String annsField, List<?> vector) {
+    public LambdaQueryWrapper<T> vector(String annsField,BaseVector vector) {
         this.annsField=annsField;
         vectors.add(vector);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(FieldFunction<T,?> annsField, List<?> vector) {
+    public LambdaQueryWrapper<T> vector(FieldFunction<T,?> annsField, BaseVector vector) {
         this.annsField=annsField.getFieldName(annsField);
         vectors.add(vector);
         return this;
@@ -431,9 +457,11 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private SearchReq buildSearch() {
         SearchReq.SearchReqBuilder<?, ?> builder = SearchReq.builder()
                 .collectionName(StringUtils.isNotBlank(collectionAlias) ? collectionAlias : collectionName);
-
         if (annsField != null && !annsField.isEmpty()) {
             builder.annsField(annsField);
+        }
+        if(consistencyLevel!=null){
+            builder.consistencyLevel(consistencyLevel);
         }
         if (!vectors.isEmpty()) {
             builder.data(vectors);
@@ -497,19 +525,56 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      *
      * @return 搜索响应对象
      */
-    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException {
-        if (!vectors.isEmpty()) {
-            SearchReq searchReq = buildSearch();
-            log.info("build search param-->{}", JSON.toJSONString(searchReq));
-            SearchResp search = client.search(searchReq);
-            return SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
-        } else {
-            QueryReq queryReq = buildQuery();
-            log.info("build query param-->{}", JSON.toJSONString(queryReq));
-            QueryResp query = client.query(queryReq);
-            return SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
+//    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException {
+//        if (!vectors.isEmpty()) {
+//            SearchReq searchReq = buildSearch();
+//            log.info("build search param-->{}", JSON.toJSONString(searchReq));
+//            SearchResp search = client.search(searchReq);
+//            return SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
+//        } else {
+//            QueryReq queryReq = buildQuery();
+//            log.info("build query param-->{}", JSON.toJSONString(queryReq));
+//            QueryResp query = client.query(queryReq);
+//            return SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
+//        }
+//    }
+    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException{
+        return query(1);
+    }
+    private MilvusResp<List<MilvusResult<T>>> query(int attempt) throws MilvusException{
+        try {
+            return executeQuery(attempt);
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("collection not loaded") && attempt < maxRetries) {
+                log.warn("Attempt {}: Collection not loaded, attempting to reload and retry.", attempt);
+                handleCollectionNotLoaded();
+                return query(attempt + 1);
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
+    private MilvusResp<List<MilvusResult<T>>> executeQuery(int attempt) throws Exception {
+        if (!vectors.isEmpty()) {
+            SearchReq searchReq = buildSearch();
+            log.info("Attempt {}: Build search param--> {}", attempt, JSON.toJSONString(searchReq));
+            SearchResp searchResp = client.search(searchReq);
+            return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
+        } else {
+            QueryReq queryReq = buildQuery();
+            log.info("Attempt {}: Build query param--> {}", attempt, JSON.toJSONString(queryReq));
+            QueryResp queryResp = client.query(queryReq);
+            return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType);
+        }
+    }
+
+    private void handleCollectionNotLoaded() {
+        ConversionCache cache = MilvusCache.milvusCache.get(entityType.getName());
+        MilvusConverter.loadStatus(cache.getMilvusEntity(), client);
+    }
+
+    // 定义最大重试次数的常量
+    private static final int maxRetries = 2;
 
     public MilvusResp<List<MilvusResult<T>>> query(FieldFunction<T, ?>... outputFields) throws MilvusException {
         List<String> otf = new ArrayList<>();

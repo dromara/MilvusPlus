@@ -28,7 +28,7 @@
         <dependency>
             <groupId>io.milvus</groupId>
             <artifactId>milvus-sdk-java</artifactId>
-            <version>2.4.0</version>
+            <version>2.4.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
@@ -57,6 +57,12 @@
             <artifactId>mica-auto</artifactId>
             <version>${mica-auto.vaersion}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>2.0.47</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

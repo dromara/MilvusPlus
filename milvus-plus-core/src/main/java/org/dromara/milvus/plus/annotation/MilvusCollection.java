@@ -1,5 +1,8 @@
 package org.dromara.milvus.plus.annotation;
 
+
+import io.milvus.v2.common.ConsistencyLevel;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,4 +23,6 @@ public @interface MilvusCollection {
      *
      */
     String[] alias() default {};
+
+    ConsistencyLevel level() default ConsistencyLevel.BOUNDED;
 }

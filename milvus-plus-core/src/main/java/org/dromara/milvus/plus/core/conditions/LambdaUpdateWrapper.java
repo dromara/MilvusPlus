@@ -2,6 +2,8 @@ package org.dromara.milvus.plus.core.conditions;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.QueryReq;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 构建器内部类，用于构建update请求
@@ -427,10 +430,12 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
     }
 
     private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects) {
+        JsonParser jsonParser = new JsonParser();
         log.info("update data--->{}", JSON.toJSONString(jsonObjects));
+        List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
         UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
                 .collectionName(collectionName)
-                .data(jsonObjects);
+                .data(objects);
         if (StringUtils.isNotEmpty(partitionName)) {
             builder.partitionName(partitionName);
         }
