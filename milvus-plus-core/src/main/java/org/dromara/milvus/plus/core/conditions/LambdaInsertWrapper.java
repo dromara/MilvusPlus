@@ -76,22 +76,30 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
 
 
     private MilvusResp<InsertResp> insert(List<JSONObject> jsonObjects){
-        JsonParser jsonParser = new JsonParser();
-        log.info("update data--->{}", JSON.toJSONString(jsonObjects));
-        List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
-        InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
-                .collectionName(collectionName)
-                .data(objects);
-        if(StringUtils.isNotEmpty(partitionName)){
-            builder.partitionName(partitionName);
-        }
-        InsertReq insertReq = builder
-                .build();
-        InsertResp insert = client.insert(insertReq);
-        MilvusResp<InsertResp> resp = new MilvusResp<>();
-        resp.setData(insert);
-        resp.setSuccess(true);
-        return resp;
+        return executeWithRetry(
+                () -> {
+                    JsonParser jsonParser = new JsonParser();
+                    log.info("update data--->{}", JSON.toJSONString(jsonObjects));
+                    List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
+                    InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
+                            .collectionName(collectionName)
+                            .data(objects);
+                    if(StringUtils.isNotEmpty(partitionName)){
+                        builder.partitionName(partitionName);
+                    }
+                    InsertReq insertReq = builder
+                            .build();
+                    InsertResp insert = client.insert(insertReq);
+                    MilvusResp<InsertResp> resp = new MilvusResp<>();
+                    resp.setData(insert);
+                    resp.setSuccess(true);
+                    return resp;
+                },
+                "collection not loaded",
+                maxRetries,
+                entityType,
+                client
+        );
     }
     public MilvusResp<InsertResp> insert(T ... entity) throws MilvusException {
         Iterator<T> iterator = new ArrayIterator<>(entity);

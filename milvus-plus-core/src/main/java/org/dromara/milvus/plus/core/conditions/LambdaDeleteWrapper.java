@@ -366,13 +366,21 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @return 搜索响应对象
      */
     public MilvusResp<DeleteResp> remove() throws MilvusException {
-        DeleteReq deleteReq = build();
-        log.info("build remove param-->{}", JSON.toJSONString(deleteReq));
-        DeleteResp delete = client.delete(deleteReq);
-        MilvusResp<DeleteResp> resp = new MilvusResp<>();
-        resp.setData(delete);
-        resp.setSuccess(true);
-        return resp;
+        return executeWithRetry(
+                () -> {
+                    DeleteReq deleteReq = build();
+                    log.info("build remove param-->{}", JSON.toJSONString(deleteReq));
+                    DeleteResp delete = client.delete(deleteReq);
+                    MilvusResp<DeleteResp> resp = new MilvusResp<>();
+                    resp.setData(delete);
+                    resp.setSuccess(true);
+                    return resp;
+                },
+                "collection not loaded",
+                maxRetries,
+                entityType,
+                client
+        );
     }
 
     public MilvusResp<DeleteResp> removeById(Serializable... ids) throws MilvusException {

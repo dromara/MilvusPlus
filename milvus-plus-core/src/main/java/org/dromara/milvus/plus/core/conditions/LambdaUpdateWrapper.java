@@ -430,22 +430,30 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
     }
 
     private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects) {
-        JsonParser jsonParser = new JsonParser();
-        log.info("update data--->{}", JSON.toJSONString(jsonObjects));
-        List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
-        UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
-                .collectionName(collectionName)
-                .data(objects);
-        if (StringUtils.isNotEmpty(partitionName)) {
-            builder.partitionName(partitionName);
-        }
-        UpsertReq upsertReq = builder
-                .build();
-        UpsertResp upsert = client.upsert(upsertReq);
-        MilvusResp<UpsertResp> resp = new MilvusResp<>();
-        resp.setData(upsert);
-        resp.setSuccess(true);
-        return resp;
+        return executeWithRetry(
+                () -> {
+                    JsonParser jsonParser = new JsonParser();
+                    log.info("update data--->{}", JSON.toJSONString(jsonObjects));
+                    List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
+                    UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
+                            .collectionName(collectionName)
+                            .data(objects);
+                    if (StringUtils.isNotEmpty(partitionName)) {
+                        builder.partitionName(partitionName);
+                    }
+                    UpsertReq upsertReq = builder
+                            .build();
+                    UpsertResp upsert = client.upsert(upsertReq);
+                    MilvusResp<UpsertResp> resp = new MilvusResp<>();
+                    resp.setData(upsert);
+                    resp.setSuccess(true);
+                    return resp;
+                },
+                "collection not loaded",
+                maxRetries,
+                entityType,
+                client
+        );
     }
 
     public MilvusResp<UpsertResp> updateById(T... entity) throws MilvusException {
