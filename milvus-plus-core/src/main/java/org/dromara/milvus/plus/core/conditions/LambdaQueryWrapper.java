@@ -17,8 +17,6 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.ConversionCache;
-import org.dromara.milvus.plus.cache.MilvusCache;
-import org.dromara.milvus.plus.converter.MilvusConverter;
 import org.dromara.milvus.plus.converter.SearchRespConverter;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
@@ -525,56 +523,27 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      *
      * @return 搜索响应对象
      */
-//    public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException {
-//        if (!vectors.isEmpty()) {
-//            SearchReq searchReq = buildSearch();
-//            log.info("build search param-->{}", JSON.toJSONString(searchReq));
-//            SearchResp search = client.search(searchReq);
-//            return SearchRespConverter.convertSearchRespToMilvusResp(search, entityType);
-//        } else {
-//            QueryReq queryReq = buildQuery();
-//            log.info("build query param-->{}", JSON.toJSONString(queryReq));
-//            QueryResp query = client.query(queryReq);
-//            return SearchRespConverter.convertGetRespToMilvusResp(query, entityType);
-//        }
-//    }
     public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException{
-        return query(1);
+        return executeWithRetry(
+                () -> {
+                    if (!vectors.isEmpty()) {
+                        SearchReq searchReq = buildSearch();
+                        log.info("Build search param--> {}", JSON.toJSONString(searchReq));
+                        SearchResp searchResp = client.search(searchReq);
+                        return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
+                    } else {
+                        QueryReq queryReq = buildQuery();
+                        log.info("Build query param--> {}", JSON.toJSONString(queryReq));
+                        QueryResp queryResp = client.query(queryReq);
+                        return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType);
+                    }
+                },
+                "collection not loaded",
+                maxRetries,
+                entityType,
+                client
+        );
     }
-    private MilvusResp<List<MilvusResult<T>>> query(int attempt) throws MilvusException{
-        try {
-            return executeQuery(attempt);
-        } catch (Exception e) {
-            if (e.getMessage() != null && e.getMessage().contains("collection not loaded") && attempt < maxRetries) {
-                log.warn("Attempt {}: Collection not loaded, attempting to reload and retry.", attempt);
-                handleCollectionNotLoaded();
-                return query(attempt + 1);
-            } else {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-    private MilvusResp<List<MilvusResult<T>>> executeQuery(int attempt) throws Exception {
-        if (!vectors.isEmpty()) {
-            SearchReq searchReq = buildSearch();
-            log.info("Attempt {}: Build search param--> {}", attempt, JSON.toJSONString(searchReq));
-            SearchResp searchResp = client.search(searchReq);
-            return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
-        } else {
-            QueryReq queryReq = buildQuery();
-            log.info("Attempt {}: Build query param--> {}", attempt, JSON.toJSONString(queryReq));
-            QueryResp queryResp = client.query(queryReq);
-            return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType);
-        }
-    }
-
-    private void handleCollectionNotLoaded() {
-        ConversionCache cache = MilvusCache.milvusCache.get(entityType.getName());
-        MilvusConverter.loadStatus(cache.getMilvusEntity(), client);
-    }
-
-    // 定义最大重试次数的常量
-    private static final int maxRetries = 2;
 
     public MilvusResp<List<MilvusResult<T>>> query(FieldFunction<T, ?>... outputFields) throws MilvusException {
         List<String> otf = new ArrayList<>();
