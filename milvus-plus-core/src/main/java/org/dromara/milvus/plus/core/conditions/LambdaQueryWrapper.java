@@ -4,11 +4,10 @@ import com.alibaba.fastjson2.JSON;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
-import io.milvus.v2.service.vector.request.GetReq;
-import io.milvus.v2.service.vector.request.QueryReq;
-import io.milvus.v2.service.vector.request.SearchReq;
+import io.milvus.v2.service.vector.request.*;
 import io.milvus.v2.service.vector.request.data.BaseVector;
 import io.milvus.v2.service.vector.request.data.FloatVec;
+import io.milvus.v2.service.vector.request.ranker.BaseRanker;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
@@ -53,6 +52,10 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private MilvusClientV2 client;
     private Map<String, Object> searchParams = new HashMap<>(16);
 
+    private List<LambdaQueryWrapper<T>> hybridWrapper=new ArrayList<>();
+
+    private BaseRanker ranker;
+
     public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
@@ -62,6 +65,10 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     public LambdaQueryWrapper() {
 
+    }
+    public LambdaQueryWrapper<T> hybrid(LambdaQueryWrapper<T> wrapper) {
+        this.hybridWrapper.add(wrapper);
+        return this;
     }
 
     /**
@@ -408,6 +415,10 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.annsField=annsField.getFieldName(annsField);
         return this;
     }
+    public LambdaQueryWrapper<T> ranker(BaseRanker ranker){
+        this.ranker=ranker;
+        return this;
+    }
     public LambdaQueryWrapper<T> vector(List<? extends Float> vector) {
         BaseVector baseVector = new FloatVec((List<Float>) vector);
         vectors.add(baseVector);
@@ -425,6 +436,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         vectors.add(baseVector);
         return this;
     }
+
 
     public LambdaQueryWrapper<T> vector(BaseVector vector) {
         vectors.add(vector);
@@ -444,6 +456,11 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.setLimit(limit);
         return this;
     }
+    public LambdaQueryWrapper<T> offset(Long offset) {
+        this.setOffset(offset);
+        return this;
+    }
+
     public LambdaQueryWrapper<T> topK(Integer topK) {
         this.setTopK(topK);
         return this;
@@ -474,6 +491,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         if (limit > 0) {
             builder.limit(limit);
         }
+        if(offset > 0){
+            builder.offset(offset);
+        }
         if (!CollectionUtils.isEmpty(partitionNames)) {
             builder.partitionNames(partitionNames);
         }
@@ -493,7 +513,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         return builder.build();
     }
 
-    public QueryReq buildQuery() {
+    private QueryReq buildQuery() {
         QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
                 .collectionName(StringUtils.isNotBlank(collectionAlias) ? collectionAlias : collectionName);
         String filterStr = buildFilters();
@@ -506,6 +526,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         if (limit > 0L) {
             builder.limit(limit);
         }
+        if(offset > 0){
+            builder.offset(offset);
+        }
+        if(consistencyLevel!=null){
+            builder.consistencyLevel(consistencyLevel);
+        }
         if (!CollectionUtils.isEmpty(partitionNames)) {
             builder.partitionNames(partitionNames);
         }
@@ -517,6 +543,42 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         return builder.build();
     }
+    private HybridSearchReq buildHybrid(){
+        //混合查询
+        List<AnnSearchReq> searchRequests = hybridWrapper.stream().filter(v -> StringUtils.isNotEmpty(v.getAnnsField()) && !v.getVectors().isEmpty()).map(
+                v -> {
+                    AnnSearchReq.AnnSearchReqBuilder<?, ?> annBuilder = AnnSearchReq.builder()
+                            .vectorFieldName(v.getAnnsField())
+                            .vectors(v.getVectors());
+                    if (v.getTopK() > 0) {
+                        annBuilder.topK(v.getTopK());
+                    }
+                    String expr = v.buildFilters();
+                    if (StringUtils.isNotEmpty(expr)) {
+                        annBuilder.expr(expr);
+                    }
+                    Map<String, Object> params = v.searchParams;
+                    if (!params.isEmpty()) {
+                        annBuilder.params(JSON.toJSONString(params));
+                    }
+                    return annBuilder.build();
+                }
+        ).collect(Collectors.toList());
+        HybridSearchReq.HybridSearchReqBuilder<?, ?> reqBuilder = HybridSearchReq.builder()
+                .collectionName(collectionName)
+                .searchRequests(searchRequests);
+        if(ranker!=null){
+            reqBuilder.ranker(ranker);
+        }
+        if(topK>0){
+            reqBuilder.topK(topK);
+        }
+        if(consistencyLevel!=null){
+            reqBuilder.consistencyLevel(consistencyLevel);
+        }
+        HybridSearchReq hybridSearchReq= reqBuilder.build();
+        return hybridSearchReq;
+    }
 
     /**
      * 执行搜索
@@ -526,6 +588,11 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     public MilvusResp<List<MilvusResult<T>>> query() throws MilvusException{
         return executeWithRetry(
                 () -> {
+                    if(hybridWrapper.size()>0){
+                        HybridSearchReq hybridSearchReq = buildHybrid();
+                        SearchResp searchResp = client.hybridSearch(hybridSearchReq);
+                        return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
+                    }
                     if (!vectors.isEmpty()) {
                         SearchReq searchReq = buildSearch();
                         log.info("Build search param--> {}", JSON.toJSONString(searchReq));
