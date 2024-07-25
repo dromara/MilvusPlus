@@ -8,7 +8,7 @@
   <img src="./logo/milvus.png" alt="MilvusPlus" style="border-radius: 10px;" />
 </div>
 
-> 🔥🔥🔥[MilvusPlus](https://gitee.com/dromara/MilvusPlus)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
+> 🔥🔥🔥[MilvusPlus](https://milvusplus.cn/)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
 
 ## 特性
 
@@ -31,7 +31,7 @@
 <dependency>
     <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Spring应用支持：
 <dependency>
     <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
 </dependency>
 ```
 
@@ -51,7 +51,7 @@ Solon应用支持：
 <dependency>
     <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
 </dependency>
 ```
 
@@ -540,18 +540,18 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 
 ## 欢迎给项目点赞！！
 
-https://gitee.com/dromara/MilvusPlus
+https://gitcode.com/dromara/MilvusPlus
 
 ## 贡献
 
 欢迎贡献！
 
-- 报告问题或建议功能，[创建一个 issue](https://gitee.com/giteeClass/MilvusPlus/issues/new)。
-- 提交更改，[创建一个 pull request](https://gitee.com/giteeClass/MilvusPlus/compare)。
+- 报告问题或建议功能，[创建一个 issue](https://gitecode.com/dromara/MilvusPlus/issues/new)。
+- 提交更改，[创建一个 pull request](https://gitecode.com/dromara/MilvusPlus/compare)。
 
 ## 许可证
 
-MilvusPlus 是开源的，遵循 [许可证](https://gitee.com/giteeClass/MilvusPlus/blob/master/LICENSE)。
+MilvusPlus 是开源的，遵循 [许可证](https://gitecode.com/dromara/MilvusPlus/blob/master/LICENSE)。
 
 ## 联系
 
