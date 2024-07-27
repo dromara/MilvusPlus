@@ -58,12 +58,6 @@
             <version>${mica-auto.vaersion}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>2.0.47</version>
-            <scope>compile</scope>
-        </dependency>
 
     </dependencies>
 
