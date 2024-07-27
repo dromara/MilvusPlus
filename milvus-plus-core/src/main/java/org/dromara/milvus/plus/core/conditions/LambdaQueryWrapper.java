@@ -594,17 +594,18 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
                 () -> {
                     if(hybridWrapper.size()>0){
                         HybridSearchReq hybridSearchReq = buildHybrid();
+                        log.info("Build HybridSearch Param--> {}", GsonUtil.toJson(hybridSearchReq));
                         SearchResp searchResp = client.hybridSearch(hybridSearchReq);
                         return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
                     }
                     if (!vectors.isEmpty()) {
                         SearchReq searchReq = buildSearch();
-                        log.info("Build search param--> {}", GsonUtil.toJson(searchReq));
+                        log.info("Build Search Param--> {}", GsonUtil.toJson(searchReq));
                         SearchResp searchResp = client.search(searchReq);
                         return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
                     } else {
                         QueryReq queryReq = buildQuery();
-                        log.info("Build query param--> {}", GsonUtil.toJson(queryReq));
+                        log.info("Build Query param--> {}", GsonUtil.toJson(queryReq));
                         QueryResp queryResp = client.query(queryReq);
                         return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType);
                     }
