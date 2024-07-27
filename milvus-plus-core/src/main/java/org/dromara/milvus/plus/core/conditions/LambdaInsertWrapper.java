@@ -1,9 +1,6 @@
 package org.dromara.milvus.plus.core.conditions;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.InsertReq;
@@ -18,10 +15,10 @@ import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
+import org.dromara.milvus.plus.util.GsonUtil;
 import org.dromara.milvus.plus.util.IdWorkerUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
 * 构建器内部类，用于构建insert请求
@@ -35,7 +32,7 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
     private String collectionName;
     private String partitionName;
     private MilvusClientV2 client;
-    private JSONObject entity=new JSONObject();
+    private JsonObject entity=new JsonObject();
     public LambdaInsertWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
         this.client = client;
@@ -47,11 +44,11 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
 
     }
     public LambdaInsertWrapper<T> put(FieldFunction<T,?> fieldName, Object value){
-        this.entity.put(fieldName.getFieldName(fieldName),value);
+        GsonUtil.put(this.entity,fieldName.getFieldName(fieldName),value);
         return this;
     }
     public LambdaInsertWrapper<T> put(String fieldName, Object value){
-        this.entity.put(fieldName,value);
+        GsonUtil.put(this.entity,fieldName,value);
         return this;
     }
     public LambdaInsertWrapper<T> partition(String partitionName){
@@ -68,22 +65,20 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
      * @return 搜索请求对象
      */
     public MilvusResp<InsertResp> insert() {
-        if (!entity.isEmpty()) {
+        if (!entity.isJsonNull()) {
             return insert(Collections.singletonList(entity));
         }
         throw new MilvusException("not insert data",400);
     }
 
 
-    private MilvusResp<InsertResp> insert(List<JSONObject> jsonObjects){
+    private MilvusResp<InsertResp> insert(List<JsonObject> jsonObjects){
         return executeWithRetry(
                 () -> {
-                    JsonParser jsonParser = new JsonParser();
-                    log.info("update data--->{}", JSON.toJSONString(jsonObjects));
-                    List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
+                    log.info("update data--->{}", GsonUtil.toJson(jsonObjects));
                     InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
                             .collectionName(collectionName)
-                            .data(objects);
+                            .data(jsonObjects);
                     if(StringUtils.isNotEmpty(partitionName)){
                         builder.partitionName(partitionName);
                     }
@@ -101,7 +96,8 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
                 client
         );
     }
-    public MilvusResp<InsertResp> insert(T ... entity) throws MilvusException {
+    @SafeVarargs
+    public final MilvusResp<InsertResp> insert(T... entity) throws MilvusException {
         Iterator<T> iterator = new ArrayIterator<>(entity);
         return insert(iterator);
     }
@@ -109,19 +105,20 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
-        List<JSONObject> jsonObjects=new ArrayList<>();
+        List<JsonObject> jsonObjects=new ArrayList<>();
         while (iterator.hasNext()) {
             T t1 = iterator.next();
             Map<String, Object> propertiesMap = getPropertiesMap(t1);
-            JSONObject jsonObject=new JSONObject();
+            JsonObject jsonObject=new JsonObject();
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 String tk = propertyCache.functionToPropertyMap.get(key);
-                jsonObject.put(tk,value);
+                GsonUtil.put(jsonObject,tk,value);
             }
             if(conversionCache.isAutoID()){
-                jsonObject.put(pk, IdWorkerUtils.nextId());
+                GsonUtil.put(jsonObject,pk,IdWorkerUtils.nextId());
+
             }
             jsonObjects.add(jsonObject);
         }

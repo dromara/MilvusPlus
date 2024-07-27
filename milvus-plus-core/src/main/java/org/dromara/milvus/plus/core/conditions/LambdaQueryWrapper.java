@@ -1,6 +1,5 @@
 package org.dromara.milvus.plus.core.conditions;
 
-import com.alibaba.fastjson2.JSON;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
@@ -20,6 +19,7 @@ import org.dromara.milvus.plus.converter.SearchRespConverter;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
+import org.dromara.milvus.plus.util.GsonUtil;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
@@ -55,13 +55,6 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private List<LambdaQueryWrapper<T>> hybridWrapper=new ArrayList<>();
 
     private BaseRanker ranker;
-
-    public LambdaQueryWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
-        this.collectionName = collectionName;
-        this.client = client;
-        this.conversionCache = conversionCache;
-        this.entityType = entityType;
-    }
 
     public LambdaQueryWrapper() {
 
@@ -419,14 +412,14 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.ranker=ranker;
         return this;
     }
-    public LambdaQueryWrapper<T> vector(List<? extends Float> vector) {
-        BaseVector baseVector = new FloatVec((List<Float>) vector);
+    public LambdaQueryWrapper<T> vector(List<Float> vector) {
+        BaseVector baseVector = new FloatVec(vector);
         vectors.add(baseVector);
         return this;
     }
-    public LambdaQueryWrapper<T> vector(String annsField, List<? extends Float> vector) {
+    public LambdaQueryWrapper<T> vector(String annsField,List<Float> vector) {
         this.annsField=annsField;
-        BaseVector baseVector = new FloatVec((List<Float>) vector);
+        BaseVector baseVector = new FloatVec(vector);
         vectors.add(baseVector);
         return this;
     }
@@ -436,7 +429,6 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         vectors.add(baseVector);
         return this;
     }
-
 
     public LambdaQueryWrapper<T> vector(BaseVector vector) {
         vectors.add(vector);
@@ -559,7 +551,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
                     }
                     Map<String, Object> params = v.searchParams;
                     if (!params.isEmpty()) {
-                        annBuilder.params(JSON.toJSONString(params));
+                        annBuilder.params(GsonUtil.toJson(params));
                     }
                     return annBuilder.build();
                 }
@@ -575,6 +567,18 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         if(consistencyLevel!=null){
             reqBuilder.consistencyLevel(consistencyLevel);
+        }
+        if (outputFields != null && !outputFields.isEmpty()) {
+            reqBuilder.outFields(outputFields);
+        } else {
+            Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
+            reqBuilder.outFields(new ArrayList<>(values));
+        }
+        if (!CollectionUtils.isEmpty(partitionNames)) {
+            reqBuilder.partitionNames(partitionNames);
+        }
+        if (roundDecimal != -1) {
+            reqBuilder.roundDecimal(roundDecimal);
         }
         HybridSearchReq hybridSearchReq= reqBuilder.build();
         return hybridSearchReq;
@@ -595,12 +599,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
                     }
                     if (!vectors.isEmpty()) {
                         SearchReq searchReq = buildSearch();
-                        log.info("Build search param--> {}", JSON.toJSONString(searchReq));
+                        log.info("Build search param--> {}", GsonUtil.toJson(searchReq));
                         SearchResp searchResp = client.search(searchReq);
                         return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
                     } else {
                         QueryReq queryReq = buildQuery();
-                        log.info("Build query param--> {}", JSON.toJSONString(queryReq));
+                        log.info("Build query param--> {}", GsonUtil.toJson(queryReq));
                         QueryResp queryResp = client.query(queryReq);
                         return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType);
                     }

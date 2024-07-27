@@ -1,8 +1,5 @@
 package org.dromara.milvus.plus.converter;
 
-import com.alibaba.fastjson2.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
@@ -11,6 +8,7 @@ import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
+import org.dromara.milvus.plus.util.GsonUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +18,6 @@ import java.util.stream.Collectors;
  **/
 public class SearchRespConverter {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 将SearchResp对象转换为自定义的MilvusResp对象，其中SearchResp是Milvus搜索响应的内部结构，
@@ -45,15 +42,10 @@ public class SearchRespConverter {
                     for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
                         String key = propertyCache.findKeyByValue(entry.getKey());
                         Object value = entry.getValue();
-                        if (value instanceof JsonObject) {
-                            JSONObject v = JSONObject.parseObject(value.toString());
-                            entityMap.put(key,v);
-                        } else {
-                            entityMap.put(key,value);
-                        }
+                        entityMap.put(key,value);
                     }
                     // 将转换后的Map转换为Java实体类T
-                    T entity = objectMapper.convertValue(entityMap, entityType);
+                    T entity = GsonUtil.convertMapToType(entityMap, entityType);
                     MilvusResult<T> tMilvusResult = new MilvusResult<>();
                     tMilvusResult.setId(searchResult.getId());
                     tMilvusResult.setDistance(searchResult.getScore());
@@ -115,15 +107,12 @@ public class SearchRespConverter {
             for (Map.Entry<String, Object> entry : entityMap.entrySet()) {
                 String key = propertyCache.findKeyByValue(entry.getKey());
                 Object value = entry.getValue();
-                if (value instanceof JsonObject) {
-                    JSONObject v = JSONObject.parseObject(value.toString());
-                    entityMap2.put(key,v);
-                } else {
-                    entityMap2.put(key,value);
-                }
+                entityMap2.put(key,value);
+
             }
             // 使用转换工具将映射后的Map转换为指定类型的实体
-            T entity =  objectMapper.convertValue(entityMap2, entityType);
+            T entity =  GsonUtil.convertMapToType(entityMap2, entityType);
+
             entities.add(entity);
         }
 
