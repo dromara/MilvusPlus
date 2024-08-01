@@ -5,41 +5,41 @@ import org.dromara.milvus.plus.config.MilvusPropertiesConfiguration;
 import org.dromara.milvus.plus.log.LogLevelController;
 import org.dromara.milvus.plus.model.MilvusProperties;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 @Service
-public class MilvusInit extends AbstractMilvusClientBuilder {
+public class MilvusInit extends AbstractMilvusClientBuilder implements InitializingBean, DisposableBean {
 
-    @Autowired
-    private MilvusPropertiesConfiguration milvusPropertiesConfiguration;
+    private final MilvusPropertiesConfiguration milvusPropertiesConfiguration;
 
     private MilvusClientV2 client;
 
-    // Spring会调用这个方法来初始化client
-    @PostConstruct
+    public MilvusInit(MilvusPropertiesConfiguration milvusPropertiesConfiguration) {
+        this.milvusPropertiesConfiguration = milvusPropertiesConfiguration;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        initialize();
+    }
+    @Override
+    public void destroy() throws Exception {
+        super.close();
+    }
+
     public void initialize() {
         printBanner();
-
         LogLevelController.setLoggingEnabledForPackage("org.dromara.milvus.plus",
                 milvusPropertiesConfiguration.isOpenLog(),
                 milvusPropertiesConfiguration.getLogLevel());
-
         MilvusProperties milvusProperties = new MilvusProperties();
         BeanUtils.copyProperties(milvusPropertiesConfiguration, milvusProperties);
         super.setProperties(milvusProperties);
         super.initialize();
         client = getClient();
-    }
-
-    // Spring会调用这个方法来关闭client
-    @PreDestroy
-    public void close() throws InterruptedException {
-        super.close();
     }
 
     @Bean
