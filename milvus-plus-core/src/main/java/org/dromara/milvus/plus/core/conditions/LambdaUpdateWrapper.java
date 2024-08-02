@@ -1,9 +1,6 @@
 package org.dromara.milvus.plus.core.conditions;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.QueryReq;
@@ -19,12 +16,12 @@ import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
+import org.dromara.milvus.plus.util.GsonUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 构建器内部类，用于构建update请求
@@ -368,12 +365,10 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         // 初始化主键标识和主键值
         boolean hasPrimaryKey = false;
         Object  primaryKeyValue = null;
-
         // 准备更新的数据列表
-        List<JSONObject> updateDataList = new ArrayList<>();
-
+        List<JsonObject> updateDataList = new ArrayList<>();
         // 构建单个更新对象
-        JSONObject updateObject = new JSONObject();
+        JsonObject updateObject = new JsonObject();
         for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
             String field = entry.getKey();
             Object value = entry.getValue();
@@ -384,9 +379,8 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
                 primaryKeyValue = value;
             }
             // 添加到更新对象
-            updateObject.put(tableNameColumn, value);
+            GsonUtil.put(updateObject,tableNameColumn, value);
         }
-
         // 检查是否需要构建查询条件
         boolean needBuildQuery = !hasPrimaryKey;
         if (hasPrimaryKey) {
@@ -405,13 +399,12 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
             if (queryResp != null) {
                 for (QueryResp.QueryResult result : queryResp.getQueryResults()) {
                     Map<String, Object> existingEntity = result.getEntity();
-                    JSONObject existingData = new JSONObject();
-
+                    JsonObject existingData = new JsonObject();
                     for (Map.Entry<String, Object> existingEntry : existingEntity.entrySet()) {
                         String existingField = existingEntry.getKey();
                         Object existingValue = existingEntry.getValue();
                         Object updateValue = updateObject.get(existingField);
-                        existingData.put(existingField, updateValue != null ? updateValue : existingValue);
+                        GsonUtil.put(existingData,existingField, updateValue != null ? updateValue : existingValue);
                     }
 
                     updateDataList.add(existingData);
@@ -429,15 +422,13 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         return update(updateDataList);
     }
 
-    private MilvusResp<UpsertResp> update(List<JSONObject> jsonObjects) {
+    private MilvusResp<UpsertResp> update(List<JsonObject> jsonObjects) {
         return executeWithRetry(
                 () -> {
-                    JsonParser jsonParser = new JsonParser();
-                    log.info("update data--->{}", JSON.toJSONString(jsonObjects));
-                    List<JsonObject> objects = jsonObjects.stream().map(v -> jsonParser.parse(v.toJSONString()).getAsJsonObject()).collect(Collectors.toList());
+                    log.info("update data--->{}", GsonUtil.toJson(jsonObjects));
                     UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
                             .collectionName(collectionName)
-                            .data(objects);
+                            .data(jsonObjects);
                     if (StringUtils.isNotEmpty(partitionName)) {
                         builder.partitionName(partitionName);
                     }
@@ -464,28 +455,28 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
     public MilvusResp<UpsertResp> updateById(Iterator<T> iterator) throws MilvusException {
         PropertyCache propertyCache = conversionCache.getPropertyCache();
         String pk = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
-        List<JSONObject> jsonObjects = new ArrayList<>();
+        List<JsonObject> jsonObjects = new ArrayList<>();
         // 使用迭代器遍历可变参数
         while (iterator.hasNext()) {
             T t1 = iterator.next();
             Map<String, Object> propertiesMap = getPropertiesMap(t1);
-            JSONObject jsonObject = new JSONObject();
+            JsonObject jsonObject = new JsonObject();
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 // 根据PropertyCache转换属性名
                 String tk = propertyCache.functionToPropertyMap.get(key);
-                jsonObject.put(tk, value);
+                GsonUtil.put(jsonObject,tk, value);
             }
             // 检查是否包含主键
-            if (!jsonObject.containsKey(pk)) {
+            if (!jsonObject.has(pk)) {
                 throw new MilvusException("not find primary key", 400);
             }
             jsonObjects.add(jsonObject);
         }
         // 准备更新的数据列表
-        List<JSONObject> updateDataList = new ArrayList<>();
-        for (JSONObject updateObject : jsonObjects) {
+        List<JsonObject> updateDataList = new ArrayList<>();
+        for (JsonObject updateObject : jsonObjects) {
             boolean isBuild=false;
             for (Map.Entry<String, String> property : propertyCache.functionToPropertyMap.entrySet()) {
                 if (updateObject.get(property.getValue()) == null) {
@@ -500,12 +491,12 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
                 if (queryResp != null) {
                     for (QueryResp.QueryResult result : queryResp.getQueryResults()) {
                         Map<String, Object> existingEntity = result.getEntity();
-                        JSONObject existingData = new JSONObject();
+                        JsonObject existingData = new JsonObject();
                         for (Map.Entry<String, Object> existingEntry : existingEntity.entrySet()) {
                             String existingField = existingEntry.getKey();
                             Object existingValue = existingEntry.getValue();
                             Object updateValue = updateObject.get(existingField);
-                            existingData.put(existingField, updateValue != null ? updateValue : existingValue);
+                            GsonUtil.put(existingData,existingField, updateValue != null ? updateValue : existingValue);
                         }
                         updateDataList.add(existingData);
                     }
