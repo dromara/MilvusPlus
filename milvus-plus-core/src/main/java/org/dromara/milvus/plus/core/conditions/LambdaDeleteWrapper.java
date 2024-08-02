@@ -1,6 +1,5 @@
 package org.dromara.milvus.plus.core.conditions;
 
-import com.alibaba.fastjson.JSON;
 import io.milvus.exception.MilvusException;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.request.DeleteReq;
@@ -12,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.core.FieldFunction;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
+import org.dromara.milvus.plus.util.GsonUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -369,7 +369,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         return executeWithRetry(
                 () -> {
                     DeleteReq deleteReq = build();
-                    log.info("build remove param-->{}", JSON.toJSONString(deleteReq));
+                    log.info("build remove param-->{}", GsonUtil.toJson(deleteReq));
                     DeleteResp delete = client.delete(deleteReq);
                     MilvusResp<DeleteResp> resp = new MilvusResp<>();
                     resp.setData(delete);
