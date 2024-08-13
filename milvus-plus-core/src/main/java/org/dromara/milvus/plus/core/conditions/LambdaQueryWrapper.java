@@ -133,6 +133,13 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.eq(fieldName,value);
         return this;
     }
+    public LambdaQueryWrapper<T> eq(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.eq(fieldName,value);
+        }
+        return this;
+    }
+
 
     /**
      * 添加不等于条件。
@@ -143,6 +150,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      */
     public LambdaQueryWrapper<T> ne(String fieldName, Object value) {
         super.ne(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> ne(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.ne(fieldName,value);
+        }
         return this;
     }
 
@@ -157,6 +170,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.gt(fieldName,value);
         return this;
     }
+    public LambdaQueryWrapper<T> gt(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.gt(fieldName,value);
+        }
+        return this;
+    }
 
     /**
      * 添加大于等于条件。
@@ -167,6 +186,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      */
     public LambdaQueryWrapper<T> ge(String fieldName, Object value) {
         super.ge(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> ge(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.ge(fieldName,value);
+        }
         return this;
     }
 
@@ -181,6 +206,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.lt(fieldName,value);
         return this;
     }
+    public LambdaQueryWrapper<T> lt(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.lt(fieldName,value);
+        }
+        return this;
+    }
 
     /**
      * 添加小于等于条件。
@@ -191,6 +222,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      */
     public LambdaQueryWrapper<T> le(String fieldName, Object value) {
         super.le(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> le(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.le(fieldName,value);
+        }
         return this;
     }
 
@@ -204,6 +241,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
      */
     public LambdaQueryWrapper<T> between(String fieldName, Object start, Object end) {
         super.between(fieldName,start,end);
+        return this;
+    }
+    public LambdaQueryWrapper<T> between(boolean condition,String fieldName, Object start, Object end) {
+        if(condition){
+            super.between(fieldName,start,end);
+        }
         return this;
     }
 
@@ -240,6 +283,12 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.in(fieldName,values);
         return this;
     }
+    public LambdaQueryWrapper<T> in(boolean condition,String fieldName, List<?> values) {
+        if(condition){
+            super.in(fieldName,values);
+        }
+        return this;
+    }
 
     /**
      * 添加LIKE条件。
@@ -252,9 +301,21 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.like(fieldName,value);
         return this;
     }
+    public LambdaQueryWrapper<T> like(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.like(fieldName,value);
+        }
+        return this;
+    }
 
     public LambdaQueryWrapper<T> jsonContains(String fieldName, Object value) {
         super.jsonContains(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> jsonContains(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.jsonContains(fieldName,value);
+        }
         return this;
     }
 
@@ -262,9 +323,20 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.jsonContainsAll(fieldName,values);
         return this;
     }
-
+    public LambdaQueryWrapper<T> jsonContainsAll(boolean condition,String fieldName, List<?> values) {
+        if(condition){
+            super.jsonContainsAll(fieldName,values);
+        }
+        return this;
+    }
     public LambdaQueryWrapper<T> jsonContainsAny(String fieldName, List<?> values) {
         super.jsonContainsAny(fieldName,values);
+        return this;
+    }
+    public LambdaQueryWrapper<T> jsonContainsAny(boolean condition,String fieldName, List<?> values) {
+        if(condition){
+            super.jsonContainsAny(fieldName,values);
+        }
         return this;
     }
 
@@ -273,9 +345,21 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.arrayContains(fieldName,value);
         return this;
     }
+    public LambdaQueryWrapper<T> arrayContains(boolean condition,String fieldName, Object value) {
+        if(condition){
+            super.arrayContains(fieldName,value);
+        }
+        return this;
+    }
 
     public LambdaQueryWrapper<T> arrayContainsAll(String fieldName, List<?> values) {
         super.arrayContainsAll(fieldName,values);
+        return this;
+    }
+    public LambdaQueryWrapper<T> arrayContainsAll(boolean condition,String fieldName, List<?> values) {
+        if(condition){
+            super.arrayContainsAll(fieldName,values);
+        }
         return this;
     }
 
@@ -283,9 +367,21 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.arrayContainsAny(fieldName,values);
         return this;
     }
+    public LambdaQueryWrapper<T> arrayContainsAny(boolean condition,String fieldName, List<?> values) {
+        if(condition){
+            super.arrayContainsAny(fieldName,values);
+        }
+        return this;
+    }
 
     public LambdaQueryWrapper<T> arrayLength(String fieldName, int length) {
         super.arrayLength(fieldName,length);
+        return this;
+    }
+    public LambdaQueryWrapper<T> arrayLength(boolean condition,String fieldName, int length) {
+        if(condition){
+            super.arrayLength(fieldName,length);
+        }
         return this;
     }
 
@@ -381,6 +477,118 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
 
     public LambdaQueryWrapper<T> arrayLength(FieldFunction<T,?> fieldName, int length) {
         super.arrayLength(fieldName,length);
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> eq(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.eq(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> ne(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.ne(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> gt(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.gt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> ge(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.ge(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> lt(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.lt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> le(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.le(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> between(boolean condition, FieldFunction<T, ?> fieldName, Object start, Object end) {
+        if (condition) {
+            super.between(fieldName, start, end);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> in(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.in(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> like(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.like(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> jsonContains(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.jsonContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> jsonContainsAll(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> jsonContainsAny(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> arrayContains(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.arrayContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> arrayContainsAll(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> arrayContainsAny(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaQueryWrapper<T> arrayLength(boolean condition, FieldFunction<T, ?> fieldName, int length) {
+        if (condition) {
+            super.arrayLength(fieldName, length);
+        }
         return this;
     }
 

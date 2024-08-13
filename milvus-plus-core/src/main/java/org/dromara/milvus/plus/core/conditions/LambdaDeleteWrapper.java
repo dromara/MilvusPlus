@@ -311,6 +311,231 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         super.arrayLength(fieldName,length);
         return this;
     }
+    public LambdaDeleteWrapper<T> eq(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.eq(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> ne(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.ne(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> gt(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.gt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> ge(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.ge(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> lt(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.lt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> le(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.le(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> between(boolean condition, String fieldName, Object start, Object end) {
+        if (condition) {
+            super.between(fieldName, start, end);
+        }
+        return this;
+    }
+
+
+    public LambdaDeleteWrapper<T> in(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.in(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> like(boolean condition, String fieldName, String value) {
+        if (condition) {
+            super.like(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> jsonContains(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.jsonContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> jsonContainsAll(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> jsonContainsAny(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayContains(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.arrayContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayContainsAll(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayContainsAny(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayLength(boolean condition, String fieldName, int length) {
+        if (condition) {
+            super.arrayLength(fieldName, length);
+        }
+        return this;
+    }
+
+    // FieldFunction<T, ?> version methods with condition parameter added
+    public LambdaDeleteWrapper<T> eq(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.eq(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> ne(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.ne(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> gt(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.gt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> ge(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.ge(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> lt(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.lt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> le(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.le(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> between(boolean condition, FieldFunction<T, ?> fieldName, Object start, Object end) {
+        if (condition) {
+            super.between(fieldName, start, end);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> in(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.in(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> like(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.like(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> jsonContains(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.jsonContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> jsonContainsAll(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> jsonContainsAny(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayContains(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.arrayContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayContainsAll(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayContainsAny(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaDeleteWrapper<T> arrayLength(boolean condition, FieldFunction<T, ?> fieldName, int length) {
+        if (condition) {
+            super.arrayLength(fieldName, length);
+        }
+        return this;
+    }
 
     // Logic operations
     public LambdaDeleteWrapper<T> and(ConditionBuilder<T> other) {
