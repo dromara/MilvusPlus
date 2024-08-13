@@ -318,6 +318,229 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         super.arrayLength(fieldName,length);
         return this;
     }
+    public LambdaUpdateWrapper<T> eq(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.eq(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> ne(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.ne(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> gt(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.gt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> ge(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.ge(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> lt(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.lt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> le(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.le(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> between(boolean condition, String fieldName, Object start, Object end) {
+        if (condition) {
+            super.between(fieldName, start, end);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> in(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.in(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> like(boolean condition, String fieldName, String value) {
+        if (condition) {
+            super.like(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> jsonContains(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.jsonContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> jsonContainsAll(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> jsonContainsAny(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayContains(boolean condition, String fieldName, Object value) {
+        if (condition) {
+            super.arrayContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayContainsAll(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayContainsAny(boolean condition, String fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayLength(boolean condition, String fieldName, int length) {
+        if (condition) {
+            super.arrayLength(fieldName, length);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> eq(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.eq(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> ne(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.ne(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> gt(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.gt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> ge(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.ge(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> lt(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.lt(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> le(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.le(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> between(boolean condition, FieldFunction<T, ?> fieldName, Object start, Object end) {
+        if (condition) {
+            super.between(fieldName, start, end);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> in(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.in(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> like(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.like(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> jsonContains(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.jsonContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> jsonContainsAll(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> jsonContainsAny(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.jsonContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayContains(boolean condition, FieldFunction<T, ?> fieldName, Object value) {
+        if (condition) {
+            super.arrayContains(fieldName, value);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayContainsAll(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAll(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayContainsAny(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
+        if (condition) {
+            super.arrayContainsAny(fieldName, values);
+        }
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> arrayLength(boolean condition, FieldFunction<T, ?> fieldName, int length) {
+        if (condition) {
+            super.arrayLength(fieldName, length);
+        }
+        return this;
+    }
 
     // Logic operations
     public LambdaUpdateWrapper<T> and(ConditionBuilder<T> other) {
