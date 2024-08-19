@@ -95,6 +95,9 @@ public abstract class BaseMilvusMapper<T>{
         // 获取实例化的类的类型参数T
         Type type = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         Class<T> entityType = (Class<T>) type;
+        return lambda(entityType,wrapper);
+    }
+    public  <W> W lambda(Class<T> entityType,Wrapper<W, T> wrapper) {
         // 从实体类上获取@MilvusCollection注解
         MilvusCollection collectionAnnotation = entityType.getAnnotation(MilvusCollection.class);
         if (collectionAnnotation == null) {
