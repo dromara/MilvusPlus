@@ -31,7 +31,7 @@
 <dependency>
     <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.1.3</version>
+    <version>2.1.4</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Spring应用支持：
 <dependency>
     <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.1.3</version>
+    <version>2.1.4</version>
 </dependency>
 ```
 
@@ -51,7 +51,7 @@ Solon应用支持：
 <dependency>
     <groupId>org.dromara</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.1.3</version>
+    <version>2.1.4</version>
 </dependency>
 ```
 
