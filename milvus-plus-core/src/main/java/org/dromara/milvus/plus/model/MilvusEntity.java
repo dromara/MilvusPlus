@@ -18,4 +18,5 @@ public class MilvusEntity {
     private List<AddFieldReq> milvusFields;
     private List<String> partitionName;
     private ConsistencyLevel consistencyLevel;
+    private Boolean enableDynamicField;
 }

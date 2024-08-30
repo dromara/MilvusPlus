@@ -69,6 +69,8 @@ public class MilvusConverter {
         // 集合名称
         String collectionName = collectionAnnotation.name();
         milvus.setCollectionName(collectionName);
+        boolean enableDynamicField = collectionAnnotation.enableDynamicField();
+        milvus.setEnableDynamicField(enableDynamicField);
         //一致性级别
         ConsistencyLevel level = collectionAnnotation.level();
         milvus.setConsistencyLevel(level);
@@ -220,7 +222,7 @@ public class MilvusConverter {
         }
         // 创建新集合
         CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
-                milvusEntity.getCollectionName(), client
+                milvusEntity.getEnableDynamicField(),milvusEntity.getCollectionName(), client
         );
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
         schemaBuilder.addConsistencyLevel(milvusEntity.getConsistencyLevel());

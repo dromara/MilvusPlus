@@ -20,9 +20,19 @@ public @interface MilvusCollection {
     String name();
 
     /**
-     *
+     *  别名
      */
     String[] alias() default {};
 
+    /**
+     * 一致性级别
+     */
+
     ConsistencyLevel level() default ConsistencyLevel.BOUNDED;
+
+    /**
+     * 禁用动态字段
+     */
+    boolean enableDynamicField() default false;
+
 }

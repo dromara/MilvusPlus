@@ -16,7 +16,14 @@ public class CollectionSchemaBuilder {
     private final MilvusClientV2 wrapper;
     private final CreateCollectionReq.CollectionSchema  schema;
     private ConsistencyLevel consistencyLevel=ConsistencyLevel.BOUNDED;
+    private Boolean enableDynamicField=false;
 
+    public CollectionSchemaBuilder(Boolean enableDynamicField,String collectionName, MilvusClientV2 wrapper) {
+        this.collectionName = collectionName;
+        this.wrapper = wrapper;
+        this.schema = wrapper.createSchema();
+        this.enableDynamicField=enableDynamicField;
+    }
     public CollectionSchemaBuilder(String collectionName, MilvusClientV2 wrapper) {
         this.collectionName = collectionName;
         this.wrapper = wrapper;
@@ -44,7 +51,8 @@ public class CollectionSchemaBuilder {
         CreateCollectionReq req=CreateCollectionReq.builder().
                 collectionName(this.collectionName).
                 collectionSchema(this.schema).
-                consistencyLevel(this.consistencyLevel)
+                consistencyLevel(this.consistencyLevel).
+                enableDynamicField(this.enableDynamicField)
                 .build();
         wrapper.createCollection(req);
     }
