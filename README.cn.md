@@ -555,7 +555,7 @@ MilvusPlus 是开源的，遵循 [许可证](https://gitecode.com/dromara/Milvus
 
 ## 联系
 
-如有问题或需要支持，请联系
+如有问题或需要支持，请联系(备注 milvusplus)
 
 <div style="display: inline-block; border: 4px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin: 10px; padding: 10px;">
   <img src="./logo/img.png" alt="微信加群" style="border-radius: 10px;" />
