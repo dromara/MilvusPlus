@@ -2,9 +2,11 @@
 
 ## Project Introduction
 
-![MilvusPlus](./logo/MilvusPlus.jpg)
+<div style="display: inline-block; border: 4px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin: 10px; padding: 10px;">
+  <img src="./logo/milvus.png" alt="MilvusPlus" style="border-radius: 10px;" />
+</div>
 
-> 🔥🔥🔥 [MilvusPlus](https://gitee.com/dromara/MilvusPlus) (short for MP) is an operational tool for [Milvus](https://milvus.io), designed to simplify interactions with the Milvus vector database, providing developers with an intuitive API similar to MyBatis-Plus annotations and method call style, born to improve efficiency.
+> 🔥🔥🔥 [MilvusPlus](https://milvusplus.cn/) (short for MP) is an operational tool for [Milvus](https://milvus.io), designed to simplify interactions with the Milvus vector database, providing developers with an intuitive API similar to MyBatis-Plus annotations and method call style, born to improve efficiency.
 
 ## Features
 
