@@ -10,7 +10,6 @@ import java.util.List;
 
 @Data
 @MilvusCollection(name = "face_collection",level = ConsistencyLevel.STRONG)
-@MilvusPartition(name = {"face_001", "face_002"})
 @GenerateMilvusMapper
 public class Face {
     @MilvusField(
@@ -32,6 +31,12 @@ public class Face {
             dataType = DataType.JSON
     )
     private Person person;
+
+    @MilvusField(
+            name = "temp",
+            dataType = DataType.Int64
+    )
+    private Integer temp;
 
     @MilvusField(
             name = "face_vector", // 字段名称
