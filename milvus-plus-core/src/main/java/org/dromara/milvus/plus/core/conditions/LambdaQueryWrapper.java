@@ -825,6 +825,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         );
     }
 
+
     public MilvusResp<List<MilvusResult<T>>> query(FieldFunction<T, ?>... outputFields) throws MilvusException {
         List<String> otf = new ArrayList<>();
         for (FieldFunction<T, ?> outputField : outputFields) {
@@ -832,6 +833,24 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         this.outputFields = otf;
         return query();
+    }
+
+    public MilvusResp<Long> count() throws MilvusException {
+        this.outputFields = new ArrayList<>();
+        this.outputFields.add("count(*)");
+        return executeWithRetry(
+                () -> {
+                        QueryReq queryReq = buildQuery();
+                        log.info("Build Query param--> {}", GsonUtil.toJson(queryReq));
+                        QueryResp queryResp = client.query(queryReq);
+                        return SearchRespConverter.convertGetRespToCount(queryResp);
+                },
+                "collection not loaded",
+                maxRetries,
+                entityType,
+                client
+        );
+
     }
 
     public MilvusResp<List<MilvusResult<T>>> query(String... outputFields) throws MilvusException {
