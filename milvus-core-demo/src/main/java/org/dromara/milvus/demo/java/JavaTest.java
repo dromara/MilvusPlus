@@ -17,7 +17,7 @@ public class JavaTest {
         MilvusProperties properties=new MilvusProperties();
         properties.setEnable(true);
         properties.setUri("https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com");
-        properties.setToken("xxx");
+        properties.setToken("6fab5641a3156d2666feba14390e4ef4b6d376b5dce91faed303eec91a4bdb82239b70b29eb252b981daa3170516245818d4ee12");
         properties.setPackages(Lists.newArrayList("io.github.javpower.milvus.demo.model"));
         MilvusClientBuild build = new MilvusClientBuild(properties);
         build.initialize();

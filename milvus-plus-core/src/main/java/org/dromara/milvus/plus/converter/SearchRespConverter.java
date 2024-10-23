@@ -72,6 +72,11 @@ public class SearchRespConverter {
         List<QueryResp.QueryResult> queryResults = getResp.getQueryResults();
         return convertQuery(queryResults, entityType);
     }
+    public static MilvusResp<Long> convertGetRespToCount(QueryResp getResp) {
+        // 从QueryResp中提取查询结果
+        List<QueryResp.QueryResult> queryResults = getResp.getQueryResults();
+        return convertQueryCount(queryResults);
+    }
 
     /**
      * 将Get响应转换为Milvus响应的通用方法。
@@ -127,6 +132,20 @@ public class SearchRespConverter {
         // 构建并返回一个包含转换结果的MilvusResp对象，标记操作成功
         MilvusResp<List<MilvusResult<T>>> milvusResp = new MilvusResp<>();
         milvusResp.setData(results);
+        milvusResp.setSuccess(true);
+        return milvusResp;
+    }
+    private static MilvusResp<Long> convertQueryCount(List<QueryResp.QueryResult> getResults){
+        // 初始化转换缓存和属性缓存，用于帮助将查询结果映射到Java实体
+        Long total= 0L;
+        // 遍历每个查询结果，映射到对应的Java实体
+        for (QueryResp.QueryResult queryResult : getResults) {
+            Map<String, Object> entityMap = queryResult.getEntity();
+            total = (Long) entityMap.get("count(*)");
+        }
+        // 构建并返回一个包含转换结果的MilvusResp对象，标记操作成功
+        MilvusResp<Long> milvusResp = new MilvusResp<>();
+        milvusResp.setData(total);
         milvusResp.setSuccess(true);
         return milvusResp;
     }
