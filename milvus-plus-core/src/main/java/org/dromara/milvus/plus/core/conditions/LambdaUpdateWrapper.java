@@ -187,6 +187,48 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         super.like(fieldName,value);
         return this;
     }
+    ////
+    public LambdaUpdateWrapper<T> likeLeft(String fieldName, String value) {
+        super.likeLeft(fieldName,value);
+        return this;
+    }
+    public LambdaUpdateWrapper<T> likeLeft(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.likeLeft(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaUpdateWrapper<T> likeLeft(FieldFunction<T,?> fieldName, String value) {
+        super.likeLeft(fieldName,value);
+        return this;
+    }
+    public LambdaUpdateWrapper<T> likeLeft(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.likeLeft(fieldName, value);
+        }
+        return this;
+    }
+    ////
+    public LambdaUpdateWrapper<T> likeRight(String fieldName, String value) {
+        super.likeRight(fieldName,value);
+        return this;
+    }
+    public LambdaUpdateWrapper<T> likeRight(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.likeRight(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaUpdateWrapper<T> likeRight(FieldFunction<T,?> fieldName, String value) {
+        super.likeRight(fieldName,value);
+        return this;
+    }
+    public LambdaUpdateWrapper<T> likeRight(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.likeRight(fieldName, value);
+        }
+        return this;
+    }
 
     public LambdaUpdateWrapper<T> jsonContains(String fieldName, Object value) {
         super.jsonContains(fieldName,value);
