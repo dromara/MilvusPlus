@@ -307,6 +307,58 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         return this;
     }
+    public LambdaQueryWrapper<T> like(FieldFunction<T,?> fieldName, String value) {
+        super.like(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> like(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.like(fieldName, value);
+        }
+        return this;
+    }
+    ////
+    public LambdaQueryWrapper<T> likeLeft(String fieldName, String value) {
+        super.likeLeft(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> likeLeft(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.likeLeft(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaQueryWrapper<T> likeLeft(FieldFunction<T,?> fieldName, String value) {
+        super.likeLeft(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> likeLeft(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.likeLeft(fieldName, value);
+        }
+        return this;
+    }
+    ////
+    public LambdaQueryWrapper<T> likeRight(String fieldName, String value) {
+        super.likeRight(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> likeRight(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.likeRight(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaQueryWrapper<T> likeRight(FieldFunction<T,?> fieldName, String value) {
+        super.likeRight(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> likeRight(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.likeRight(fieldName, value);
+        }
+        return this;
+    }
 
     public LambdaQueryWrapper<T> jsonContains(String fieldName, Object value) {
         super.jsonContains(fieldName,value);
@@ -438,11 +490,6 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         return this;
     }
 
-    // Like operator
-    public LambdaQueryWrapper<T> like(FieldFunction<T,?> fieldName, String value) {
-        super.like(fieldName,value);
-        return this;
-    }
 
     // JSON array operations
     public LambdaQueryWrapper<T> jsonContains(FieldFunction<T,?> fieldName, Object value) {
@@ -532,13 +579,6 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     public LambdaQueryWrapper<T> in(boolean condition, FieldFunction<T, ?> fieldName, List<?> values) {
         if (condition) {
             super.in(fieldName, values);
-        }
-        return this;
-    }
-
-    public LambdaQueryWrapper<T> like(boolean condition, FieldFunction<T, ?> fieldName, String value) {
-        if (condition) {
-            super.like(fieldName, value);
         }
         return this;
     }
