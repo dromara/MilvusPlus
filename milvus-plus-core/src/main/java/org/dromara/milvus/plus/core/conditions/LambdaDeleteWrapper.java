@@ -180,6 +180,48 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         super.like(fieldName,value);
         return this;
     }
+    ////
+    public LambdaDeleteWrapper<T> likeLeft(String fieldName, String value) {
+        super.likeLeft(fieldName,value);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> likeLeft(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.likeLeft(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaDeleteWrapper<T> likeLeft(FieldFunction<T,?> fieldName, String value) {
+        super.likeLeft(fieldName,value);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> likeLeft(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.likeLeft(fieldName, value);
+        }
+        return this;
+    }
+    ////
+    public LambdaDeleteWrapper<T> likeRight(String fieldName, String value) {
+        super.likeRight(fieldName,value);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> likeRight(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.likeRight(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaDeleteWrapper<T> likeRight(FieldFunction<T,?> fieldName, String value) {
+        super.likeRight(fieldName,value);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> likeRight(boolean condition, FieldFunction<T, ?> fieldName, String value) {
+        if (condition) {
+            super.likeRight(fieldName, value);
+        }
+        return this;
+    }
 
     public LambdaDeleteWrapper<T> jsonContains(String fieldName, Object value) {
         super.jsonContains(fieldName,value);

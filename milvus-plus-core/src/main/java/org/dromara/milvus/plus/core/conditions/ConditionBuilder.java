@@ -264,6 +264,24 @@ public abstract class ConditionBuilder<T> {
         filters.add(fn + " like '%" + value + "%'");
         return this;
     }
+    protected ConditionBuilder<T> likeLeft(String fieldName, String value) {
+        filters.add(wrapFieldName(fieldName) + " like '" + value + "%'");
+        return this;
+    }
+    protected ConditionBuilder<T> likeRight(String fieldName, String value) {
+        filters.add(wrapFieldName(fieldName) + " like '%'" + value + "'");
+        return this;
+    }
+    protected ConditionBuilder<T> likeLeft(FieldFunction<T,?> fieldName, String value) {
+        String fn = getFieldName(fieldName);
+        filters.add(fn + " like '" + value + "%'");
+        return this;
+    }
+    protected ConditionBuilder<T> likeRight(FieldFunction<T,?> fieldName, String value) {
+        String fn = getFieldName(fieldName);
+        filters.add(fn + " like '%" + value + "'");
+        return this;
+    }
 
     // JSON array operations
     public ConditionBuilder<T> jsonContains(FieldFunction<T,?> fieldName, Object value) {
@@ -369,4 +387,5 @@ public abstract class ConditionBuilder<T> {
         filters.add(wrapFieldName(getFieldName(fieldName)) + " " + op + " " + convertValue(value));
         return this;
     }
+
 }
