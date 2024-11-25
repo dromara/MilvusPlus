@@ -75,7 +75,7 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
     private MilvusResp<InsertResp> insert(List<JsonObject> jsonObjects){
         return executeWithRetry(
                 () -> {
-                    log.info("update data--->{}", GsonUtil.toJson(jsonObjects));
+                    log.info("insert data--->{}", GsonUtil.toJson(jsonObjects));
                     InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
                             .collectionName(collectionName)
                             .data(jsonObjects);

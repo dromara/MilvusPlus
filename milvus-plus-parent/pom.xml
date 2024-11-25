@@ -2,7 +2,7 @@
     <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
-        <groupId>org.dromara</groupId>
+        <groupId>org.dromara.milvus-plus</groupId>
         <artifactId>milvus-plus-parent</artifactId>
         <version>${revision}</version>
         <packaging>pom</packaging>
@@ -30,7 +30,7 @@
             </developer>
         </developers>
         <properties>
-            <revision>2.1.6</revision>
+            <revision>2.1.8</revision>
             <maven.compiler.source>${java.version}</maven.compiler.source>
             <maven.compiler.target>${java.version}</maven.compiler.target>
             <maven-compiler.version>3.11.0</maven-compiler.version>
@@ -52,17 +52,17 @@
         <dependencyManagement>
             <dependencies>
                 <dependency>
-                    <groupId>org.dromara</groupId>
+                    <groupId>org.dromara.milvus-plus</groupId>
                     <artifactId>milvus-plus-core</artifactId>
                     <version>${revision}</version>
                 </dependency>
                 <dependency>
-                    <groupId>org.dromara</groupId>
+                    <groupId>org.dromara.milvus-plus</groupId>
                     <artifactId>milvus-plus-boot-starter</artifactId>
                     <version>${revision}</version>
                 </dependency>
                 <dependency>
-                    <groupId>org.dromara</groupId>
+                    <groupId>org.dromara.milvus-plus</groupId>
                     <artifactId>milvus-plus-solon-plugin</artifactId>
                     <version>${revision}</version>
                 </dependency>
@@ -76,16 +76,16 @@
             </dependencies>
         </dependencyManagement>
 
-        <distributionManagement>
-            <repository>
-                <id>oss</id>
-                <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-            </repository>
-            <snapshotRepository>
-                <id>oss</id>
-                <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            </snapshotRepository>
-        </distributionManagement>
+<!--        <distributionManagement>-->
+<!--            <snapshotRepository>-->
+<!--                <id>ossrh</id>-->
+<!--                <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--            </snapshotRepository>-->
+<!--            <repository>-->
+<!--                <id>ossrh</id>-->
+<!--                <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+<!--            </repository>-->
+<!--        </distributionManagement>-->
 
         <build>
             <plugins>
@@ -104,18 +104,29 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
                 </plugin>
+<!--                <plugin>-->
+<!--                    <groupId>org.sonatype.plugins</groupId>-->
+<!--                    <artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--                    <version>${nexus-staging-maven-plugin.version}</version>-->
+<!--                    <extensions>true</extensions>-->
+<!--                    <configuration>-->
+<!--                        <serverId>ossrh</serverId>-->
+<!--                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
+<!--                        <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+<!--                        <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>-->
+<!--                    </configuration>-->
+<!--                </plugin>-->
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${nexus-staging-maven-plugin.version}</version>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.4.0</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <serverId>oss</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+                        <publishingServerId>central</publishingServerId>
+                        <tokenAuth>true</tokenAuth>
                     </configuration>
                 </plugin>
+
                 <plugin>
                     <groupId> org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
