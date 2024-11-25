@@ -122,12 +122,6 @@ public interface ICMService {
                 .collectionName(collectionName)
                 .build();
         client.dropCollection(dropCollectionReq);
-
-        // 检查集合是否已被删除
-        boolean isDropped = hasCollection(collectionName);
-        if (!isDropped) {
-            throw new RuntimeException("Failed to drop collection: " + collectionName);
-        }
     }
 
     /**

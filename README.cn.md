@@ -29,9 +29,9 @@
 
 ```
 <dependency>
-    <groupId>org.dromara</groupId>
+    <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.8</version>
 </dependency>
 ```
 
@@ -39,9 +39,9 @@ Spring应用支持：
 
 ```
 <dependency>
-    <groupId>org.dromara</groupId>
+    <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.8</version>
 </dependency>
 ```
 
@@ -49,14 +49,14 @@ Solon应用支持：
 
 ```
 <dependency>
-    <groupId>org.dromara</groupId>
+    <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.8</version>
 </dependency>
 ```
 
 ## 需知
-
+- 2.1.7版本之后groupId修改为 org.dromara.milvus-plus，版本之前为 org.dromara
 - 2.0.0版本必须使用索引注解定义索引，不然启动报错后，再添加无效，需要先删除集合
 - 2.0.0版本暂未发布 MilvusService 功能
 
@@ -538,7 +538,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 }
 ```
 
-## 联系
+# 联系
 
 如有问题或需要支持，请联系(备注 milvusplus)
 
