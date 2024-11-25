@@ -37,16 +37,17 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
+        milvusService.dropCollection("face_collection");
 //        insertFace();
 //        selectFace(12);
-//        selectFace(11);
+////        selectFace(11);
 //        delFace(11);
 //        Thread.sleep(10000);
-        countFace(22);
+//        countFace(22);
 //        getByIdTest();
 //        vectorQuery();
 //        scalarQuery();
-//        update();
+        //update();
     }
 
     private void selectFace(Integer temp){

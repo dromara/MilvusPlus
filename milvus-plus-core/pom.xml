@@ -3,7 +3,7 @@
              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.dromara</groupId>
+        <groupId>org.dromara.milvus-plus</groupId>
         <artifactId>milvus-plus-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../milvus-plus-parent/pom.xml</relativePath>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>io.milvus</groupId>
             <artifactId>milvus-sdk-java</artifactId>
-            <version>2.4.2</version>
+            <version>2.4.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>

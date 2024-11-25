@@ -27,9 +27,9 @@ Custom extension support:
 
 ```
 <dependency>
-    <groupId>org.dromara</groupId>
+    <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.8</version>
 </dependency>
 ```
 
@@ -37,9 +37,9 @@ Spring application support:
 
 ```
 <dependency>
-    <groupId>org.dromara</groupId>
+    <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.8</version>
 </dependency>
 ```
 
@@ -47,9 +47,9 @@ Solon application support:
 
 ```
 <dependency>
-    <groupId>org.dromara</groupId>
+    <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.8</version>
 </dependency>
 ```
 
