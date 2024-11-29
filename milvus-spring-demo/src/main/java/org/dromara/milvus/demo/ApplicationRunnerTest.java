@@ -37,25 +37,40 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
-        milvusService.dropCollection("face_collection");
 //        insertFace();
 //        selectFace(12);
-////        selectFace(11);
+//        selectFace(11);
 //        delFace(11);
 //        Thread.sleep(10000);
 //        countFace(22);
 //        getByIdTest();
 //        vectorQuery();
 //        scalarQuery();
-        //update();
+//        update();
+       selectTextEmbedding();
     }
 
+    private void selectTextEmbedding(){
+        MilvusResp<List<MilvusResult<Face>>> xx = mapper
+                .queryWrapper()
+                .textVector(Face::getText, "whats the focus of information retrieval?")
+                .textMatch(Face::getText,"retrieval")
+                .topK(2)
+                .query();
+        System.out.println("===");
+    }
     private void selectFace(Integer temp){
         MilvusResp<List<MilvusResult<Face>>> query = mapper.
                 queryWrapper()
                 .eq(Face::getTemp, temp)
                 .query(Face::getPersonName,Face::getTemp);
         log.info("query temp 11--{}", GsonUtil.toJson(query));
+
+        LambdaQueryWrapper<Face> mapper = milvusService.ofQuery(Face.class);
+        MilvusResp<List<MilvusResult<Face>>> test = mapper
+                .eq(Face::getPersonName, "test")
+                .topK(1)
+                .query();
     }
     private void countFace(Integer temp){
         MilvusResp<Long> query = mapper.
@@ -69,7 +84,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
         log.info("del temp 11 --{}", GsonUtil.toJson(remove));
     }
     private void insertFace() {
-        List<Face> faces = LongStream.range(1, 10)
+        List<Face> faces = LongStream.range(1, 2)
                 .mapToObj(i -> {
                     Face faceTmp = new Face();
                    // faceTmp.setPersonId(i);
@@ -84,6 +99,7 @@ public class ApplicationRunnerTest implements ApplicationRunner {
                     person.setImages(Lists.newArrayList("https://baidu.com"));
                     faceTmp.setPerson(person);
                     faceTmp.setTemp(i%2==0?11:22);
+                    faceTmp.setText(i % 2 == 0 ?"nformation retrieval is a field of study.":"information retrieval focuses on finding relevant information in large datasets.");
                     return faceTmp;
                 })
                 .collect(Collectors.toList());

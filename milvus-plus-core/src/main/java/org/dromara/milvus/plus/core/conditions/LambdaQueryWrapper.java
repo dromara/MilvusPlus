@@ -5,6 +5,7 @@ import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.service.vector.request.*;
 import io.milvus.v2.service.vector.request.data.BaseVector;
+import io.milvus.v2.service.vector.request.data.EmbeddedText;
 import io.milvus.v2.service.vector.request.data.FloatVec;
 import io.milvus.v2.service.vector.request.ranker.BaseRanker;
 import io.milvus.v2.service.vector.response.GetResp;
@@ -677,6 +678,18 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         vectors.add(baseVector);
         return this;
     }
+    public LambdaQueryWrapper<T> textVector(FieldFunction<T,?> annsField, String vector) {
+        this.annsField=annsField.getFieldName(annsField)+"_sparse";
+        BaseVector baseVector = new EmbeddedText(vector);
+        vectors.add(baseVector);
+        return this;
+    }
+    public LambdaQueryWrapper<T> textVector(String annsField,String vector) {
+        this.annsField=annsField+"_sparse";
+        BaseVector baseVector = new EmbeddedText(vector);
+        vectors.add(baseVector);
+        return this;
+    }
 
     public LambdaQueryWrapper<T> vector(BaseVector vector) {
         vectors.add(vector);
@@ -705,6 +718,55 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         this.setTopK(topK);
         return this;
     }
+
+    /**
+     * 添加 TEXT_MATCH 条件，使用 FieldFunction，支持多个值。
+     *
+     * @param fieldName 字段函数
+     * @param values    要匹配的值列表
+     * @return 当前条件构建器对象
+     */
+    public LambdaQueryWrapper<T> textMatch(String fieldName, List<String> values) {
+        super.textMatch(fieldName,values);
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(String fieldName, String value) {
+        super.textMatch(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(FieldFunction<T,?> fieldName, String value) {
+        super.textMatch(fieldName,value);
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(FieldFunction<T,?> fieldName, List<String> values) {
+        super.textMatch(fieldName,values);
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(boolean condition,String fieldName, List<String> values) {
+        if(condition){
+            super.textMatch(fieldName,values);
+        }
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.textMatch(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(boolean condition,FieldFunction<T,?> fieldName, String value) {
+        if(condition){
+            super.textMatch(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaQueryWrapper<T> textMatch(boolean condition,FieldFunction<T,?> fieldName, List<String> values) {
+        if(condition){
+            super.textMatch(fieldName,values);
+        }
+        return this;
+    }
+
     /**
      * 构建完整的搜索请求
      * @return 搜索请求对象

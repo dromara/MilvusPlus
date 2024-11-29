@@ -578,6 +578,54 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         }
         return this;
     }
+    /**
+     * 添加 TEXT_MATCH 条件，使用 FieldFunction，支持多个值。
+     *
+     * @param fieldName 字段函数
+     * @param values    要匹配的值列表
+     * @return 当前条件构建器对象
+     */
+    public LambdaDeleteWrapper<T> textMatch(String fieldName, List<String> values) {
+        super.textMatch(fieldName,values);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(String fieldName, String value) {
+        super.textMatch(fieldName,value);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(FieldFunction<T,?> fieldName, String value) {
+        super.textMatch(fieldName,value);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(FieldFunction<T,?> fieldName, List<String> values) {
+        super.textMatch(fieldName,values);
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(boolean condition,String fieldName, List<String> values) {
+        if(condition){
+            super.textMatch(fieldName,values);
+        }
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(boolean condition,String fieldName, String value) {
+        if(condition){
+            super.textMatch(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(boolean condition,FieldFunction<T,?> fieldName, String value) {
+        if(condition){
+            super.textMatch(fieldName,value);
+        }
+        return this;
+    }
+    public LambdaDeleteWrapper<T> textMatch(boolean condition,FieldFunction<T,?> fieldName, List<String> values) {
+        if(condition){
+            super.textMatch(fieldName,values);
+        }
+        return this;
+    }
+
 
     // Logic operations
     public LambdaDeleteWrapper<T> and(ConditionBuilder<T> other) {

@@ -1,14 +1,14 @@
 package org.dromara.milvus.demo.java;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import io.milvus.v2.client.MilvusClientV2;
 import org.dromara.milvus.demo.model.Face;
 import org.dromara.milvus.plus.core.mapper.BaseMilvusMapper;
 import org.dromara.milvus.plus.model.MilvusProperties;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
 import org.dromara.milvus.plus.service.impl.MilvusClientBuild;
-import io.milvus.v2.client.MilvusClientV2;
+import org.dromara.milvus.plus.util.GsonUtil;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class JavaTest {
                 .partition("face_01")
                 .topK(3)
                 .query();
-        System.out.println("标量查询   query--queryWrapper---{}"+JSONObject.toJSONString(query2));
+        System.out.println("标量查询   query--queryWrapper---{}"+ GsonUtil.toJson(query2));
         build.close();
     }
 }

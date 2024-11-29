@@ -67,4 +67,21 @@ public @interface MilvusField {
      * 是否为分区键
      */
     boolean isPartitionKey() default false;
+
+    /**
+     * 启动分析器
+     */
+    boolean enableAnalyzer() default false;
+
+    /**
+     *
+     * 启用文本匹配
+     */
+    boolean enableMatch() default false;
+
+    /**
+     * 分析器参数。
+     */
+    AnalyzerParams analyzerParams() default @AnalyzerParams;
+
 }
