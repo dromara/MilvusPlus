@@ -12,6 +12,10 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BuiltInFilter {
-    BuiltInFilterType name() default BuiltInFilterType.lowercase;
+public @interface Filter {
+
+    BuiltInFilterType[] builtInFilters() default {};; //内置过滤器
+
+    CustomFilter[] customFilters() default {}; //自定义过滤器
+
 }
