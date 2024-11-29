@@ -34,35 +34,55 @@ public class TextEntity {
             dataType = DataType.VarChar,
             enableAnalyzer = true,
             analyzerParams = @AnalyzerParams(
-                    builtInFilters = {
-                            @BuiltInFilter
-                    },
-                    customFilters = {
-                            @CustomFilter(type = "length", max = 40),
-                            @CustomFilter(type = "stop", stopWords = {"of", "to"})
-                    }
+                    type= AnalyzerType.CHINESE
             )
+//            analyzerParams = @AnalyzerParams(
+//            tokenizer= "standard",
+//            filter=@Filter(
+//                    builtInFilters={
+//                            BuiltInFilterType.lowercase
+//                    },
+//                    customFilters = {
+//                            @CustomFilter(
+//                                    type = "length",
+//                                    max = 40
+//                            ),
+//                            @CustomFilter(
+//                                    type = "stop",
+//                                    stopWords = {"of","to"}
+//                            )
+//                    }
+//            )
+//            )
     )
     private String text; 
 }
 ```
-
 非专业人员不要设置 analyzerParams，只需设置 enableAnalyzer = true即可。
+
+## 分析仪的使用
+
+- 使用type指定内置分析仪
+- 自定义分析仪，需配置分词器和过滤器
+
+### 默认分析仪（Type）
+
+- **默认分析仪**：可以根据 AnalyzerType 接口中的常量来设置具体的分词器类型
 
 ### 分词器（Tokenizer）
 
 - **默认分词器**：`standard` 分词器，基于语法规则将文本拆分为离散的单词单元。
-- **注解属性**：`tokenizer`，其默认值为 `TokenizerType.standard`。
+- **注解属性**：在 `AnalyzerParams` 注解中使用 `tokenizer` 属性来配置分词器。如果未指定，则默认为空字符串
 
 ### 过滤器（Filter）
 
 - **默认过滤器**：`lowercase` 过滤器，将所有标记转换为小写，以支持不区分大小写的搜索。
-- **注解属性**：`builtInFilters` 和 `customFilters`，分别用于配置内置过滤器和自定义过滤器。
+- **注解属性**：在 `Filter` 注解中使用 `builtInFilters` 和 `customFilters` 属性来配置内置过滤器和自定义过滤器。`builtInFilters` 属性接受 `BuiltInFilterType` 枚举值的数组，而 `customFilters` 属性接受 `CustomFilter` 注解的数组。
 
 ### 自定义停用词（StopWords）
 
 - **可选参数**：`stop_words`，用于指定要从分词结果中排除的停用词列表。
-- **注解属性**：`customFilters` 中的 `stopWords` 属性，允许定义自定义停用词。
+- **注解属性**：在 `CustomFilter` 注解中使用 `stopWords` 属性来定义自定义停用词。
 
 
 
