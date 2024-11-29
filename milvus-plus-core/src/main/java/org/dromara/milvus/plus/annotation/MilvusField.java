@@ -1,6 +1,7 @@
 package org.dromara.milvus.plus.annotation;
 
 import io.milvus.v2.common.DataType;
+import org.dromara.milvus.plus.model.AnalyzerType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -82,6 +83,7 @@ public @interface MilvusField {
     /**
      * 分析器参数。
      */
-    AnalyzerParams analyzerParams() default @AnalyzerParams;
+    AnalyzerParams analyzerParams() default @AnalyzerParams(type =AnalyzerType.STANDARD);
+
 
 }

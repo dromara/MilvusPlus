@@ -1,7 +1,5 @@
 package org.dromara.milvus.plus.annotation;
 
-import org.dromara.milvus.plus.model.TokenizerType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,9 +11,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AnalyzerParams {
-
-    TokenizerType tokenizer() default TokenizerType.standard; // 分词器配置
-    BuiltInFilter[] builtInFilters() default {}; //内置过滤器
-    CustomFilter[] customFilters() default {}; //自定义过滤器
+    String type() default ""; // 分析器类型
+    String tokenizer() default ""; // 自定义分词器配置
+    Filter filter() default @Filter; //过滤器
 
 }
