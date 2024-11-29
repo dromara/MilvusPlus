@@ -7,6 +7,9 @@ import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
 import io.milvus.v2.service.collection.request.CreateCollectionReq;
 import io.milvus.v2.service.index.request.CreateIndexReq;
+
+import java.util.List;
+
 /**
  * @author xgc
  **/
@@ -17,6 +20,8 @@ public class CollectionSchemaBuilder {
     private final CreateCollectionReq.CollectionSchema  schema;
     private ConsistencyLevel consistencyLevel=ConsistencyLevel.BOUNDED;
     private Boolean enableDynamicField=false;
+    private List<CreateCollectionReq.Function> functions;
+
 
     public CollectionSchemaBuilder(Boolean enableDynamicField,String collectionName, MilvusClientV2 wrapper) {
         this.collectionName = collectionName;
@@ -39,6 +44,11 @@ public class CollectionSchemaBuilder {
             schema.addField(field);
         }
         return this;
+    }
+    public void addFun(List<CreateCollectionReq.Function> functions){
+        for (CreateCollectionReq.Function function : functions) {
+            schema.addFunction(function);
+        }
     }
     public void addConsistencyLevel(ConsistencyLevel level){
         this.consistencyLevel=level;

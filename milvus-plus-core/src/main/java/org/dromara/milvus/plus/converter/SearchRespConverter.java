@@ -41,8 +41,10 @@ public class SearchRespConverter {
                     Map<String, Object> entityMap = new HashMap<>();
                     for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
                         String key = propertyCache.findKeyByValue(entry.getKey());
-                        Object value = entry.getValue();
-                        entityMap.put(key,value);
+                        if(key!=null){
+                            Object value = entry.getValue();
+                            entityMap.put(key,value);
+                        }
                     }
                     // 将转换后的Map转换为Java实体类T
                     T entity = GsonUtil.convertMapToType(entityMap, entityType);
@@ -111,9 +113,10 @@ public class SearchRespConverter {
             // 通过属性缓存转换键名，以适应Java实体的字段命名
             for (Map.Entry<String, Object> entry : entityMap.entrySet()) {
                 String key = propertyCache.findKeyByValue(entry.getKey());
-                Object value = entry.getValue();
-                entityMap2.put(key,value);
-
+                if(key!=null){
+                    Object value = entry.getValue();
+                    entityMap2.put(key,value);
+                }
             }
             // 使用转换工具将映射后的Map转换为指定类型的实体
             T entity =  GsonUtil.convertMapToType(entityMap2, entityType);

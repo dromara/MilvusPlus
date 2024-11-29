@@ -2,10 +2,13 @@ package org.dromara.milvus.plus.converter;
 
 
 import com.google.common.collect.Lists;
+import io.milvus.common.clientenum.FunctionType;
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.common.ConsistencyLevel;
+import io.milvus.v2.common.DataType;
 import io.milvus.v2.common.IndexParam;
 import io.milvus.v2.service.collection.request.AddFieldReq;
+import io.milvus.v2.service.collection.request.CreateCollectionReq;
 import io.milvus.v2.service.collection.request.GetLoadStateReq;
 import io.milvus.v2.service.collection.request.LoadCollectionReq;
 import io.milvus.v2.service.partition.request.CreatePartitionReq;
@@ -20,6 +23,8 @@ import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
 import org.dromara.milvus.plus.model.MilvusEntity;
+import org.dromara.milvus.plus.util.AnalyzerParamsUtils;
+import org.dromara.milvus.plus.util.GsonUtil;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -84,6 +89,7 @@ public class MilvusConverter {
         // 用于存储属性与函数映射的缓存
         PropertyCache propertyCache = new PropertyCache();
         List<Field> fields = getAllFieldsFromClass(entityClass);
+        List<CreateCollectionReq.Function> functions=new ArrayList<>();
         // 遍历实体类的所有字段，读取@MilvusField注解信息
         for (Field field : fields) {
             MilvusField fieldAnnotation = field.getAnnotation(MilvusField.class);
@@ -106,8 +112,35 @@ public class MilvusConverter {
                     .isPrimaryKey(fieldAnnotation.isPrimaryKey())
                     .isPartitionKey(fieldAnnotation.isPartitionKey())
                     .elementType(fieldAnnotation.elementType())
+                    .enableAnalyzer(fieldAnnotation.enableAnalyzer())
+                    .enableMatch(fieldAnnotation.enableMatch())
                     .autoID(false);
             autoID=autoID?autoID:fieldAnnotation.autoID();
+
+            if(fieldAnnotation.enableAnalyzer()&&fieldAnnotation.dataType()==DataType.VarChar){
+                Map<String, Object> analyzerParams = AnalyzerParamsUtils.convertToMap(fieldAnnotation.analyzerParams());
+                log.info("-----------analyzerParams--------- \n"+ GsonUtil.toJson(analyzerParams));
+                builder.analyzerParams(analyzerParams);
+                //构建该文本对应的SPARSE_FLOAT_VECTOR向量字段
+                AddFieldReq sparse = AddFieldReq.builder().fieldName(fieldName + "_sparse").dataType(DataType.SparseFloatVector).build();
+                milvusFields.add(sparse);
+                //构建索引
+                IndexParam sparseIndex = IndexParam.builder()
+                        .indexName(fieldName + "_sparse_index")
+                        .fieldName(fieldName + "_sparse")
+                        .indexType(IndexParam.IndexType.AUTOINDEX)
+                        .metricType(IndexParam.MetricType.BM25)
+                        .build();
+                indexParams.add(sparseIndex);
+                //定义一个函数，将文本转换为稀疏向量
+                String funName = fieldName+"_bm25_emb";
+                CreateCollectionReq.Function fun= CreateCollectionReq.Function.builder().
+                        name(funName).
+                        functionType(FunctionType.BM25).
+                        inputFieldNames(Lists.newArrayList(fieldName)).
+                        outputFieldNames(Lists.newArrayList(fieldName + "_sparse")).build();
+                functions.add(fun);
+            }
             // 描述
             Optional.of(fieldAnnotation.description())
                     .filter(StringUtils::isNotEmpty).ifPresent(builder::description);
@@ -134,6 +167,7 @@ public class MilvusConverter {
         // 设置Milvus字段和索引参数
         milvus.setMilvusFields(milvusFields);
         milvus.setIndexParams(indexParams);
+        milvus.setFunctions(functions);
         // 缓存转换结果和集合信息
         ConversionCache conversionCache = new ConversionCache();
         conversionCache.setMilvusEntity(milvus);
@@ -226,8 +260,10 @@ public class MilvusConverter {
         );
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
         schemaBuilder.addConsistencyLevel(milvusEntity.getConsistencyLevel());
+        schemaBuilder.addFun(milvusEntity.getFunctions());
         log.info("-------create schema---------");
         schemaBuilder.createSchema();
+        log.info("-------create schema fun---------");
         schemaBuilder.createIndex(indexParams);
         log.info("-------create index---------");
         // 创建分区
