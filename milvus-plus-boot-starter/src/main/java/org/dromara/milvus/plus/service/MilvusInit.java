@@ -54,6 +54,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Initializ
                         " | |\\/| | | \\ \\ / / | | / __|  | |_) | | | | / __|\n" +
                         " | |  | | | |\\ V /| |_| \\__ \\  |  __/| | |_| \\__ \\\n" +
                         " |_|  |_|_|_| \\_/  \\__,_|___/  |_|   |_|\\__,_|___/\n\n";
+
         System.out.println(banner);
     }
 }

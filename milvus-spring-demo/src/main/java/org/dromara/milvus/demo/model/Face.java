@@ -39,6 +39,14 @@ public class Face {
     private Integer temp;
 
     @MilvusField(
+            name = "text",
+            dataType = DataType.VarChar,
+            enableAnalyzer = true,
+            enableMatch = true
+    )
+    private String text; // 文本
+
+    @MilvusField(
             name = "face_vector", // 字段名称
             dataType = DataType.FloatVector, // 数据类型为浮点型向量
             dimension = 128 // 向量维度，假设人脸特征向量的维度是128

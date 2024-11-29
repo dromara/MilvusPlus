@@ -1,6 +1,7 @@
 package org.dromara.milvus.plus.core.conditions;
 
 import org.dromara.milvus.plus.core.FieldFunction;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public abstract class ConditionBuilder<T> {
 
     protected List<String> filters = new ArrayList<>();
+    protected List<String> textMatches =new ArrayList<>();
     protected Map<String, Object> getPropertiesMap(T t) {
         Map<String, Object> propertiesMap = new HashMap<>();
         Class<?> clazz = t.getClass();
@@ -33,6 +35,34 @@ public abstract class ConditionBuilder<T> {
             }
         }
         return propertiesMap; // 返回包含属性名和属性值的Map
+    }
+
+
+    /**
+     * 添加 TEXT_MATCH 条件，使用 FieldFunction，支持多个值。
+     *
+     * @param fieldName 字段函数
+     * @param values    要匹配的值列表
+     * @return 当前条件构建器对象
+     */
+    protected ConditionBuilder<T> textMatch(String fieldName, List<String> values) {
+        String joinedValues = String.join(" ", values);
+        String match = "TEXT_MATCH(" + wrapFieldName(fieldName) + ", '" + joinedValues + "')";
+        textMatches.add(match);
+        return this;
+    }
+    protected ConditionBuilder<T> textMatch(String fieldName, String value) {
+        String match = "TEXT_MATCH(" + wrapFieldName(fieldName) + ", '" + value + "')";
+        textMatches.add(match);
+        return this;
+    }
+    protected ConditionBuilder<T> textMatch(FieldFunction<T,?> fieldName, String value) {
+        textMatch(fieldName.getFieldName(fieldName),value);
+        return this;
+    }
+    protected ConditionBuilder<T> textMatch(FieldFunction<T,?> fieldName, List<String> values) {
+       textMatch(fieldName.getFieldName(fieldName),values);
+       return this;
     }
 
     /**
@@ -354,6 +384,10 @@ public abstract class ConditionBuilder<T> {
      * @return 构建好的过滤条件字符串
      */
     protected String buildFilters(){
+        if(!CollectionUtils.isEmpty(textMatches)){
+            String textMatchFilter = textMatches.stream().collect(Collectors.joining(" and "));
+            filters.add(textMatchFilter);
+        }
         return filters.stream().collect(Collectors.joining(" && "));
     }
 
