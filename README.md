@@ -1,4 +1,4 @@
-# MilvusPlus: Enhanced Vector Database Operations Library
+# Dromara MilvusPlus: Enhanced Vector Database Operations Library
 
 ## Project Introduction
 
