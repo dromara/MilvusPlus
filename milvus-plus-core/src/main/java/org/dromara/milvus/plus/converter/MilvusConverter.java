@@ -255,17 +255,46 @@ public class MilvusConverter {
             throw new IllegalArgumentException("the index does not exist, please define the index");
         }
         // 创建新集合
-        CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
-                milvusEntity.getEnableDynamicField(),milvusEntity.getCollectionName(), client
-        );
-        schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
-        schemaBuilder.addConsistencyLevel(milvusEntity.getConsistencyLevel());
-        schemaBuilder.addFun(milvusEntity.getFunctions());
-        log.info("-------create schema---------");
-        schemaBuilder.createSchema();
-        log.info("-------create schema fun---------");
-        schemaBuilder.createIndex(indexParams);
-        log.info("-------create index---------");
+        if(milvusEntity.getEnableDynamicField()){
+            List<AddFieldReq> milvusFields = milvusEntity.getMilvusFields();
+            AddFieldReq primaryKeyField = milvusFields.stream()
+                    .filter(v -> v.getIsPrimaryKey()!=null&&v.getIsPrimaryKey())
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("No primary key field found"));
+            AddFieldReq vectorField = milvusFields.stream()
+                    .filter(v->v.getDimension()!=null&&v.getDimension()>0)
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("No vector field found"));
+            IndexParam vectorIndexParams = indexParams.stream().filter(v -> Objects.equals(v.getFieldName(), vectorField.getFieldName()))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("No vector index params found"));
+
+            CreateCollectionReq.CreateCollectionReqBuilder<?, ?> builder = CreateCollectionReq.builder();
+            builder.enableDynamicField(milvusEntity.getEnableDynamicField()).
+            collectionName(milvusEntity.getCollectionName()).
+            idType(primaryKeyField.getDataType()).
+            primaryFieldName(primaryKeyField.getFieldName()).
+            maxLength(primaryKeyField.getMaxLength()).
+            autoID(primaryKeyField.getAutoID()).
+            vectorFieldName(vectorField.getFieldName()).
+            dimension(vectorField.getDimension()).
+            metricType(vectorIndexParams.getMetricType().name()).
+            consistencyLevel(milvusEntity.getConsistencyLevel());
+            CreateCollectionReq build = builder.build();
+            client.createCollection(build);
+        }else {
+            CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
+                    false,milvusEntity.getCollectionName(), client
+            );
+            schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
+            schemaBuilder.addConsistencyLevel(milvusEntity.getConsistencyLevel());
+            schemaBuilder.addFun(milvusEntity.getFunctions());
+            log.info("-------create schema---------");
+            schemaBuilder.createSchema();
+            log.info("-------create schema fun---------");
+            schemaBuilder.createIndex(indexParams);
+            log.info("-------create index---------");
+        }
         // 创建分区
         List<String> partitionName = milvusEntity.getPartitionName();
         if (CollectionUtils.isEmpty(partitionName)) {
