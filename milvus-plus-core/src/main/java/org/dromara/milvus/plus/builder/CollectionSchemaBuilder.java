@@ -27,6 +27,7 @@ public class CollectionSchemaBuilder {
         this.collectionName = collectionName;
         this.wrapper = wrapper;
         this.schema = wrapper.createSchema();
+        this.schema.setEnableDynamicField(enableDynamicField);
         this.enableDynamicField=enableDynamicField;
     }
     public CollectionSchemaBuilder(String collectionName, MilvusClientV2 wrapper) {
