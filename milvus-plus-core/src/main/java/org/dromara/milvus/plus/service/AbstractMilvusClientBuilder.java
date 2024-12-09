@@ -62,8 +62,7 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
                     client.releaseCollection(releaseCollectionReq);
                 }
             }
-            client.close(100);
-
+            client.close(5);
         }
     }
 

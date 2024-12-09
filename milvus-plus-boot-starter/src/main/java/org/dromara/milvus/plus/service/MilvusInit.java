@@ -27,7 +27,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Initializ
     }
     @Override
     public void destroy() throws Exception {
-        super.close();
+       // super.close();
     }
 
     public void initialize() {

@@ -16,7 +16,7 @@ import org.dromara.milvus.plus.core.mapper.BaseMilvusMapper;
 import org.dromara.milvus.plus.model.MilvusEntity;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
-import org.dromara.milvus.plus.util.SpringUtils;
+import org.dromara.milvus.plus.util.MilvusSpringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ public class MilvusService implements IAMService,ICMService,IVecMService{
 
     @Override
     public MilvusClientV2 getClient() {
-        return SpringUtils.getBean(MilvusClientV2.class);
+        return MilvusSpringUtils.getBean(MilvusClientV2.class);
     }
 
     public <T> MilvusResp<List<MilvusResult<T>>> getById(Class<T> entityClass,Serializable... ids) {

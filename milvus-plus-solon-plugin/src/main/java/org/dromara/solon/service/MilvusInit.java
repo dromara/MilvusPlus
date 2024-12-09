@@ -33,7 +33,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Lifecycle
     }
 
     public void stop() throws Throwable {
-        super.close();
+      //  super.close();
     }
 
     public void printBanner() {

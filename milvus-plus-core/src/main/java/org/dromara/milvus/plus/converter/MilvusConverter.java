@@ -114,6 +114,7 @@ public class MilvusConverter {
                     .elementType(fieldAnnotation.elementType())
                     .enableAnalyzer(fieldAnnotation.enableAnalyzer())
                     .enableMatch(fieldAnnotation.enableMatch())
+                    .isNullable(fieldAnnotation.nullable())
                     .autoID(false);
             autoID=autoID?autoID:fieldAnnotation.autoID();
 
