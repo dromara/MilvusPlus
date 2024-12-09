@@ -9,7 +9,7 @@ import org.dromara.milvus.plus.annotation.*;
 import java.util.List;
 
 @Data
-@MilvusCollection(name = "face_collection",level = ConsistencyLevel.STRONG)
+@MilvusCollection(name = "face_collection",level = ConsistencyLevel.STRONG,enableDynamicField = true)
 @GenerateMilvusMapper
 public class Face {
     @MilvusField(
@@ -60,4 +60,19 @@ public class Face {
             }
     )
     private List<Float> faceVector; // 存储人脸特征的向量
+
+
+    //后续添加
+    @MilvusField(
+            name = "sex",
+            dataType = DataType.VarChar
+    )
+    private String sex;
+
+    @MilvusField(
+            name = "age",
+            dataType = DataType.Int16
+    )
+    private Integer age;
+
 }
