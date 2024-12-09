@@ -49,13 +49,19 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     private int roundDecimal = -1;
     private long guaranteeTimestamp;
     private ConsistencyLevel consistencyLevel;
-    private boolean ignoreGrowing;
+    private Boolean ignoreGrowing;
     private MilvusClientV2 client;
     private Map<String, Object> searchParams = new HashMap<>(16);
 
     private List<LambdaQueryWrapper<T>> hybridWrapper=new ArrayList<>();
 
     private BaseRanker ranker;
+
+    private long gracefulTime;
+    private String groupByFieldName;
+
+    private Integer groupSize;
+    private Boolean strictGroupSize;
 
     public LambdaQueryWrapper() {
 
@@ -768,6 +774,49 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     }
 
     /**
+     * @param fieldName 按指定字段对搜索结果进行分组
+     * @return
+     */
+    public LambdaQueryWrapper<T> groupByFieldName(String fieldName) {
+        this.groupByFieldName=fieldName;
+        return this;
+    }
+    public LambdaQueryWrapper<T> groupByFieldName(FieldFunction<T,?> fieldName) {
+        this.groupByFieldName=fieldName.getFieldName(fieldName);
+        return this;
+    }
+
+    // 设置保证时间戳
+    public LambdaQueryWrapper<T> guaranteeTimestamp(long guaranteeTimestamp) {
+        this.guaranteeTimestamp = guaranteeTimestamp;
+        return this;
+    }
+
+    // 设置优雅的时间（毫秒）
+    public LambdaQueryWrapper<T> gracefulTime(long gracefulTime) {
+        this.gracefulTime=gracefulTime;
+        return this;
+    }
+
+    // 设置是否忽略增长的段
+    public LambdaQueryWrapper<T> ignoreGrowing(boolean ignoreGrowing) {
+        this.ignoreGrowing = ignoreGrowing;
+        return this;
+    }
+
+    // 设置分组搜索中每组内返回的实体目标数量
+    public LambdaQueryWrapper<T> groupSize(Integer groupSize) {
+        this.groupSize=groupSize;
+        return this;
+    }
+
+    // 设置是否严格执行groupSize
+    public LambdaQueryWrapper<T> strictGroupSize(Boolean strictGroupSize) {
+        this.strictGroupSize=strictGroupSize;
+        return this;
+    }
+
+    /**
      * 构建完整的搜索请求
      * @return 搜索请求对象
      */
@@ -810,6 +859,24 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         }
         if (roundDecimal != -1) {
             builder.roundDecimal(roundDecimal);
+        }
+        if(guaranteeTimestamp>0l){
+            builder.guaranteeTimestamp(guaranteeTimestamp);
+        }
+        if(gracefulTime>0l){
+            builder.gracefulTime(gracefulTime);
+        }
+        if(ignoreGrowing!=null){
+            builder.ignoreGrowing(ignoreGrowing);
+        }
+        if(groupByFieldName!=null&&!groupByFieldName.isEmpty()){
+            builder.groupByFieldName(groupByFieldName);
+        }
+        if(groupSize!=null&&groupSize>0){
+            builder.groupSize(groupSize);
+        }
+        if(strictGroupSize!=null){
+            builder.strictGroupSize(strictGroupSize);
         }
         // Set other parameters as needed
         return builder.build();

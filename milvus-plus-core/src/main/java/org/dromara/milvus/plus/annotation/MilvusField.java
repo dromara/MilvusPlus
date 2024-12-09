@@ -43,6 +43,12 @@ public @interface MilvusField {
     boolean autoID() default false;
 
     /**
+     * 是否允许为空
+     * @return
+     */
+    boolean nullable() default false;
+
+    /**
      * 字段描述
      */
     String description() default "";
@@ -73,6 +79,7 @@ public @interface MilvusField {
      * 启动分析器
      */
     boolean enableAnalyzer() default false;
+
 
     /**
      *
