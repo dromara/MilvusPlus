@@ -2,25 +2,19 @@ package org.dromara.milvus.plus.service;
 
 import io.milvus.v2.client.MilvusClientV2;
 import io.milvus.v2.service.vector.response.DeleteResp;
-import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.InsertResp;
 import io.milvus.v2.service.vector.response.UpsertResp;
-import org.dromara.milvus.plus.cache.ConversionCache;
-import org.dromara.milvus.plus.cache.MilvusCache;
-import org.dromara.milvus.plus.converter.SearchRespConverter;
 import org.dromara.milvus.plus.core.conditions.LambdaDeleteWrapper;
 import org.dromara.milvus.plus.core.conditions.LambdaInsertWrapper;
 import org.dromara.milvus.plus.core.conditions.LambdaQueryWrapper;
 import org.dromara.milvus.plus.core.conditions.LambdaUpdateWrapper;
 import org.dromara.milvus.plus.core.mapper.BaseMilvusMapper;
-import org.dromara.milvus.plus.model.MilvusEntity;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.model.vo.MilvusResult;
 import org.dromara.milvus.plus.util.MilvusSpringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -33,20 +27,15 @@ public class MilvusService implements IAMService,ICMService,IVecMService{
     }
 
     public <T> MilvusResp<List<MilvusResult<T>>> getById(Class<T> entityClass,Serializable... ids) {
-        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityClass.getName());
-        MilvusEntity milvusEntity = conversionCache.getMilvusEntity();
-        GetResp getResp = getByIds(milvusEntity.getCollectionName(),Arrays.asList(ids));
-        MilvusResp<List<MilvusResult<T>>> milvusResp = SearchRespConverter.convertGetRespToMilvusResp(getResp, entityClass);
-        return milvusResp;
+        BaseMilvusMapper<T> mapper=getBaseMilvusMapper();
+        LambdaQueryWrapper<T> lambda = mapper.lambda(entityClass, new LambdaQueryWrapper<>());
+        return lambda.getById(ids);
     }
 
     public <T>MilvusResp<DeleteResp> removeById(Class<T> entityClass,Serializable ... ids){
-        ConversionCache conversionCache = MilvusCache.milvusCache.get(entityClass.getName());
-        DeleteResp deleteResp = deleteByIds(conversionCache.getCollectionName(), Arrays.asList(ids));
-        MilvusResp<DeleteResp> resp = new MilvusResp<>();
-        resp.setData(deleteResp);
-        resp.setSuccess(true);
-        return resp;
+        BaseMilvusMapper<T> mapper=getBaseMilvusMapper();
+        LambdaDeleteWrapper<T> lambda = mapper.lambda(entityClass, new LambdaDeleteWrapper<>());
+        return lambda.removeById(ids);
     }
     public <T>MilvusResp<InsertResp> insert(T ... entities){
         Class<T> entityClass = getEntityClass(entities[0]);
