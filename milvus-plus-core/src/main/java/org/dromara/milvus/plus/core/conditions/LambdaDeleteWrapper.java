@@ -642,6 +642,10 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         super.not();
         return this;
     }
+    public LambdaDeleteWrapper<T> not(ConditionBuilder<T> other) {
+        super.not(other);
+        return this;
+    }
 
     public LambdaDeleteWrapper<T> id(Object id) {
         this.ids.add(id);

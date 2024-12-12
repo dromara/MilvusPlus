@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 public abstract class ConditionBuilder<T> {
 
     protected List<String> filters = new ArrayList<>();
-    protected List<String> textMatches =new ArrayList<>();
+    protected List<String> textMatches = new ArrayList<>();
+
     protected Map<String, Object> getPropertiesMap(T t) {
         Map<String, Object> propertiesMap = new HashMap<>();
         Class<?> clazz = t.getClass();
@@ -26,7 +27,7 @@ public abstract class ConditionBuilder<T> {
                 field.setAccessible(true); // 确保私有属性也可以访问
                 String fieldName = field.getName(); // 获取属性名
                 Object value = field.get(t); // 获取属性值
-                if(value!=null){
+                if (value != null) {
                     propertiesMap.put(fieldName, value); // 将属性名和属性值放入Map
                 }
             } catch (IllegalAccessException e) {
@@ -51,18 +52,21 @@ public abstract class ConditionBuilder<T> {
         textMatches.add(match);
         return this;
     }
+
     protected ConditionBuilder<T> textMatch(String fieldName, String value) {
         String match = "TEXT_MATCH(" + wrapFieldName(fieldName) + ", '" + value + "')";
         textMatches.add(match);
         return this;
     }
-    protected ConditionBuilder<T> textMatch(FieldFunction<T,?> fieldName, String value) {
-        textMatch(fieldName.getFieldName(fieldName),value);
+
+    protected ConditionBuilder<T> textMatch(FieldFunction<T, ?> fieldName, String value) {
+        textMatch(fieldName.getFieldName(fieldName), value);
         return this;
     }
-    protected ConditionBuilder<T> textMatch(FieldFunction<T,?> fieldName, List<String> values) {
-       textMatch(fieldName.getFieldName(fieldName),values);
-       return this;
+
+    protected ConditionBuilder<T> textMatch(FieldFunction<T, ?> fieldName, List<String> values) {
+        textMatch(fieldName.getFieldName(fieldName), values);
+        return this;
     }
 
     /**
@@ -233,32 +237,32 @@ public abstract class ConditionBuilder<T> {
         return this;
     }
 
-    public ConditionBuilder<T> eq(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> eq(FieldFunction<T, ?> fieldName, Object value) {
         return addFilter(fieldName, "==", value);
     }
 
-    public ConditionBuilder<T> ne(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> ne(FieldFunction<T, ?> fieldName, Object value) {
         return addFilter(fieldName, "!=", value);
     }
 
-    public ConditionBuilder<T> gt(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> gt(FieldFunction<T, ?> fieldName, Object value) {
         return addFilter(fieldName, ">", value);
     }
 
-    public ConditionBuilder<T> ge(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> ge(FieldFunction<T, ?> fieldName, Object value) {
         return addFilter(fieldName, ">=", value);
     }
 
-    public ConditionBuilder<T> lt(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> lt(FieldFunction<T, ?> fieldName, Object value) {
         return addFilter(fieldName, "<", value);
     }
 
-    public ConditionBuilder<T> le(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> le(FieldFunction<T, ?> fieldName, Object value) {
         return addFilter(fieldName, "<=", value);
     }
 
     // Range operation
-    public ConditionBuilder<T> between(FieldFunction<T,?> fieldName, Object start, Object end) {
+    public ConditionBuilder<T> between(FieldFunction<T, ?> fieldName, Object start, Object end) {
         String fn = getFieldName(fieldName);
         String filter = String.format("%s >= %s && %s <= %s", fn, convertValue(start), fn, convertValue(end));
         filters.add(filter);
@@ -266,20 +270,20 @@ public abstract class ConditionBuilder<T> {
     }
 
     // Null check
-    public ConditionBuilder<T> isNull(FieldFunction<T,?> fieldName) {
+    public ConditionBuilder<T> isNull(FieldFunction<T, ?> fieldName) {
         String fn = getFieldName(fieldName);
         filters.add(fn + " == null");
         return this;
     }
 
-    public ConditionBuilder<T> isNotNull(FieldFunction<T,?> fieldName) {
+    public ConditionBuilder<T> isNotNull(FieldFunction<T, ?> fieldName) {
         String fn = getFieldName(fieldName);
         filters.add(fn + " != null");
         return this;
     }
 
     // In operator
-    public ConditionBuilder<T> in(FieldFunction<T,?> fieldName, List<?> values) {
+    public ConditionBuilder<T> in(FieldFunction<T, ?> fieldName, List<?> values) {
         String fn = getFieldName(fieldName);
         String valueList = values.stream()
                 .map(this::convertValue)
@@ -289,45 +293,49 @@ public abstract class ConditionBuilder<T> {
     }
 
     // Like operator
-    public ConditionBuilder<T> like(FieldFunction<T,?> fieldName, String value) {
+    public ConditionBuilder<T> like(FieldFunction<T, ?> fieldName, String value) {
         String fn = getFieldName(fieldName);
         filters.add(fn + " like '%" + value + "%'");
         return this;
     }
+
     protected ConditionBuilder<T> likeLeft(String fieldName, String value) {
         filters.add(wrapFieldName(fieldName) + " like '" + value + "%'");
         return this;
     }
+
     protected ConditionBuilder<T> likeRight(String fieldName, String value) {
         filters.add(wrapFieldName(fieldName) + " like '%'" + value + "'");
         return this;
     }
-    protected ConditionBuilder<T> likeLeft(FieldFunction<T,?> fieldName, String value) {
+
+    protected ConditionBuilder<T> likeLeft(FieldFunction<T, ?> fieldName, String value) {
         String fn = getFieldName(fieldName);
         filters.add(fn + " like '" + value + "%'");
         return this;
     }
-    protected ConditionBuilder<T> likeRight(FieldFunction<T,?> fieldName, String value) {
+
+    protected ConditionBuilder<T> likeRight(FieldFunction<T, ?> fieldName, String value) {
         String fn = getFieldName(fieldName);
         filters.add(fn + " like '%" + value + "'");
         return this;
     }
 
     // JSON array operations
-    public ConditionBuilder<T> jsonContains(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> jsonContains(FieldFunction<T, ?> fieldName, Object value) {
         String fn = getFieldName(fieldName);
         filters.add("JSON_CONTAINS(" + fn + ", " + convertValue(value) + ")");
         return this;
     }
 
-    public ConditionBuilder<T> jsonContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
+    public ConditionBuilder<T> jsonContainsAll(FieldFunction<T, ?> fieldName, List<?> values) {
         String fn = getFieldName(fieldName);
         String valueList = convertValues(values);
         filters.add("JSON_CONTAINS_ALL(" + fn + ", " + valueList + ")");
         return this;
     }
 
-    public ConditionBuilder<T> jsonContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
+    public ConditionBuilder<T> jsonContainsAny(FieldFunction<T, ?> fieldName, List<?> values) {
         String fn = getFieldName(fieldName);
         String valueList = convertValues(values);
         filters.add("JSON_CONTAINS_ANY(" + fn + ", " + valueList + ")");
@@ -335,26 +343,27 @@ public abstract class ConditionBuilder<T> {
     }
 
     // Array operations
-    public ConditionBuilder<T> arrayContains(FieldFunction<T,?> fieldName, Object value) {
+    public ConditionBuilder<T> arrayContains(FieldFunction<T, ?> fieldName, Object value) {
         String fn = getFieldName(fieldName);
         filters.add("ARRAY_CONTAINS(" + fn + ", " + convertValue(value) + ")");
         return this;
     }
 
-    public ConditionBuilder<T> arrayContainsAll(FieldFunction<T,?> fieldName, List<?> values) {
+    public ConditionBuilder<T> arrayContainsAll(FieldFunction<T, ?> fieldName, List<?> values) {
         String fn = getFieldName(fieldName);
         String valueList = convertValues(values);
         filters.add("ARRAY_CONTAINS_ALL(" + fn + ", " + valueList + ")");
         return this;
     }
-    public ConditionBuilder<T> arrayContainsAny(FieldFunction<T,?> fieldName, List<?> values) {
+
+    public ConditionBuilder<T> arrayContainsAny(FieldFunction<T, ?> fieldName, List<?> values) {
         String fn = getFieldName(fieldName);
         String valueList = convertValues(values);
         filters.add("ARRAY_CONTAINS_ANY(" + fn + ", " + valueList + ")");
         return this;
     }
 
-    public ConditionBuilder<T> arrayLength(FieldFunction<T,?> fieldName, int length) {
+    public ConditionBuilder<T> arrayLength(FieldFunction<T, ?> fieldName, int length) {
         String fn = getFieldName(fieldName);
         filters.add(fn + ".length() == " + length);
         return this;
@@ -372,7 +381,14 @@ public abstract class ConditionBuilder<T> {
     }
 
     public ConditionBuilder<T> not() {
-        filters.add("not (" + String.join(" && ", filters) + ")");
+        String filter="not (" + String.join(" && ", filters) + ")";
+        filters.clear();
+        filters.add(filter);
+        return this;
+    }
+
+    public ConditionBuilder<T> not(ConditionBuilder<T> other){
+        filters.add("not ("+String.join(" && ",other.filters)+")");
         return this;
     }
 

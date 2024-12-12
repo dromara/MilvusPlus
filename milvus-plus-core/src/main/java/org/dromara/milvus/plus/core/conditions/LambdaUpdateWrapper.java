@@ -647,6 +647,10 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         super.not();
         return this;
     }
+    public LambdaUpdateWrapper<T> not(ConditionBuilder<T> other) {
+        super.not(other);
+        return this;
+    }
 
     /**
      * 构建完整的删除请求
