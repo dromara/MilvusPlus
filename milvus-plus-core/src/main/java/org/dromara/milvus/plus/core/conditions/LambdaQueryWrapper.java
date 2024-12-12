@@ -654,6 +654,10 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         super.not();
         return this;
     }
+    public LambdaQueryWrapper<T> not(ConditionBuilder<T> other) {
+        super.not(other);
+        return this;
+    }
 
     public LambdaQueryWrapper<T> annsField(String annsField){
         this.annsField=annsField;
