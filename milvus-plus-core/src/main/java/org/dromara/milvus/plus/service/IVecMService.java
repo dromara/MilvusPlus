@@ -7,6 +7,7 @@ import io.milvus.v2.common.ConsistencyLevel;
 import io.milvus.v2.service.vector.request.*;
 import io.milvus.v2.service.vector.request.data.BaseVector;
 import io.milvus.v2.service.vector.response.*;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,12 +33,15 @@ public interface IVecMService {
             List<Object> ids
     ) throws MilvusException {
         MilvusClientV2 client = getClient();
-        DeleteReq deleteReq = DeleteReq.builder()
+        DeleteReq.DeleteReqBuilder<?, ?> o = DeleteReq.builder()
                 .collectionName(collectionName)
-                .partitionName(partitionName)
-                .filter(filter)
-                .ids(ids)
-                .build();
+                .partitionName(partitionName);
+        if(!CollectionUtils.isEmpty(ids)){
+            o.ids(ids);
+        }else {
+            o.filter(filter);
+        }
+        DeleteReq deleteReq = o.build();
         return client.delete(deleteReq);
     }
 
