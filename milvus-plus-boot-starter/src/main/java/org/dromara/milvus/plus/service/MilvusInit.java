@@ -47,7 +47,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Initializ
         return client;
     }
 
-    private void maybePrintBanner() {
+    public void maybePrintBanner() {
         if (milvusPropertiesConfiguration.isPrintBanner()) {
             printBanner();
         }
