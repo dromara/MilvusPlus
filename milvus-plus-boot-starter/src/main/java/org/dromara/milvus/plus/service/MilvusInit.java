@@ -31,7 +31,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Initializ
     }
 
     public void initialize() {
-        printBanner();
+        maybePrintBanner();
         LogLevelController.setLoggingEnabledForPackage("org.dromara.milvus.plus",
                 milvusPropertiesConfiguration.isOpenLog(),
                 milvusPropertiesConfiguration.getLogLevel());
@@ -45,6 +45,12 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Initializ
     @Bean
     public MilvusClientV2 milvusClientV2() {
         return client;
+    }
+
+    private void maybePrintBanner() {
+        if (milvusPropertiesConfiguration.isPrintBanner()) {
+            printBanner();
+        }
     }
 
     public void printBanner() {

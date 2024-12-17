@@ -22,4 +22,5 @@ public class MilvusPropertiesConfiguration {
     private List<String> packages;
     private boolean openLog;
     private String logLevel;
+    private boolean isPrintBanner = true;
 }
