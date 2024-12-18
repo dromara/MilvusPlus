@@ -37,7 +37,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Lifecycle
     }
 
     public void maybePrintBanner(MilvusPropertiesConfiguration propertiesConfiguration) {
-        if (propertiesConfiguration.isPrintBanner()) {
+        if (propertiesConfiguration.isBanner()) {
             printBanner();
         }
     }
