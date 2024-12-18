@@ -16,7 +16,7 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Lifecycle
     //see https://solon.noear.org/article/324
     @Bean
     public MilvusClientV2 init(MilvusPropertiesConfiguration milvusPropertiesConfiguration) {
-        printBanner();
+        maybePrintBanner(milvusPropertiesConfiguration);
         LogLevelController.setLoggingEnabledForPackage("org.dromara.milvus.plus",
                 milvusPropertiesConfiguration.isOpenLog(),
                 milvusPropertiesConfiguration.getLogLevel());
@@ -34,6 +34,12 @@ public class MilvusInit extends AbstractMilvusClientBuilder implements Lifecycle
 
     public void stop() throws Throwable {
       //  super.close();
+    }
+
+    public void maybePrintBanner(MilvusPropertiesConfiguration propertiesConfiguration) {
+        if (propertiesConfiguration.isBanner()) {
+            printBanner();
+        }
     }
 
     public void printBanner() {
