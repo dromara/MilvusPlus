@@ -676,6 +676,9 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
     public MilvusResp<UpsertResp> update(T entity) throws MilvusException {
         // 获取主键字段
         String primaryKeyField = CollectionToPrimaryCache.collectionToPrimary.get(collectionName);
+        if (StringUtils.isNotEmpty(primaryKeyField)) {
+            throw new MilvusException("not find primary key", 400);
+        }
         // 将实体转换为属性映射
         Map<String, Object> propertiesMap = getPropertiesMap(entity);
         PropertyCache propertyCache = conversionCache.getPropertyCache();
@@ -695,8 +698,11 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
                 hasPrimaryKey = true;
                 primaryKeyValue = value;
             }
-            // 添加到更新对象
-            GsonUtil.put(updateObject,tableNameColumn, value);
+            // 校验是否为空
+            if (StringUtils.isNotEmpty(tableNameColumn)) {
+                // 添加到更新对象
+                GsonUtil.put(updateObject,tableNameColumn, value);
+            }
         }
         // 检查是否需要构建查询条件
         boolean needBuildQuery = !hasPrimaryKey;
@@ -783,7 +789,9 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
                 Object value = entry.getValue();
                 // 根据PropertyCache转换属性名
                 String tk = propertyCache.functionToPropertyMap.get(key);
-                GsonUtil.put(jsonObject,tk, value);
+                if (StringUtils.isNotEmpty(tk)) {
+                    GsonUtil.put(jsonObject,tk, value);
+                }
             }
             // 检查是否包含主键
             if (!jsonObject.has(pk)) {

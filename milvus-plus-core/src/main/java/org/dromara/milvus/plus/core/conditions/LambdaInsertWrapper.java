@@ -114,7 +114,9 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 String tk = propertyCache.functionToPropertyMap.get(key);
-                GsonUtil.put(jsonObject,tk,value);
+                if (StringUtils.isNotEmpty(tk)) {
+                    GsonUtil.put(jsonObject,tk,value);
+                }
             }
             if(conversionCache.isAutoID()){
                 GsonUtil.put(jsonObject,pk,IdWorkerUtils.nextId());
