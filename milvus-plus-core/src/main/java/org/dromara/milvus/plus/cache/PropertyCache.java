@@ -9,6 +9,8 @@ public class PropertyCache {
 
     public Map<String, String> functionToPropertyMap = new HashMap<>(); //属性名称->集合属性名称
 
+    public Map<String, Boolean> nullableToPropertyMap = new HashMap<>(); //属性名称->是否允许为空
+
     public Map<String, String> methodToPropertyMap = new HashMap<>(); //属性get方法名称->集合属性名称
 
 

@@ -100,6 +100,7 @@ public class MilvusConverter {
             String fieldName = fieldAnnotation.name().isEmpty() ? field.getName() : fieldAnnotation.name();
             // 缓存属性名与函数名的映射
             propertyCache.functionToPropertyMap.put(field.getName(), fieldName);
+            propertyCache.nullableToPropertyMap.put(field.getName(),fieldAnnotation.nullable());
             propertyCache.methodToPropertyMap.put(getGetMethodName(field), fieldName);
             // 处理主键字段
             if (fieldAnnotation.isPrimaryKey()) {
