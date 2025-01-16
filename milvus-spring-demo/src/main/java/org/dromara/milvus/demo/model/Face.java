@@ -63,16 +63,10 @@ public class Face {
 
 
     //后续添加
-    @MilvusField(
-            name = "sex",
-            dataType = DataType.VarChar
-    )
+
     private String sex;
 
-    @MilvusField(
-            name = "age",
-            dataType = DataType.Int16
-    )
+
     private Integer age;
 
 }
