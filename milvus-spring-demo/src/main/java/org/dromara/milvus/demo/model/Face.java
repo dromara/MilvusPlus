@@ -38,13 +38,13 @@ public class Face {
     )
     private Integer temp;
 
-    @MilvusField(
-            name = "text",
-            dataType = DataType.VarChar,
-            enableAnalyzer = true,
-            enableMatch = true
-    )
-    private String text; // 文本
+//    @MilvusField(
+//            name = "text",
+//            dataType = DataType.VarChar,
+//            enableAnalyzer = true,
+//            enableMatch = true
+//    )
+//    private String text; // 文本
 
     @MilvusField(
             name = "face_vector", // 字段名称
@@ -62,11 +62,11 @@ public class Face {
     private List<Float> faceVector; // 存储人脸特征的向量
 
 
-    //后续添加
-
-    private String sex;
-
-
-    private Integer age;
+//    //后续添加
+//
+//    private String sex;
+//
+//
+//    private Integer age;
 
 }

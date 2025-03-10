@@ -1,0 +1,3 @@
+org.dromara.milvus.plus.log.spi.impl.LogbackAdapter
+org.dromara.milvus.plus.log.spi.impl.Log4j2Adapter
+org.dromara.milvus.plus.log.spi.impl.JulAdapter
