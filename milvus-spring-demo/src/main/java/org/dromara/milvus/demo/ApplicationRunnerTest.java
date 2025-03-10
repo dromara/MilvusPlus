@@ -119,9 +119,9 @@ public class ApplicationRunnerTest implements ApplicationRunner {
                     person.setImages(Lists.newArrayList("https://baidu.com"));
                     faceTmp.setPerson(person);
                     faceTmp.setTemp(i%2==0?11:22);
-                    faceTmp.setText(i % 2 == 0 ?"nformation retrieval is a field of study.":"information retrieval focuses on finding relevant information in large datasets.");
-                    faceTmp.setAge(10);
-                    faceTmp.setSex("男");
+//                    faceTmp.setText(i % 2 == 0 ?"nformation retrieval is a field of study.":"information retrieval focuses on finding relevant information in large datasets.");
+//                    faceTmp.setAge(10);
+//                    faceTmp.setSex("男");
                     return faceTmp;
                 })
                 .collect(Collectors.toList());
