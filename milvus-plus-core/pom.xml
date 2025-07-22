@@ -10,6 +10,7 @@
     </parent>
     <artifactId>milvus-plus-core</artifactId>
     <packaging>jar</packaging>
+    <name>milvus-plus-core</name>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

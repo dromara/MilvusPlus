@@ -151,9 +151,9 @@ public class MilvusConverter {
                     .filter(dimension -> dimension > 0).ifPresent(
                             dimension -> {
                                 builder.dimension(dimension);
-                               if (!isListFloat(field)) {
-                                   throw new IllegalArgumentException("Vector field type mismatch");
-                                }
+//                               if (!isListFloat(field)) {
+//                                   throw new IllegalArgumentException("Vector field type mismatch");
+//                                }
                             } );
             // 数组字段的最大长度
             Optional.of(fieldAnnotation.maxLength())
