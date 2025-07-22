@@ -10,6 +10,7 @@
     </parent>
     <artifactId>milvus-plus-boot-starter</artifactId>
     <packaging>jar</packaging>
+    <name>milvus-plus-boot-starter</name>
 
     <dependencies>
         <dependency>

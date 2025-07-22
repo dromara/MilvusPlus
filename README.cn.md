@@ -8,7 +8,7 @@
   <img src="./logo/milvus.png" alt="MilvusPlus" style="border-radius: 10px;" />
 </div>
 
-> 🔥🔥🔥[MilvusPlus](https://milvus-plus.dromara.org)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
+> 🔥🔥🔥[MilvusPlus](https://milvus-plus.m78cloud.cn)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
 
 ## 特性
 
@@ -31,7 +31,7 @@
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.2.4</version>
+    <version>2.2.5</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Spring应用支持：
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.2.4</version>
+    <version>2.2.5</version>
 </dependency>
 ```
 
@@ -51,7 +51,7 @@ Solon应用支持：
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.2.4</version>
+    <version>2.2.5</version>
 </dependency>
 ```
 

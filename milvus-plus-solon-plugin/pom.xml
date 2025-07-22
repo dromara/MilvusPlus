@@ -11,7 +11,7 @@
     </parent>
     <artifactId>milvus-plus-solon-plugin</artifactId>
     <packaging>jar</packaging>
-
+    <name>milvus-plus-solon-plugin</name>
 
     <dependencies>
         <dependency>
