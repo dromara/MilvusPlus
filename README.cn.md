@@ -8,7 +8,7 @@
   <img src="./logo/milvus.png" alt="MilvusPlus" style="border-radius: 10px;" />
 </div>
 
-> 🔥🔥🔥[MilvusPlus](https://milvus-plus.dromara.org)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
+> 🔥🔥🔥[MilvusPlus](https://milvus-plus.m78cloud.cn)（简称 MP）是一个 [Milvus](https://milvus.io) 的操作工具，旨在简化与 Milvus 向量数据库的交互，为开发者提供类似 MyBatis-Plus 注解和方法调用风格的直观 API,提高效率而生。
 
 ## 特性
 

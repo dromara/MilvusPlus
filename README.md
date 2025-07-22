@@ -6,7 +6,7 @@
   <img src="./logo/milvus.png" alt="MilvusPlus" style="border-radius: 10px;" />
 </div>
 
-> 🔥🔥🔥 [MilvusPlus](https://milvus-plus.dromara.org) (short for MP) is an operational tool for [Milvus](https://milvus.io), designed to simplify interactions with the Milvus vector database, providing developers with an intuitive API similar to MyBatis-Plus annotations and method call style, born to improve efficiency.
+> 🔥🔥🔥 [MilvusPlus](https://milvus-plus.m78cloud.cn) (short for MP) is an operational tool for [Milvus](https://milvus.io), designed to simplify interactions with the Milvus vector database, providing developers with an intuitive API similar to MyBatis-Plus annotations and method call style, born to improve efficiency.
 
 ## Features
 
