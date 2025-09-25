@@ -76,6 +76,11 @@ public @interface MilvusField {
     boolean isPartitionKey() default false;
 
     /**
+     * 分区键为true时, 分区数量
+     */
+    int numPartitions() default -1;
+
+    /**
      * 启动分析器
      */
     boolean enableAnalyzer() default false;
