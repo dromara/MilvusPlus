@@ -116,6 +116,8 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
                 String tk = propertyCache.functionToPropertyMap.get(key);
                 if (StringUtils.isNotEmpty(tk)) {
                     GsonUtil.put(jsonObject,tk,value);
+                } else if (conversionCache.getMilvusEntity().getEnableDynamicField()){
+                    GsonUtil.put(jsonObject,key,value);
                 }
             }
             if(conversionCache.isAutoID()){
