@@ -21,4 +21,5 @@ public class MilvusEntity {
     private ConsistencyLevel consistencyLevel;
     private Boolean enableDynamicField;
     private List<CreateCollectionReq.Function> functions;
+    private Integer numPartitions;
 }
