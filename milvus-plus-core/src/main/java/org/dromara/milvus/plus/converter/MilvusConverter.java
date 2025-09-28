@@ -106,6 +106,9 @@ public class MilvusConverter {
             if (fieldAnnotation.isPrimaryKey()) {
                 CollectionToPrimaryCache.collectionToPrimary.put(collectionName, fieldName);
             }
+            if (fieldAnnotation.isPartitionKey()) {
+                milvus.setNumPartitions(fieldAnnotation.numPartitions());
+            }
             // 构建Milvus字段描述
             AddFieldReq.AddFieldReqBuilder<?, ?> builder = AddFieldReq.builder()
                     .fieldName(fieldName)
@@ -263,6 +266,7 @@ public class MilvusConverter {
         schemaBuilder.addField(milvusEntity.getMilvusFields().toArray(new AddFieldReq[0]));
         schemaBuilder.addConsistencyLevel(milvusEntity.getConsistencyLevel());
         schemaBuilder.addFun(milvusEntity.getFunctions());
+        schemaBuilder.addNumPartitions(milvusEntity.getNumPartitions());
         log.info("-------create schema---------");
         schemaBuilder.createSchema();
         log.info("-------create schema fun---------");

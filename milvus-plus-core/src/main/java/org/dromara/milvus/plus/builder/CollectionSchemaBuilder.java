@@ -21,6 +21,7 @@ public class CollectionSchemaBuilder {
     private ConsistencyLevel consistencyLevel=ConsistencyLevel.BOUNDED;
     private Boolean enableDynamicField=false;
     private List<CreateCollectionReq.Function> functions;
+    private Integer numPartitions;
 
 
     public CollectionSchemaBuilder(Boolean enableDynamicField,String collectionName, MilvusClientV2 wrapper) {
@@ -51,6 +52,14 @@ public class CollectionSchemaBuilder {
             schema.addFunction(function);
         }
     }
+
+    public void addNumPartitions(Integer numPartitions){
+        if (numPartitions < 1) {
+            return;
+        }
+        this.numPartitions=numPartitions;
+    }
+
     public void addConsistencyLevel(ConsistencyLevel level){
         this.consistencyLevel=level;
     }
@@ -63,7 +72,8 @@ public class CollectionSchemaBuilder {
                 collectionName(this.collectionName).
                 collectionSchema(this.schema).
                 consistencyLevel(this.consistencyLevel).
-                enableDynamicField(this.enableDynamicField)
+                enableDynamicField(this.enableDynamicField).
+                numPartitions(this.numPartitions)
                 .build();
         wrapper.createCollection(req);
     }
