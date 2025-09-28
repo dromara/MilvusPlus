@@ -41,7 +41,13 @@ public class SearchRespConverter {
                     Map<String, Object> entityMap = new HashMap<>();
                     for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
                         String key = propertyCache.findKeyByValue(entry.getKey());
-                        if(key!=null){
+                        if (conversionCache.getMilvusEntity().getEnableDynamicField()
+                                && "$meta".equals(entry.getKey())) {
+                            if (entry.getValue() == null) {
+                                continue;
+                            }
+                            entityMap.putAll(GsonUtil.fromJsonToMap(entry.getValue().toString()));
+                        } else if(key!=null){
                             Object value = entry.getValue();
                             entityMap.put(key,value);
                         }
