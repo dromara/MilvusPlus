@@ -859,6 +859,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
         }
+        if (CollectionUtils.isEmpty(outputMetaFields) && !CollectionUtils.isEmpty(conversionCache.getPropertyCache().metaFunctionSet)) {
+            outputMetaFields = new ArrayList<>(conversionCache.getPropertyCache().metaFunctionSet);
+        }
         if (!searchParams.isEmpty()) {
             builder.searchParams(searchParams);
         }
@@ -915,6 +918,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
         }
+        if (CollectionUtils.isEmpty(outputMetaFields) && !CollectionUtils.isEmpty(conversionCache.getPropertyCache().metaFunctionSet)) {
+            outputMetaFields = new ArrayList<>(conversionCache.getPropertyCache().metaFunctionSet);
+        }
         return builder.build();
     }
     private HybridSearchReq buildHybrid(){
@@ -955,6 +961,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         } else {
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             reqBuilder.outFields(new ArrayList<>(values));
+        }
+        if (CollectionUtils.isEmpty(outputMetaFields) && !CollectionUtils.isEmpty(conversionCache.getPropertyCache().metaFunctionSet)) {
+            outputMetaFields = new ArrayList<>(conversionCache.getPropertyCache().metaFunctionSet);
         }
         if (!CollectionUtils.isEmpty(partitionNames)) {
             reqBuilder.partitionNames(partitionNames);
