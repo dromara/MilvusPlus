@@ -96,6 +96,8 @@ public class MilvusConverter {
             if (Objects.isNull(fieldAnnotation)) {
                 if (collectionAnnotation.enableDynamicField()) {
                     propertyCache.functionToPropertyMap.put("$meta", "$meta");
+                    propertyCache.metaFunctionSet.add(field.getName());
+                    propertyCache.metaMethodMap.put(getGetMethodName(field), field.getName());
                 }
                 continue;
             }
