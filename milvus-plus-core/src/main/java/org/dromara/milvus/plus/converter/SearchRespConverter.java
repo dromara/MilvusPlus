@@ -3,6 +3,7 @@ package org.dromara.milvus.plus.converter;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
+import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
@@ -42,7 +43,8 @@ public class SearchRespConverter {
                     for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
                         String key = propertyCache.findKeyByValue(entry.getKey());
                         if (conversionCache.getMilvusEntity().getEnableDynamicField()
-                                && "$meta".equals(entry.getKey())) {
+                                && "$meta".equals(entry.getKey())
+                                && CollectionUtils.isNotEmpty(outputMetaFields)) {
                             if (entry.getValue() == null) {
                                 continue;
                             }
@@ -110,7 +112,7 @@ public class SearchRespConverter {
      * @param entityType 需要转换成的实体类型，指定了转换的目标。
      * @return MilvusResp对象，包含转换后的实体列表。每个实体都包装在一个MilvusResult对象中，同时设置成功状态为true。
      */
-    private static <T> MilvusResp<List<MilvusResult<T>>> convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType, List<String> outputFields){
+    private static <T> MilvusResp<List<MilvusResult<T>>> convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType, List<String> outputMetaFields){
         // 初始化转换缓存和属性缓存，用于帮助将查询结果映射到Java实体
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
@@ -125,7 +127,8 @@ public class SearchRespConverter {
                 String key = propertyCache.findKeyByValue(entry.getKey());
                 if (conversionCache.getMilvusEntity().getEnableDynamicField()
                         && propertyCache.metaFunctionSet.contains(entry.getKey())
-                        && outputFields.contains(entry.getKey())) {
+                        && CollectionUtils.isNotEmpty(outputMetaFields)
+                        && outputMetaFields.contains(entry.getKey())) {
                     entityMap2.put(String.valueOf(entry.getKey()), entry.getValue());
                 } else if(key!=null){
                     Object value = entry.getValue();
