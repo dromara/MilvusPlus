@@ -94,6 +94,11 @@ public class MilvusConverter {
         for (Field field : fields) {
             MilvusField fieldAnnotation = field.getAnnotation(MilvusField.class);
             if (Objects.isNull(fieldAnnotation)) {
+                if (collectionAnnotation.enableDynamicField()) {
+                    propertyCache.functionToPropertyMap.put("$meta", "$meta");
+                    propertyCache.metaFunctionSet.add(field.getName());
+                    propertyCache.metaMethodMap.put(getGetMethodName(field), field.getName());
+                }
                 continue;
             }
             // 处理字段名，优先使用注解中的字段名，若无则用反射获取的字段名

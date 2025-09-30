@@ -54,7 +54,7 @@ public class CollectionSchemaBuilder {
     }
 
     public void addNumPartitions(Integer numPartitions){
-        if (numPartitions < 1) {
+        if (numPartitions == null || numPartitions < 1) {
             return;
         }
         this.numPartitions=numPartitions;

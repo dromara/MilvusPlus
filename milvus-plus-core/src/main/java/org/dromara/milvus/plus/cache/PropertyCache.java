@@ -1,7 +1,10 @@
 package org.dromara.milvus.plus.cache;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 /**
  * @author xgc
  **/
@@ -13,6 +16,9 @@ public class PropertyCache {
 
     public Map<String, String> methodToPropertyMap = new HashMap<>(); //属性get方法名称->集合属性名称
 
+    public Set<String> metaFunctionSet = new HashSet<>(); //动态字段属性名称
+
+    public Map<String, String> metaMethodMap = new HashMap<>(); //属性get方法名称
 
     // 根据值查找第一个匹配的键
     public String findKeyByValue(String value) {

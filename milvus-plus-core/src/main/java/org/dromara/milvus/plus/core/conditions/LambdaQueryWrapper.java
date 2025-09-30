@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wrapper<LambdaQueryWrapper<T>, T> {
     private ConversionCache conversionCache;
     private List<String> outputFields;
+    private List<String> outputMetaFields;
     private Class<T> entityType;
     private String collectionName;
     private String collectionAlias;
@@ -858,6 +859,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
         }
+        if (CollectionUtils.isEmpty(outputMetaFields) && !CollectionUtils.isEmpty(conversionCache.getPropertyCache().metaFunctionSet)) {
+            outputMetaFields = new ArrayList<>(conversionCache.getPropertyCache().metaFunctionSet);
+        }
         if (!searchParams.isEmpty()) {
             builder.searchParams(searchParams);
         }
@@ -914,6 +918,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             builder.outputFields(new ArrayList<>(values));
         }
+        if (CollectionUtils.isEmpty(outputMetaFields) && !CollectionUtils.isEmpty(conversionCache.getPropertyCache().metaFunctionSet)) {
+            outputMetaFields = new ArrayList<>(conversionCache.getPropertyCache().metaFunctionSet);
+        }
         return builder.build();
     }
     private HybridSearchReq buildHybrid(){
@@ -955,6 +962,9 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
             Collection<String> values = conversionCache.getPropertyCache().functionToPropertyMap.values();
             reqBuilder.outFields(new ArrayList<>(values));
         }
+        if (CollectionUtils.isEmpty(outputMetaFields) && !CollectionUtils.isEmpty(conversionCache.getPropertyCache().metaFunctionSet)) {
+            outputMetaFields = new ArrayList<>(conversionCache.getPropertyCache().metaFunctionSet);
+        }
         if (!CollectionUtils.isEmpty(partitionNames)) {
             reqBuilder.partitionNames(partitionNames);
         }
@@ -977,18 +987,18 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
                         HybridSearchReq hybridSearchReq = buildHybrid();
                         log.info("Build HybridSearch Param--> {}", GsonUtil.toJson(hybridSearchReq));
                         SearchResp searchResp = client.hybridSearch(hybridSearchReq);
-                        return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
+                        return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType, outputMetaFields);
                     }
                     if (!vectors.isEmpty()) {
                         SearchReq searchReq = buildSearch();
                         log.info("Build Search Param--> {}", GsonUtil.toJson(searchReq));
                         SearchResp searchResp = client.search(searchReq);
-                        return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType);
+                        return SearchRespConverter.convertSearchRespToMilvusResp(searchResp, entityType, outputMetaFields);
                     } else {
                         QueryReq queryReq = buildQuery();
                         log.info("Build Query param--> {}", GsonUtil.toJson(queryReq));
                         QueryResp queryResp = client.query(queryReq);
-                        return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType);
+                        return SearchRespConverter.convertGetRespToMilvusResp(queryResp, entityType, outputMetaFields);
                     }
                 },
                 "collection not loaded",
@@ -1002,7 +1012,15 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     public MilvusResp<List<MilvusResult<T>>> query(FieldFunction<T, ?>... outputFields) throws MilvusException {
         List<String> otf = new ArrayList<>();
         for (FieldFunction<T, ?> outputField : outputFields) {
-            otf.add(outputField.getFieldName(outputField));
+            String methodName = outputField.getSerializedLambda(outputField).getImplMethodName();
+            if (conversionCache.getMilvusEntity().getEnableDynamicField() &&
+                    conversionCache.getPropertyCache().metaMethodMap.containsKey(methodName)){
+                outputMetaFields = Optional.ofNullable(outputMetaFields).orElse(new ArrayList<>());
+                outputMetaFields.add(conversionCache.getPropertyCache().metaMethodMap.get(methodName));
+                otf.add("$meta");
+            } else {
+                otf.add(outputField.getFieldName(outputField));
+            }
         }
         this.outputFields = otf;
         return query();
@@ -1027,7 +1045,19 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
     }
 
     public MilvusResp<List<MilvusResult<T>>> query(String... outputFields) throws MilvusException {
-        this.outputFields = Arrays.stream(outputFields).collect(Collectors.toList());
+        this.outputFields = Arrays.stream(outputFields)
+                .map(field -> {
+                    String milvusField = conversionCache.getPropertyCache().functionToPropertyMap.get(field);
+                    if (milvusField == null &&
+                            conversionCache.getMilvusEntity().getEnableDynamicField() &&
+                            conversionCache.getPropertyCache().metaFunctionSet.contains(field)) {
+                        outputMetaFields = Optional.ofNullable(outputMetaFields).orElse(new ArrayList<>());
+                        outputMetaFields.add(field);
+                        return "$meta";
+                    }
+                    return milvusField;
+                })
+                .collect(Collectors.toList());
         return query();
     }
 
@@ -1041,7 +1071,7 @@ public class LambdaQueryWrapper<T> extends AbstractChainWrapper<T> implements Wr
         GetReq getReq = builder.build();
         GetResp getResp = client.get(getReq);
 
-        return SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType);
+        return SearchRespConverter.convertGetRespToMilvusResp(getResp, entityType, outputMetaFields);
     }
 
     @Override
