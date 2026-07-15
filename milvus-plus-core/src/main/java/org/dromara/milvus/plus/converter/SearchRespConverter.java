@@ -3,7 +3,6 @@ package org.dromara.milvus.plus.converter;
 import io.milvus.v2.service.vector.response.GetResp;
 import io.milvus.v2.service.vector.response.QueryResp;
 import io.milvus.v2.service.vector.response.SearchResp;
-import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.cache.PropertyCache;
@@ -28,7 +27,7 @@ public class SearchRespConverter {
      * @param entityType 指定的Java实体类类型，用于将搜索结果的每个实体转换为该类型。
      * @return 转换后的MilvusResp对象，其中包含了列表形式的搜索结果以及操作是否成功的标志。
      */
-    public static <T> MilvusResp<List<MilvusResult<T>>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType, List<String> outputMetaFields) {
+    public static <T> MilvusResp<List<MilvusResult<T>>> convertSearchRespToMilvusResp(SearchResp searchResp, Class<T> entityType) {
         // 从缓存中获取对应实体类型的转换缓存和属性缓存
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
@@ -42,18 +41,7 @@ public class SearchRespConverter {
                     Map<String, Object> entityMap = new HashMap<>();
                     for (Map.Entry<String, Object> entry : searchResult.getEntity().entrySet()) {
                         String key = propertyCache.findKeyByValue(entry.getKey());
-                        if (conversionCache.getMilvusEntity().getEnableDynamicField()
-                                && "$meta".equals(entry.getKey())
-                                && CollectionUtils.isNotEmpty(outputMetaFields)) {
-                            if (entry.getValue() == null) {
-                                continue;
-                            }
-                            Map<String, Object> metaMap = GsonUtil.fromJsonToMap(entry.getValue().toString());
-                            //metaFunctionSet 类型匹配，并完成 map 放入 entityMap 的操作
-                            metaMap.entrySet().stream()
-                                    .filter(mapEntry -> propertyCache.metaFunctionSet.contains(String.valueOf(mapEntry.getKey())) && outputMetaFields.contains(mapEntry.getKey()))
-                                    .forEach(mapEntry -> entityMap.put(String.valueOf(mapEntry.getKey()), mapEntry.getValue()));
-                        } else if(key!=null){
+                        if(key!=null){
                             Object value = entry.getValue();
                             entityMap.put(key,value);
                         }
@@ -81,10 +69,10 @@ public class SearchRespConverter {
      * @param entityType 实体类型，用于泛型结果的类型转换。
      * @return 返回一个包含Milvus结果列表的MilvusResp对象。
      */
-    public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(QueryResp getResp, Class<T> entityType, List<String> outputMetaFields) {
+    public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(QueryResp getResp, Class<T> entityType) {
         // 从QueryResp中提取查询结果
         List<QueryResp.QueryResult> queryResults = getResp.getQueryResults();
-        return convertQuery(queryResults, entityType, outputMetaFields);
+        return convertQuery(queryResults, entityType);
     }
     public static MilvusResp<Long> convertGetRespToCount(QueryResp getResp) {
         // 从QueryResp中提取查询结果
@@ -98,10 +86,10 @@ public class SearchRespConverter {
      * @param entityType 实体类型，用于泛型结果的类型转换。
      * @return 返回一个包含Milvus结果列表的MilvusResp对象。
      */
-    public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType, List<String> outputMetaFields) {
+    public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType) {
         // 从GetResp中提取结果
-        List<QueryResp.QueryResult> getResults = getResp.getResults;
-        return convertQuery(getResults, entityType, outputMetaFields);
+        List<QueryResp.QueryResult> getResults = getResp.getGetResults();
+        return convertQuery(getResults, entityType);
     }
 
 
@@ -112,7 +100,7 @@ public class SearchRespConverter {
      * @param entityType 需要转换成的实体类型，指定了转换的目标。
      * @return MilvusResp对象，包含转换后的实体列表。每个实体都包装在一个MilvusResult对象中，同时设置成功状态为true。
      */
-    private static <T> MilvusResp<List<MilvusResult<T>>> convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType, List<String> outputMetaFields){
+    private static <T> MilvusResp<List<MilvusResult<T>>> convertQuery(List<QueryResp.QueryResult> getResults, Class<T> entityType){
         // 初始化转换缓存和属性缓存，用于帮助将查询结果映射到Java实体
         ConversionCache conversionCache = MilvusCache.milvusCache.get(entityType.getName());
         PropertyCache propertyCache = conversionCache.getPropertyCache();
@@ -125,12 +113,7 @@ public class SearchRespConverter {
             // 通过属性缓存转换键名，以适应Java实体的字段命名
             for (Map.Entry<String, Object> entry : entityMap.entrySet()) {
                 String key = propertyCache.findKeyByValue(entry.getKey());
-                if (conversionCache.getMilvusEntity().getEnableDynamicField()
-                        && propertyCache.metaFunctionSet.contains(entry.getKey())
-                        && CollectionUtils.isNotEmpty(outputMetaFields)
-                        && outputMetaFields.contains(entry.getKey())) {
-                    entityMap2.put(String.valueOf(entry.getKey()), entry.getValue());
-                } else if(key!=null){
+                if(key!=null){
                     Object value = entry.getValue();
                     entityMap2.put(key,value);
                 }

@@ -14,6 +14,7 @@ import org.dromara.milvus.plus.model.vo.MilvusResp;
 import org.dromara.milvus.plus.util.GsonUtil;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -633,17 +634,76 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
         return this;
     }
 
+    /**
+     * Nested AND: (current) && (nested). Preferred style.
+     */
+    public LambdaDeleteWrapper<T> and(Consumer<LambdaDeleteWrapper<T>> consumer) {
+        LambdaDeleteWrapper<T> nested = new LambdaDeleteWrapper<>();
+        if (consumer != null) {
+            consumer.accept(nested);
+        }
+        return and(nested);
+    }
+
     public LambdaDeleteWrapper<T> or(ConditionBuilder<T> other) {
         super.or(other);
         return this;
+    }
+
+    /**
+     * Nested OR: (current group) || (nested group). Nested multi-conditions default to AND.
+     * Example: .eq(a,1).or(w -> w.eq(b,2).eq(c,3)) => (a == 1) || (b == 2 && c == 3)
+     */
+    public LambdaDeleteWrapper<T> or(Consumer<LambdaDeleteWrapper<T>> consumer) {
+        LambdaDeleteWrapper<T> nested = new LambdaDeleteWrapper<>();
+        if (consumer != null) {
+            consumer.accept(nested);
+        }
+        return or(nested);
     }
 
     public LambdaDeleteWrapper<T> not() {
         super.not();
         return this;
     }
+
     public LambdaDeleteWrapper<T> not(ConditionBuilder<T> other) {
         super.not(other);
+        return this;
+    }
+
+    /**
+     * Nested NOT: append not (nested).
+     */
+    public LambdaDeleteWrapper<T> not(Consumer<LambdaDeleteWrapper<T>> consumer) {
+        LambdaDeleteWrapper<T> nested = new LambdaDeleteWrapper<>();
+        if (consumer != null) {
+            consumer.accept(nested);
+        }
+        return not(nested);
+    }
+
+    /**
+     * 原生 Milvus filter 表达式。
+     */
+    public LambdaDeleteWrapper<T> filter(String milvusExpr) {
+        super.filter(milvusExpr);
+        return this;
+    }
+
+    /**
+     * 同 filter。
+     */
+    public LambdaDeleteWrapper<T> where(String milvusExpr) {
+        super.where(milvusExpr);
+        return this;
+    }
+
+    /**
+     * 类 SQL WHERE 子集（实验）。例：status = 1 AND name LIKE '%x%'
+     */
+    public LambdaDeleteWrapper<T> sqlWhere(String sqlWhere) {
+        super.sqlWhere(sqlWhere);
         return this;
     }
 
@@ -664,7 +724,7 @@ public  class LambdaDeleteWrapper<T> extends AbstractChainWrapper<T> implements 
      * @return 搜索请求对象
      */
     private DeleteReq build() {
-        DeleteReq.DeleteReqBuilder<?, ?> builder = DeleteReq.builder()
+        DeleteReq.DeleteReqBuilder builder = DeleteReq.builder()
                 .collectionName(this.collectionName);
         String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {

@@ -17,10 +17,11 @@ import io.milvus.v2.service.utility.request.DropAliasReq;
 import io.milvus.v2.service.utility.request.ListAliasesReq;
 import io.milvus.v2.service.utility.response.ListAliasResp;
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.milvus.plus.builder.CollectionSchemaBuilder;
 import org.dromara.milvus.plus.converter.MilvusConverter;
 import org.dromara.milvus.plus.core.FieldFunction;
+import org.dromara.milvus.plus.exception.MilvusPlusException;
 import org.dromara.milvus.plus.model.MilvusEntity;
+import org.dromara.milvus.plus.model.SchemaMode;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,55 +36,172 @@ public interface ICMService {
     }
 
     /**
-     * 创建集合
+     * 创建集合（不存在才创建，等价 schema-mode=IGNORE）。
      * @param milvusEntity
      */
     default void createCollection(MilvusEntity milvusEntity){
+        try {
+            SchemaSyncHelper.sync(milvusEntity, getClient(), SchemaMode.IGNORE, false);
+        } catch (MilvusException e) {
+            throw new MilvusPlusException("Error handling Milvus collection", e);
+        }
+    }
+
+    /**
+     * 按实体注解同步集合结构（默认 AUTO_ADD：自动补齐缺失字段）。
+     */
+    default void ensureSchema(Class<?> milvusClass) {
+        ensureSchema(milvusClass, SchemaMode.AUTO_ADD, false);
+    }
+
+    /**
+     * 按指定策略同步集合结构。
+     */
+    default void ensureSchema(Class<?> milvusClass, SchemaMode mode) {
+        ensureSchema(milvusClass, mode, false);
+    }
+
+    default void ensureSchema(Class<?> milvusClass, SchemaMode mode, boolean enableRecreate) {
+        MilvusEntity milvusEntity = MilvusConverter.convert(milvusClass);
+        SchemaSyncHelper.sync(milvusEntity, getClient(), mode == null ? SchemaMode.AUTO_ADD : mode, enableRecreate);
+    }
+
+    /**
+     * 运行时为逻辑实体指定物理集合名并确保存在（动态集合/分表场景）。
+     */
+    default void ensureSchema(Class<?> milvusClass, String collectionName, SchemaMode mode) {
+        if (StringUtils.isBlank(collectionName)) {
+            throw MilvusPlusException.of("COLLECTION_NAME_EMPTY", "collectionName must not be blank");
+        }
+        MilvusEntity milvusEntity = MilvusConverter.convert(milvusClass);
+        milvusEntity.setCollectionName(collectionName);
+        SchemaSyncHelper.sync(milvusEntity, getClient(), mode == null ? SchemaMode.AUTO_ADD : mode, false);
+    }
+
+    /**
+     * 清空集合数据（保留 schema）。
+     * <p>
+     * 优先调用服务端 TruncateCollection（Milvus 2.6+/3.x）。
+     * 旧版本不支持时，回退为按主键分批删除，保证 Plus API 在 2.5 standalone 上仍可用。
+     */
+    default void truncateCollection(String collectionName) {
         MilvusClientV2 client = getClient();
         try {
-            String collectionName = milvusEntity.getCollectionName();
-            // 检查集合是否存在
-            boolean collectionExists = client.hasCollection(
-                    HasCollectionReq.builder().collectionName(collectionName).build()
-            );
-            if (!collectionExists) {
-                // 创建新集合
-                MilvusConverter.create(milvusEntity,client);
+            client.truncateCollection(TruncateCollectionReq.builder().collectionName(collectionName).build());
+            return;
+        } catch (Exception ex) {
+            String msg = ex.getMessage() == null ? "" : ex.getMessage();
+            Throwable cause = ex.getCause();
+            String causeMsg = cause == null || cause.getMessage() == null ? "" : cause.getMessage();
+            boolean unimplemented = msg.contains("UNIMPLEMENTED") || causeMsg.contains("UNIMPLEMENTED")
+                    || msg.contains("unknown method TruncateCollection")
+                    || causeMsg.contains("unknown method TruncateCollection");
+            if (!unimplemented) {
+                throw MilvusPlusException.wrap(ex);
             }
-            //加载集合
-            MilvusConverter.loadStatus(milvusEntity,client);
-        } catch (MilvusException e) {
-            throw new RuntimeException("Error handling Milvus collection", e);
+            // fallback: batch delete by primary key
+            DescribeCollectionResp desc = describeCollection(collectionName);
+            String pk = desc.getPrimaryFieldName();
+            if (StringUtils.isBlank(pk)) {
+                throw MilvusPlusException.of("TRUNCATE_FALLBACK_FAILED",
+                        "TruncateCollection unsupported and primary key not found for collection: " + collectionName);
+            }
+            // 尽量用“全匹配”表达式一次删光（int/varchar 通用兜底：主键 is not null 在部分版本不生效，改用循环）
+            int guard = 0;
+            while (guard++ < 10000) {
+                io.milvus.v2.service.vector.response.QueryResp queryResp = client.query(
+                        io.milvus.v2.service.vector.request.QueryReq.builder()
+                                .collectionName(collectionName)
+                                .outputFields(java.util.Collections.singletonList(pk))
+                                .limit(1024L)
+                                .build()
+                );
+                if (queryResp == null || queryResp.getQueryResults() == null || queryResp.getQueryResults().isEmpty()) {
+                    break;
+                }
+                java.util.List<Object> ids = new java.util.ArrayList<>();
+                for (io.milvus.v2.service.vector.response.QueryResp.QueryResult row : queryResp.getQueryResults()) {
+                    Object id = row.getEntity().get(pk);
+                    if (id != null) {
+                        ids.add(id);
+                    }
+                }
+                if (ids.isEmpty()) {
+                    break;
+                }
+                client.delete(io.milvus.v2.service.vector.request.DeleteReq.builder()
+                        .collectionName(collectionName)
+                        .ids(ids)
+                        .build());
+            }
         }
+    }
+
+    default void truncateCollection(Class<?> milvusClass) {
+        MilvusEntity entity = MilvusConverter.convert(milvusClass);
+        truncateCollection(entity.getCollectionName());
     }
     /**
-     * 添加字段到集合
+     * 向已存在的集合添加字段（调用服务端 addCollectionField）。
+     * <p>
+     * 注意：新增字段在 Milvus 侧通常要求可空（nullable）或带默认值。
+     *
      * @param collectionName 集合名称
-     * @param addFieldReq 字段请求参数
+     * @param addFieldReq    字段请求参数
      */
-    default void addField(String collectionName,AddFieldReq ... addFieldReq){
+    default void addField(String collectionName, AddFieldReq... addFieldReq) {
+        if (addFieldReq == null || addFieldReq.length == 0) {
+            return;
+        }
         MilvusClientV2 client = getClient();
-        // 创建新集合
-        CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
-                collectionName, client
-        );
         for (AddFieldReq fieldReq : addFieldReq) {
-            schemaBuilder.addField(fieldReq);
+            if (fieldReq == null) {
+                continue;
+            }
+            AddCollectionFieldReq.AddCollectionFieldReqBuilder builder = AddCollectionFieldReq.builder()
+                    .collectionName(collectionName)
+                    .fieldName(fieldReq.getFieldName())
+                    .dataType(fieldReq.getDataType())
+                    .description(fieldReq.getDescription())
+                    .maxLength(fieldReq.getMaxLength())
+                    .isPrimaryKey(Boolean.TRUE.equals(fieldReq.getIsPrimaryKey()))
+                    .isPartitionKey(Boolean.TRUE.equals(fieldReq.getIsPartitionKey()))
+                    .isClusteringKey(Boolean.TRUE.equals(fieldReq.getIsClusteringKey()))
+                    .autoID(Boolean.TRUE.equals(fieldReq.getAutoID()))
+                    .dimension(fieldReq.getDimension())
+                    .elementType(fieldReq.getElementType())
+                    .maxCapacity(fieldReq.getMaxCapacity())
+                    .isNullable(fieldReq.getIsNullable() == null || Boolean.TRUE.equals(fieldReq.getIsNullable()))
+                    .enableAnalyzer(fieldReq.getEnableAnalyzer())
+                    .analyzerParams(fieldReq.getAnalyzerParams())
+                    .enableMatch(fieldReq.getEnableMatch())
+                    .typeParams(fieldReq.getTypeParams())
+                    .multiAnalyzerParams(fieldReq.getMultiAnalyzerParams());
+            if (fieldReq.isEnableDefaultValue() || fieldReq.getDefaultValue() != null) {
+                builder.defaultValue(fieldReq.getDefaultValue());
+            }
+            if (fieldReq.getStructFields() != null) {
+                builder.structFields(fieldReq.getStructFields());
+            }
+            if (fieldReq.getExternalField() != null) {
+                builder.externalField(fieldReq.getExternalField());
+            }
+            client.addCollectionField(builder.build());
         }
     }
+
     /**
      * 获取集合中的特定字段
      * @param collectionName 集合名称
      * @param fieldName 字段名称
      * @return 字段架构信息
      */
-    default CreateCollectionReq.FieldSchema getField(String collectionName,String fieldName){
-        MilvusClientV2 client = getClient();
-        // 创建新集合
-        CollectionSchemaBuilder schemaBuilder = new CollectionSchemaBuilder(
-                collectionName, client
-        );
-        return schemaBuilder.getField(fieldName);
+    default CreateCollectionReq.FieldSchema getField(String collectionName, String fieldName) {
+        DescribeCollectionResp describeCollectionResp = describeCollection(collectionName);
+        if (describeCollectionResp == null || describeCollectionResp.getCollectionSchema() == null) {
+            return null;
+        }
+        return describeCollectionResp.getCollectionSchema().getField(fieldName);
     }
 
     /**
@@ -238,7 +356,7 @@ public interface ICMService {
      */
     default Boolean getLoadState(String collectionName, String partitionName) throws MilvusException {
         MilvusClientV2 client = getClient();
-        GetLoadStateReq.GetLoadStateReqBuilder<?, ?> builder = GetLoadStateReq.builder()
+        GetLoadStateReq.GetLoadStateReqBuilder builder = GetLoadStateReq.builder()
                 .collectionName(collectionName);
         if(StringUtils.isNotEmpty(partitionName)){
             builder.partitionName(partitionName);

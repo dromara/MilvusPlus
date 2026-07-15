@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.milvus.plus.cache.ConversionCache;
 import org.dromara.milvus.plus.cache.MilvusCache;
 import org.dromara.milvus.plus.converter.MilvusConverter;
+import org.dromara.milvus.plus.exception.MilvusPlusException;
 import org.dromara.milvus.plus.model.vo.MilvusResp;
 
 import java.util.Iterator;
@@ -42,19 +43,25 @@ public abstract class AbstractChainWrapper<T> extends ConditionBuilder<T>{
         while (true) {
             try {
                 return action.get(); // 尝试执行操作
+            } catch (MilvusPlusException e) {
+                throw e;
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().contains(errorMessage) && attempt < maxRetries) {
                     log.warn("Attempt {}: {} - attempting to retry.", attempt, errorMessage);
                     handleCollectionNotLoaded(entityType,client);
                     attempt++;
                 } else {
-                    throw new RuntimeException(e); // 如果不是预期的错误或者重试次数达到上限，则抛出异常
+                    throw MilvusPlusException.wrap(e);
                 }
             }
         }
     }
     protected void handleCollectionNotLoaded(Class entityType, MilvusClientV2 client) {
         ConversionCache cache = MilvusCache.milvusCache.get(entityType.getName());
+        if (cache == null || cache.getMilvusEntity() == null) {
+            throw MilvusPlusException.of("COLLECTION_CACHE_MISSING",
+                    "Collection cache missing for entity: " + (entityType == null ? "null" : entityType.getName()));
+        }
         MilvusConverter.loadStatus(cache.getMilvusEntity(), client);
     }
 

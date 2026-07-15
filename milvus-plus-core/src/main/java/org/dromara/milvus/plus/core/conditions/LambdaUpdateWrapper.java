@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 构建器内部类，用于构建update请求
@@ -35,6 +36,7 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
     private String collectionName;
     private String partitionName;
     private MilvusClientV2 client;
+    private boolean partialUpdate = false;
 
     public LambdaUpdateWrapper(String collectionName, MilvusClientV2 client, ConversionCache conversionCache, Class<T> entityType) {
         this.collectionName = collectionName;
@@ -638,17 +640,76 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         return this;
     }
 
+    /**
+     * Nested AND: (current) && (nested). Preferred style.
+     */
+    public LambdaUpdateWrapper<T> and(Consumer<LambdaUpdateWrapper<T>> consumer) {
+        LambdaUpdateWrapper<T> nested = new LambdaUpdateWrapper<>();
+        if (consumer != null) {
+            consumer.accept(nested);
+        }
+        return and(nested);
+    }
+
     public LambdaUpdateWrapper<T> or(ConditionBuilder<T> other) {
         super.or(other);
         return this;
+    }
+
+    /**
+     * Nested OR: (current group) || (nested group). Nested multi-conditions default to AND.
+     * Example: .eq(a,1).or(w -> w.eq(b,2).eq(c,3)) => (a == 1) || (b == 2 && c == 3)
+     */
+    public LambdaUpdateWrapper<T> or(Consumer<LambdaUpdateWrapper<T>> consumer) {
+        LambdaUpdateWrapper<T> nested = new LambdaUpdateWrapper<>();
+        if (consumer != null) {
+            consumer.accept(nested);
+        }
+        return or(nested);
     }
 
     public LambdaUpdateWrapper<T> not() {
         super.not();
         return this;
     }
+
     public LambdaUpdateWrapper<T> not(ConditionBuilder<T> other) {
         super.not(other);
+        return this;
+    }
+
+    /**
+     * Nested NOT: append not (nested).
+     */
+    public LambdaUpdateWrapper<T> not(Consumer<LambdaUpdateWrapper<T>> consumer) {
+        LambdaUpdateWrapper<T> nested = new LambdaUpdateWrapper<>();
+        if (consumer != null) {
+            consumer.accept(nested);
+        }
+        return not(nested);
+    }
+
+    /**
+     * 原生 Milvus filter 表达式。
+     */
+    public LambdaUpdateWrapper<T> filter(String milvusExpr) {
+        super.filter(milvusExpr);
+        return this;
+    }
+
+    /**
+     * 同 filter。
+     */
+    public LambdaUpdateWrapper<T> where(String milvusExpr) {
+        super.where(milvusExpr);
+        return this;
+    }
+
+    /**
+     * 类 SQL WHERE 子集（实验）。例：status = 1 AND name LIKE '%x%'
+     */
+    public LambdaUpdateWrapper<T> sqlWhere(String sqlWhere) {
+        super.sqlWhere(sqlWhere);
         return this;
     }
 
@@ -660,7 +721,7 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
     private QueryResp build() {
         String filterStr = buildFilters();
         if (filterStr != null && !filterStr.isEmpty()) {
-            QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
+            QueryReq.QueryReqBuilder builder = QueryReq.builder()
                     .collectionName(collectionName).filter(filterStr);
             return client.query(builder.build());
         } else {
@@ -746,16 +807,31 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         return update(updateDataList);
     }
 
+
+    /**
+     * 部分更新：仅提交非空/已设置字段，不回填整行（依赖服务端 partial upsert）。
+     */
+    public LambdaUpdateWrapper<T> partial(boolean partialUpdate) {
+        this.partialUpdate = partialUpdate;
+        return this;
+    }
+
+    public LambdaUpdateWrapper<T> partial() {
+        return partial(true);
+    }
+
     private MilvusResp<UpsertResp> update(List<JsonObject> jsonObjects) {
         return executeWithRetry(
                 () -> {
-                    log.info("update data--->{}", GsonUtil.toJson(jsonObjects));
-                    UpsertReq.UpsertReqBuilder<?, ?> builder = UpsertReq.builder()
+                    log.info("update data--->{}, partial={}", org.dromara.milvus.plus.util.LogSanitizeUtil.truncate(jsonObjects), partialUpdate);
+                    UpsertReq.UpsertReqBuilder builder = UpsertReq.builder()
                             .collectionName(collectionName)
                             .data(jsonObjects);
                     if (StringUtils.isNotEmpty(partitionName)) {
                         builder.partitionName(partitionName);
                     }
+                    // partial 语义在 updateById 中通过「读改写」实现，兼容不支持服务端 partial 的版本。
+                    // 若已合并为完整行，不再传 partialUpdate，避免服务端校验缺字段。
                     UpsertReq upsertReq = builder
                             .build();
                     UpsertResp upsert = client.upsert(upsertReq);
@@ -787,11 +863,14 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
             JsonObject jsonObject = new JsonObject();
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
+                if (key == null) {
+                    continue;
+                }
                 Object value = entry.getValue();
                 // 根据PropertyCache转换属性名
                 String tk = propertyCache.functionToPropertyMap.get(key);
                 if (StringUtils.isNotEmpty(tk)) {
-                    GsonUtil.put(jsonObject,tk, value);
+                    GsonUtil.put(jsonObject, tk, value);
                 }
             }
             // 检查是否包含主键
@@ -803,32 +882,50 @@ public class LambdaUpdateWrapper<T> extends AbstractChainWrapper<T> implements W
         // 准备更新的数据列表
         List<JsonObject> updateDataList = new ArrayList<>();
         for (JsonObject updateObject : jsonObjects) {
-            boolean isBuild=false;
-            for (Map.Entry<String, String> property : propertyCache.functionToPropertyMap.entrySet()) {
-                Boolean nullable = propertyCache.nullableToPropertyMap.get(property.getKey());
-                if (updateObject.get(property.getValue()) == null&&!nullable) {
-                    //缺少数据需要
-                    isBuild=true;
+            boolean needMerge = partialUpdate;
+            // 非 partial：缺非空字段时回查补齐
+            // partial：始终回查，用旧行覆盖缺失字段（客户端部分更新，兼容 2.5/3.x）
+            if (!partialUpdate) {
+                for (Map.Entry<String, String> property : propertyCache.functionToPropertyMap.entrySet()) {
+                    Boolean nullable = propertyCache.nullableToPropertyMap.get(property.getKey());
+                    if (updateObject.get(property.getValue()) == null && !Boolean.TRUE.equals(nullable)) {
+                        needMerge = true;
+                        break;
+                    }
                 }
             }
-            if(isBuild){
-                QueryReq.QueryReqBuilder<?, ?> builder = QueryReq.builder()
-                        .collectionName(collectionName).filter(pk+" == "+updateObject.get(pk));
-                QueryResp queryResp= client.query(builder.build());
-                if (queryResp != null) {
+            if (needMerge) {
+                com.google.gson.JsonElement pkVal = updateObject.get(pk);
+                String pkLiteral = pkVal == null ? "null" : pkVal.toString();
+                // JsonPrimitive number toString is fine; string includes quotes
+                QueryReq.QueryReqBuilder builder = QueryReq.builder()
+                        .collectionName(collectionName)
+                        .filter(pk + " == " + pkLiteral)
+                        .outputFields(new ArrayList<>(propertyCache.functionToPropertyMap.values()))
+                        .limit(1L);
+                QueryResp queryResp = client.query(builder.build());
+                if (queryResp != null && queryResp.getQueryResults() != null && !queryResp.getQueryResults().isEmpty()) {
                     for (QueryResp.QueryResult result : queryResp.getQueryResults()) {
                         Map<String, Object> existingEntity = result.getEntity();
                         JsonObject existingData = new JsonObject();
+                        // 先铺旧值
                         for (Map.Entry<String, Object> existingEntry : existingEntity.entrySet()) {
-                            String existingField = existingEntry.getKey();
-                            Object existingValue = existingEntry.getValue();
-                            Object updateValue = updateObject.get(existingField);
-                            GsonUtil.put(existingData,existingField, updateValue != null ? updateValue : existingValue);
+                            GsonUtil.put(existingData, existingEntry.getKey(), existingEntry.getValue());
+                        }
+                        // 再用更新对象覆盖（仅非 null 字段）
+                        for (Map.Entry<String, com.google.gson.JsonElement> ue : updateObject.entrySet()) {
+                            if (ue.getValue() != null && !ue.getValue().isJsonNull()) {
+                                existingData.add(ue.getKey(), ue.getValue());
+                            }
                         }
                         updateDataList.add(existingData);
                     }
+                } else if (!partialUpdate) {
+                    // 无旧行且非 partial：直接写
+                    updateDataList.add(updateObject);
                 }
-            }else {
+                // partial 且查不到旧行：跳过，避免写入残缺行
+            } else {
                 updateDataList.add(updateObject);
             }
         }

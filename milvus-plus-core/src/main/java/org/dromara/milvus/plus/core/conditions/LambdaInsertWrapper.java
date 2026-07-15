@@ -75,8 +75,8 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
     private MilvusResp<InsertResp> insert(List<JsonObject> jsonObjects){
         return executeWithRetry(
                 () -> {
-                    log.info("insert data--->{}", GsonUtil.toJson(jsonObjects));
-                    InsertReq.InsertReqBuilder<?, ?> builder = InsertReq.builder()
+                    log.info("insert data--->{}", org.dromara.milvus.plus.util.LogSanitizeUtil.truncate(jsonObjects));
+                    InsertReq.InsertReqBuilder builder = InsertReq.builder()
                             .collectionName(collectionName)
                             .data(jsonObjects);
                     if(StringUtils.isNotEmpty(partitionName)){
@@ -112,17 +112,21 @@ public  class LambdaInsertWrapper<T> extends AbstractChainWrapper<T> implements 
             JsonObject jsonObject=new JsonObject();
             for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
                 String key = entry.getKey();
+                if (key == null) {
+                    continue;
+                }
                 Object value = entry.getValue();
                 String tk = propertyCache.functionToPropertyMap.get(key);
                 if (StringUtils.isNotEmpty(tk)) {
-                    GsonUtil.put(jsonObject,tk,value);
-                } else if (conversionCache.getMilvusEntity().getEnableDynamicField()){
-                    GsonUtil.put(jsonObject,key,value);
+                    GsonUtil.put(jsonObject, tk, value);
+                } else if (Boolean.TRUE.equals(conversionCache.getMilvusEntity().getEnableDynamicField())
+                        && StringUtils.isNotEmpty(key)) {
+                    // 动态字段：跳过 null/空 key，避免 Gson LinkedTreeMap NPE
+                    GsonUtil.put(jsonObject, key, value);
                 }
             }
-            if(conversionCache.isAutoID()){
-                GsonUtil.put(jsonObject,pk,IdWorkerUtils.nextId());
-
+            if (conversionCache.isAutoID() && StringUtils.isNotEmpty(pk)) {
+                GsonUtil.put(jsonObject, pk, IdWorkerUtils.nextId());
             }
             jsonObjects.add(jsonObject);
         }

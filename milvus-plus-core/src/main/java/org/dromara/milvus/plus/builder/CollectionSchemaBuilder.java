@@ -54,10 +54,11 @@ public class CollectionSchemaBuilder {
     }
 
     public void addNumPartitions(Integer numPartitions){
+        // 未配置分区数时为 null，不能直接拆箱比较
         if (numPartitions == null || numPartitions < 1) {
             return;
         }
-        this.numPartitions=numPartitions;
+        this.numPartitions = numPartitions;
     }
 
     public void addConsistencyLevel(ConsistencyLevel level){
@@ -68,14 +69,15 @@ public class CollectionSchemaBuilder {
         return schema.getField(fileName);
     }
     public void createSchema() throws MilvusException {
-        CreateCollectionReq req=CreateCollectionReq.builder().
-                collectionName(this.collectionName).
-                collectionSchema(this.schema).
-                consistencyLevel(this.consistencyLevel).
-                enableDynamicField(this.enableDynamicField).
-                numPartitions(this.numPartitions)
-                .build();
-        wrapper.createCollection(req);
+        CreateCollectionReq.CreateCollectionReqBuilder builder = CreateCollectionReq.builder()
+                .collectionName(this.collectionName)
+                .collectionSchema(this.schema)
+                .consistencyLevel(this.consistencyLevel)
+                .enableDynamicField(this.enableDynamicField);
+        if (this.numPartitions != null && this.numPartitions > 0) {
+            builder.numPartitions(this.numPartitions);
+        }
+        wrapper.createCollection(builder.build());
     }
     public void createIndex(java.util.List<IndexParam> indexParams) throws MilvusException {
         CreateIndexReq req = CreateIndexReq.builder()

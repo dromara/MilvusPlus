@@ -1,6 +1,7 @@
 package org.dromara.solon.entity;
 
 import lombok.Data;
+import org.dromara.milvus.plus.model.SchemaMode;
 import org.noear.solon.annotation.Configuration;
 import org.noear.solon.annotation.Inject;
 
@@ -23,4 +24,6 @@ public class MilvusPropertiesConfiguration {
     private boolean openLog;
     private String logLevel;
     private boolean banner = true;
+    private SchemaMode schemaMode = SchemaMode.IGNORE;
+    private boolean enableRecreate = false;
 }

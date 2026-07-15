@@ -76,6 +76,11 @@ public @interface MilvusField {
     boolean isPartitionKey() default false;
 
     /**
+     * 是否为聚簇键（Milvus clustering key）
+     */
+    boolean isClusteringKey() default false;
+
+    /**
      * 分区键为true时, 分区数量
      */
     int numPartitions() default -1;
@@ -97,5 +102,9 @@ public @interface MilvusField {
      */
     AnalyzerParams analyzerParams() default @AnalyzerParams(type =AnalyzerType.STANDARD);
 
-
+    /**
+     * 默认值（字符串形式，按字段类型由 SDK/服务端解析）。
+     * 已有集合 AUTO_ADD 字段时建议配置 nullable 或 defaultValue。
+     */
+    String defaultValue() default "";
 }

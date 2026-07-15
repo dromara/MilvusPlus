@@ -10,8 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.milvus.plus.annotation.MilvusCollection;
 import org.dromara.milvus.plus.cache.CollectionToPrimaryCache;
 import org.dromara.milvus.plus.converter.MilvusConverter;
+import org.dromara.milvus.plus.exception.MilvusPlusException;
 import org.dromara.milvus.plus.model.MilvusEntity;
 import org.dromara.milvus.plus.model.MilvusProperties;
+import org.dromara.milvus.plus.model.SchemaMode;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -70,6 +72,7 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
     public void handler() {
         if (Objects.isNull(client)) {
             log.warn("initialize handler over!");
+            return;
         }
         List<Class<?>> classes = getClass(properties.getPackages());
         if (classes.isEmpty()) {
@@ -88,7 +91,8 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
     private List<Class<?>> getClass(List<String> packages) {
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         return Optional.ofNullable(packages)
-                .orElseThrow(() -> new RuntimeException("model package is null, please configure the [packages] parameter"))
+                .orElseThrow(() -> MilvusPlusException.of("PACKAGES_EMPTY",
+                        "model package is null, please configure the [milvus.packages] parameter"))
                 .stream()
                 .map(pg -> {
                     List<Class<?>> res = new ArrayList<>();
@@ -107,18 +111,22 @@ public abstract class AbstractMilvusClientBuilder implements MilvusClientBuilder
                             }
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw MilvusPlusException.of("SCAN_ENTITY_FAILED",
+                                "Failed to scan milvus entity package: " + pg + ", cause: " + e.getMessage());
                     }
                     return res;
                 }).flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
-    // 缓存 + 是否构建集合
+    // 缓存 + 是否构建集合（按 schema-mode 同步）
     public void performBusinessLogic(List<Class<?>> annotatedClasses) {
+        SchemaMode mode = properties.getSchemaMode() == null ? SchemaMode.IGNORE : properties.getSchemaMode();
+        boolean enableRecreate = properties.isEnableRecreate();
+        log.info("MilvusPlus schema-mode={}, enable-recreate={}", mode, enableRecreate);
         for (Class<?> milvusClass : annotatedClasses) {
             MilvusEntity milvusEntity = MilvusConverter.convert(milvusClass);
-            createCollection(milvusEntity);
+            SchemaSyncHelper.sync(milvusEntity, client, mode, enableRecreate);
             aliasProcess(milvusEntity);
         }
     }

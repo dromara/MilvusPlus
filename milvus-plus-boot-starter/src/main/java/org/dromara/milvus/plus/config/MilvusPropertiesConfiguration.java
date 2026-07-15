@@ -1,6 +1,7 @@
 package org.dromara.milvus.plus.config;
 
 import lombok.Data;
+import org.dromara.milvus.plus.model.SchemaMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -23,4 +24,12 @@ public class MilvusPropertiesConfiguration {
     private boolean openLog;
     private String logLevel;
     private boolean banner = true;
+    /**
+     * 集合结构同步：IGNORE / VALIDATE / AUTO_ADD / RECREATE
+     */
+    private SchemaMode schemaMode = SchemaMode.IGNORE;
+    /**
+     * 是否允许 RECREATE 删表重建
+     */
+    private boolean enableRecreate = false;
 }
