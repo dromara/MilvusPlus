@@ -1,8 +1,12 @@
-README.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# OS / local logs / build flatten artifacts
+.DS_Store
+logs/
+**/.flattened-pom.xml
 
 ### STS ###
 .apt_generated
@@ -31,3 +35,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# local milvus docker data
+docker/volumes/
+**/volumes/etcd/
+**/volumes/minio/
+**/volumes/milvus/

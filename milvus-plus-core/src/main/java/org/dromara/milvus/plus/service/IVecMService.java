@@ -33,7 +33,7 @@ public interface IVecMService {
             List<Object> ids
     ) throws MilvusException {
         MilvusClientV2 client = getClient();
-        DeleteReq.DeleteReqBuilder<?, ?> o = DeleteReq.builder()
+        DeleteReq.DeleteReqBuilder o = DeleteReq.builder()
                 .collectionName(collectionName)
                 .partitionName(partitionName);
         if(!CollectionUtils.isEmpty(ids)){
@@ -235,24 +235,26 @@ public interface IVecMService {
             boolean ignoreGrowing
     ) throws MilvusException {
         MilvusClientV2 client = getClient();
-        SearchReq searchReq = SearchReq.builder()
+        long effectiveLimit = limit > 0 ? limit : topK;
+        SearchReq.SearchReqBuilder builder = SearchReq.builder()
                 .collectionName(collectionName)
                 .partitionNames(partitionNames)
                 .annsField(annsField)
-                .topK(topK)
                 .filter(filter)
                 .outputFields(outputFields)
                 .data(data)
                 .offset(offset)
-                .limit(limit)
                 .roundDecimal(roundDecimal)
                 .searchParams(searchParams)
                 .guaranteeTimestamp(guaranteeTimestamp)
                 .gracefulTime(gracefulTime)
                 .consistencyLevel(consistencyLevel)
-                .ignoreGrowing(ignoreGrowing)
-                .build();
-        return client.search(searchReq);
+                .ignoreGrowing(ignoreGrowing);
+        if (effectiveLimit > 0) {
+            // SDK 3.x 推荐 limit；topK 已弃用
+            builder.limit(effectiveLimit);
+        }
+        return client.search(builder.build());
     }
 
     /**

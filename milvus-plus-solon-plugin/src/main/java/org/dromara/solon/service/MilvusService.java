@@ -86,6 +86,12 @@ public class MilvusService implements IAMService, ICMService, IVecMService {
         return lambda;
     }
 
+
+    public <T> BaseMilvusMapper.CollectionBoundMapper<T> forCollection(Class<T> entityClass, String collectionName) {
+        BaseMilvusMapper<T> mapper = getBaseMilvusMapper();
+        return mapper.forCollection(entityClass, collectionName);
+    }
+
     private <T> BaseMilvusMapper<T> getBaseMilvusMapper() {
         MilvusClientV2 client = getClient();
         return new BaseMilvusMapper<T>() {

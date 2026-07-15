@@ -30,7 +30,7 @@
             </developer>
         </developers>
         <properties>
-            <revision>2.2.5</revision>
+            <revision>2.3.0</revision>
             <maven.compiler.source>${java.version}</maven.compiler.source>
             <maven.compiler.target>${java.version}</maven.compiler.target>
             <maven-compiler.version>3.11.0</maven-compiler.version>
@@ -40,6 +40,7 @@
             <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
             <solon.version>2.7.6</solon.version>
             <spring-boot.version>2.7.13</spring-boot.version>
+            <milvus-sdk.version>3.0.4</milvus-sdk.version>
             <mica-auto.vaersion>2.3.2</mica-auto.vaersion>
             <java.version>1.8</java.version>
             <javapoet.version>1.13.0</javapoet.version>

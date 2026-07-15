@@ -88,7 +88,7 @@ public class SearchRespConverter {
      */
     public static <T> MilvusResp<List<MilvusResult<T>>> convertGetRespToMilvusResp(GetResp getResp, Class<T> entityType) {
         // 从GetResp中提取结果
-        List<QueryResp.QueryResult> getResults = getResp.getResults;
+        List<QueryResp.QueryResult> getResults = getResp.getGetResults();
         return convertQuery(getResults, entityType);
     }
 

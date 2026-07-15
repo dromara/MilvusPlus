@@ -110,16 +110,20 @@ public class MilvusConverter {
                 milvus.setNumPartitions(fieldAnnotation.numPartitions());
             }
             // 构建Milvus字段描述
-            AddFieldReq.AddFieldReqBuilder<?, ?> builder = AddFieldReq.builder()
+            AddFieldReq.AddFieldReqBuilder<?> builder = AddFieldReq.builder()
                     .fieldName(fieldName)
                     .dataType(fieldAnnotation.dataType())
                     .isPrimaryKey(fieldAnnotation.isPrimaryKey())
                     .isPartitionKey(fieldAnnotation.isPartitionKey())
+                    .isClusteringKey(fieldAnnotation.isClusteringKey())
                     .elementType(fieldAnnotation.elementType())
                     .enableAnalyzer(fieldAnnotation.enableAnalyzer())
                     .enableMatch(fieldAnnotation.enableMatch())
                     .isNullable(fieldAnnotation.nullable())
                     .autoID(false);
+            if (StringUtils.isNotEmpty(fieldAnnotation.defaultValue())) {
+                builder.defaultValue(fieldAnnotation.defaultValue());
+            }
             autoID=autoID?autoID:fieldAnnotation.autoID();
 
             if(fieldAnnotation.enableAnalyzer()&&fieldAnnotation.dataType()==DataType.VarChar){

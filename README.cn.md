@@ -31,7 +31,7 @@
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.2.5</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Spring应用支持：
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.2.5</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
@@ -51,11 +51,15 @@ Solon应用支持：
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.2.5</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
 ## 需知
+- 2.3.0 版本升级官方 `milvus-sdk-java` 至 **3.0.4**（对齐 Milvus **3.0.x** 服务端），并修复 addField / Gson / 搜索参数等已知问题
+- **2.3.0 详细使用指南（推荐阅读）** → [docs/2.3.0-使用指南.md](./docs/2.3.0-使用指南.md)
+- 变更清单 → [CHANGELOG.md](./CHANGELOG.md)
+- 本地 Docker → [docker/README.md](./docker/README.md)
 - 2.2.0版本支持数据库版本2.5.x，增强文本搜索能力
 - 2.1.7版本之后groupId修改为 org.dromara.milvus-plus，版本之前为 org.dromara
 - 2.0.0版本必须使用索引注解定义索引，不然启动报错后，再添加无效，需要先删除集合
@@ -72,6 +76,10 @@ milvus:
   db-name: (可选)
   username: (可选)
   password: (可选)
+  # 集合结构同步：IGNORE(默认兼容) / VALIDATE / AUTO_ADD(推荐新项目) / RECREATE(危险)
+  schema-mode: AUTO_ADD
+  # 仅 schema-mode=RECREATE 时生效，生产务必 false
+  enable-recreate: false
   packages:
     - com.example.entity
 ```
@@ -81,6 +89,59 @@ milvus:
 - `token`：用于验证和授权的令牌（Token），确保访问Milvus服务的安全性。
 - `enable`：一个布尔值，用于指示Milvus模块是否应该被启用。
 - `packages`：这些包包含了自定义注解对应的Java类，你可以认为这是你自定义的实体类所在的包。
+- `schema-mode`：实体注解与服务端 collection 的同步策略。
+- `enable-recreate`：是否允许 RECREATE 删表重建。
+
+## 2.3.0 快速示例
+
+```java
+// 1) 自动补齐实体新增字段
+milvusService.ensureSchema(Face.class);
+
+// 2) 动态集合（分表/租户）
+faceMapper.forCollection("face_" + tenantId).insert(face);
+
+// 3) 语义化向量检索
+faceMapper.queryWrapper()
+    .vectorSearch(Face::getFaceVector, embedding)
+    .eq(Face::getPersonName, "张三")
+    .top(10)
+    .options(opt -> opt.metricType(IndexParam.MetricType.IP))
+    .query();
+
+// 4) 文本检索（BM25，无需手写 _sparse）
+faceMapper.queryWrapper()
+    .textSearch(Face::getContent, "关键词")
+    .top(10)
+    .query();
+
+// 5) 标量分页
+faceMapper.queryWrapper().eq(Face::getStatus, 1).page(1, 20);
+
+// 6) 部分更新
+faceMapper.updateWrapper().partial().updateById(face);
+
+// 7) 类 SQL WHERE（实验子集，不是完整 MySQL）
+faceMapper.queryWrapper()
+    .sqlWhere("status = 1 AND name LIKE '%张%' OR type IN ('A','B')")
+    .top(10)
+    .query();
+
+// 8) 原生滤器表达式（Milvus boolean expression）
+faceMapper.queryWrapper()
+    .filter("status == 1 && array_contains(tags, \"vip\")")
+    .query();
+```
+
+## 本地 Docker 测试
+
+```bash
+cd docker
+docker compose up -d
+# uri: http://localhost:19530
+```
+
+详见 `docker/README.md`。
 
 ## 应用场景
 

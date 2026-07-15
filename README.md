@@ -29,7 +29,7 @@ Custom extension support:
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-core</artifactId>
-    <version>2.2.5</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
@@ -39,7 +39,7 @@ Spring application support:
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-boot-starter</artifactId>
-    <version>2.2.5</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
@@ -49,12 +49,15 @@ Solon application support:
 <dependency>
     <groupId>org.dromara.milvus-plus</groupId>
     <artifactId>milvus-plus-solon-plugin</artifactId>
-    <version>2.2.5</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 
 ## Notes
 
+- Version **2.3.0** upgrades official `milvus-sdk-java` to **3.0.4** (aligned with Milvus **3.0.x**), fixes known bugs, and adds Plus-style features: `schema-mode`, `forCollection`, semantic search (`vectorSearch`/`textSearch`/`page`/`options`), partial upsert, `truncateCollection`. See `CHANGELOG.md`.
+- **2.3.0 full usage guide (Chinese)** → [docs/2.3.0-使用指南.md](./docs/2.3.0-使用指南.md)
+- Changelog → [CHANGELOG.md](./CHANGELOG.md) · Local Docker → [docker/README.md](./docker/README.md)
 - Version 2.0.0 requires the use of index annotations to define indexes; otherwise, an error will occur at startup, and adding them later will be ineffective, requiring the collection to be deleted first.
 - Version 2.0.0 has not yet released the MilvusService functionality.
 
