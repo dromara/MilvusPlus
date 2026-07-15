@@ -120,13 +120,19 @@
                 <plugin>
                     <groupId>org.sonatype.central</groupId>
                     <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.4.0</version>
+                    <!-- 0.4.0 无法解析 Central 返回的 warnings 字段，导致 deploy 失败 -->
+                    <version>0.11.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <publishingServerId>central</publishingServerId>
                         <tokenAuth>true</tokenAuth>
+                        <!-- 上传后自动发布（如需人工审核可改为 false） -->
+                        <autoPublish>true</autoPublish>
+                        <!-- validated 即可返回，避免长时间卡住；需要等镜像同步可用 published -->
+                        <waitUntil>published</waitUntil>
                     </configuration>
                 </plugin>
+
 
                 <plugin>
                     <groupId> org.apache.maven.plugins</groupId>
@@ -165,7 +171,14 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>1.6</version>
+                    <configuration>
+                        <!-- 非交互环境避免 Inappropriate ioctl for device -->
+                        <gpgArguments>
+                            <arg>--pinentry-mode</arg>
+                            <arg>loopback</arg>
+                        </gpgArguments>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>sign-artifacts</id>
