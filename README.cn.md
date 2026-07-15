@@ -600,7 +600,22 @@ public class ApplicationRunnerTest implements ApplicationRunner {
 }
 ```
 
-# 联系
+## 欢迎给项目点赞！！
+
+https://gitcode.com/dromara/MilvusPlus
+
+## 贡献
+
+欢迎贡献！
+
+- 报告问题或建议功能，[创建一个 issue](https://gitecode.com/dromara/MilvusPlus/issues/new)。
+- 提交更改，[创建一个 pull request](https://gitecode.com/dromara/MilvusPlus/compare)。
+
+## 许可证
+
+MilvusPlus 是开源的，遵循 [许可证](https://gitecode.com/dromara/MilvusPlus/blob/master/LICENSE)。
+
+## 联系
 
 如有问题或需要支持，请联系(备注 milvusplus)
 
